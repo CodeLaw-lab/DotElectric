@@ -8,6 +8,8 @@
 
 **Print Preview реализован.** Ctrl+Shift+P открывает DocumentViewer с FixedDocument.
 
+**README encoding fix завершён.** UTF-8 double-encoding / mojibake в README.md исправлен — 180 строк восстановлены.
+
 ### Ключевые результаты
 | Область | Было | Стало |
 |---------|------|-------|
@@ -1394,3 +1396,12 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 | `.opencode/commands/plan.md` | Команда планирования |
 | `.opencode/commands/review.md` | Команда ревью |
 | `.github/workflows/opencode-pipeline.yml` | CI + OpenCode review |
+
+## Pipeline — README encoding fix (18.07.2026)
+
+### Fix README encoding
+**Проблема:** README.md содержал UTF-8 double-encoding — русский текст и эмодзи отображались как mojibake (`рџ“‹ Рћ РџР РћР•РљРўР•` вместо `📋 О ПРОЕКТЕ`).
+**Исправление:** 180 строк с mojibake декодированы через UTF-8 → CP1251 → UTF-8 селективно (строка за строкой). 220 правильно закодированных строк сохранены без изменений.
+**Файл:** `README.md`
+**Build:** 0 errors, 0 warnings
+**Tests:** 1840 passed, 1 pre-existing skip

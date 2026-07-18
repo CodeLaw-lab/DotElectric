@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- README.md: исправлена кодировка (UTF-8 double-encoding / mojibake) — восстановлены русский текст и эмодзи
 - H1: `AutosaveService` event `Action?` → `Func<Task>?` + `InvokeAsync` in `IDispatcherService` (eliminates async-void in `MainViewModel`)
 - H2: `IValidationService` interface added; `TemplateValidator` uses injectable `IValidationService` instead of static `ValidationService.ValidateHexColor()`
 - H3: `DialogServiceFactory` dead code removed from `IDialogService.cs`
