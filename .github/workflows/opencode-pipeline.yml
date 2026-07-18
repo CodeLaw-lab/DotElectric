@@ -1,0 +1,130 @@
+name: OpenCode Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review]
+  issue_comment:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      prompt:
+        description: 'Pipeline command (/pipeline full, /pipeline quick, /plan, /review)'
+        required: true
+
+env:
+  DOTNET_VERSION: '10.0.x'
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET ${{ env.DOTNET_VERSION }}
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore src/DotElectric.TemplateEditor.slnx
+
+      - name: Build
+        run: dotnet build src/DotElectric.TemplateEditor.slnx --no-restore --warnaserror
+
+      - name: Run tests with coverage
+        run: |
+          dotnet test src/DotElectric.TemplateEditor.Tests `
+            --no-build `
+            --configuration Release `
+            --collect:"XPlat Code Coverage" `
+            --results-directory ./TestResults
+
+      - name: Check coverage gate (≥75%)
+        shell: pwsh
+        run: |
+          $coverageFiles = Get-ChildItem -Path ./TestResults -Recurse -Filter "*.cobertura.xml"
+          $totalCoverage = 0
+          $fileCount = 0
+          foreach ($file in $coverageFiles) {
+            [xml]$xml = Get-Content $file.FullName
+            $lineRate = [double]$xml.coverage.'line-rate'
+            $totalCoverage += $lineRate
+            $fileCount++
+          }
+          $avgCoverage = if ($fileCount -gt 0) { ($totalCoverage / $fileCount) * 100 } else { 0 }
+          Write-Host "Average line coverage: $([math]::Round($avgCoverage, 2))%"
+          if ($avgCoverage -lt 75) {
+            Write-Host "::error::Coverage gate failed: $([math]::Round($avgCoverage, 2))% < 75%"
+            exit 1
+          }
+          Write-Host "::notice::Coverage gate passed: $([math]::Round($avgCoverage, 2))% ≥ 75%"
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./TestResults/**/coverage.cobertura.xml
+
+  opencode-review:
+    name: OpenCode Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.draft == false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OpenCode PR Review
+        uses: anomalyco/opencode/github@latest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          model: anthropic/claude-sonnet-4-6
+          prompt: |
+            Ты — reviewer. Проверь этот Pull Request.
+
+            Загрузи skill code-reviewer и выполни полный чеклист.
+
+            Особое внимание:
+            1. Common Mistakes из AGENTS.md (все 65+)
+            2. Архитектурная целостность
+            3. INPC и DataBinding корректность
+            4. Dispose и утечки памяти
+            5. Качество тестов (есть ли, покрывают ли edge-case'ы)
+
+            Напиши review как комментарий к PR.
+            Если найдены CRITICAL или MAJOR issues — запроси изменения.
+            Если всё чисто — approve.
+
+  opencode-pipeline:
+    name: OpenCode Pipeline
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '/pipeline') ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: OpenCode Pipeline Execution
+        uses: anomalyco/opencode/github@latest
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          model: anthropic/claude-sonnet-4-6
+          prompt: |
+            Ты — conductor. Получена команда: ${{ github.event_name == 'issue_comment' && github.event.comment.body || inputs.prompt }}
+
+            Выполни соответствующий pipeline:
+            - "/pipeline full <desc>" → полный цикл с Critic
+            - "/pipeline quick <desc>" → быстрый цикл
+            - "/plan <desc>" → только планирование
+            - "/review" → только ревью
+
+            Используй `.opencode/agents/conductor.md` инструкцию.
+            Состояние храни в `.opencode/workflow/current/WORKFLOW_STATE.md`.

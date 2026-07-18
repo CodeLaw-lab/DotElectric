@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="DotElectric.TemplateEditor.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="MaterialDesignColors" />
+    <PackageReference Include="MaterialDesignThemes" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+
+  <!-- Шрифты ГОСТ (встроить как ресурсы) -->
+  <!-- Положите GostA.ttf и GostB.ttf в Resources/Fonts/ -->
+  <ItemGroup>
+    <Resource Include="Resources\Fonts\*.ttf" />
+  </ItemGroup>
+
+</Project>

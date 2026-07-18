@@ -1,0 +1,140 @@
+<Window x:Class="DotElectric.TemplateEditor.Views.SettingsView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Title="{Binding Title}"
+        Width="420" Height="440"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource WindowBackgroundBrush}"
+        TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
+
+    <Window.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="11"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondaryBrush}"/>
+            <Setter Property="Margin" Value="0,12,0,4"/>
+        </Style>
+        <Style x:Key="FieldLabelStyle" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Заголовок -->
+        <TextBlock Grid.Row="0" Text="Настройки приложения" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8"/>
+
+        <!-- Поля -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- === Тема === -->
+                <TextBlock Text="ОФОРМЛЕНИЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Тема:" Style="{StaticResource FieldLabelStyle}"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding ThemeOptions}"
+                              SelectedItem="{Binding Theme}"
+                              Padding="4,2"/>
+                </Grid>
+
+                <!-- === Сетка === -->
+                <TextBlock Text="СЕТКА" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Показывать:" Style="{StaticResource FieldLabelStyle}"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding ShowGrid}" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Привязка:" Style="{StaticResource FieldLabelStyle}"/>
+                    <CheckBox Grid.Column="1" IsChecked="{Binding SnapToGrid}" VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="30"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Шаг (мм):" Style="{StaticResource FieldLabelStyle}"/>
+                    <TextBox Grid.Column="1" Text="{Binding GridStepMm, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="4,2" VerticalContentAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="мм" VerticalAlignment="Center" Margin="4,0,0,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </Grid>
+
+                <!-- === Автосохранение === -->
+                <TextBlock Text="АВТОСОХРАНЕНИЕ" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="40"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Интервал:" Style="{StaticResource FieldLabelStyle}"/>
+                    <TextBox Grid.Column="1" Text="{Binding AutosaveIntervalMinutes, UpdateSourceTrigger=PropertyChanged}"
+                             Padding="4,2" VerticalContentAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="мин" VerticalAlignment="Center" Margin="4,0,0,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </Grid>
+
+                <!-- === Формат по умолчанию === -->
+                <TextBlock Text="НОВЫЙ ШАБЛОН" Style="{StaticResource SectionHeaderStyle}"/>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Формат:" Style="{StaticResource FieldLabelStyle}"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding FormatOptions}"
+                              SelectedItem="{Binding DefaultSheetFormat}"
+                              Padding="4,2"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Масштаб:" Style="{StaticResource FieldLabelStyle}"/>
+                    <ComboBox Grid.Column="1"
+                              ItemsSource="{Binding ZoomOptions}"
+                              SelectedItem="{Binding DefaultZoom}"
+                              Padding="4,2"/>
+                </Grid>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Кнопки -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Content="Сохранить" MinWidth="90" Height="32" Margin="4,0" FontSize="13"
+                    Command="{Binding ConfirmCommand}" IsDefault="True"
+                    Background="{DynamicResource ButtonBackgroundBrush}"
+                    Foreground="{DynamicResource TextPrimaryBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"/>
+            <Button Content="Отмена" MinWidth="90" Height="32" Margin="4,0" FontSize="13"
+                    Command="{Binding CancelCommand}" IsCancel="True"
+                    Background="{DynamicResource ButtonBackgroundBrush}"
+                    Foreground="{DynamicResource TextPrimaryBrush}"
+                    BorderBrush="{DynamicResource BorderBrush}"/>
+        </StackPanel>
+    </Grid>
+</Window>

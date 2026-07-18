@@ -1,0 +1,42 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.sln.docstates
+[Dd]ebug/
+[Rr]elease/
+*.nupkg
+*.snk
+project.assets.json
+
+## Visual Studio
+.vs/
+
+## NuGet
+packages/
+
+## Test results
+TestResults/
+coverage/
+*.cobertura.xml
+*.trx
+
+## opencode (dependencies and pipeline temp files)
+.opencode/node_modules/
+.opencode/workflow/
+.opencode/plans/
+
+## Other AI agents (not part of project)
+.kimi/
+.qwen/
+
+## IDE
+.idea/
+*.swp
+*.swo
+*~
+
+## OS
+Thumbs.db
+.DS_Store

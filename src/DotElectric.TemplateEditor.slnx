@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DotElectric.TemplateEditor.Tests/DotElectric.TemplateEditor.Tests.csproj" />
+  <Project Path="DotElectric.TemplateEditor/DotElectric.TemplateEditor.csproj" />
+</Solution>

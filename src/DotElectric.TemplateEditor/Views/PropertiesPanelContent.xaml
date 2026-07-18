@@ -1,0 +1,513 @@
+<UserControl x:Class="DotElectric.TemplateEditor.Views.PropertiesPanelContent"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:DotElectric.TemplateEditor.Converters"
+             xmlns:behaviors="clr-namespace:DotElectric.TemplateEditor.Behaviors"
+             xmlns:vm="clr-namespace:DotElectric.TemplateEditor.ViewModels">
+    <UserControl.Resources>
+        <converters:MicronsToMmConverter x:Key="MicronsToMmConverter"/>
+        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
+        <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibility"/>
+        <converters:LineTypeToStringConverter x:Key="LineTypeToStringConverter"/>
+        <converters:TextTypeToStringConverter x:Key="TextTypeToStringConverter"/>
+        <converters:TextAlignmentToIndexConverter x:Key="TextAlignmentToIndexConverter"/>
+        <converters:NotConverter x:Key="NotConverter"/>
+
+        <!-- DataTemplate for Line properties -->
+        <DataTemplate DataType="{x:Type vm:LinePropertiesViewModel}">
+            <StackPanel>
+                <TextBlock Text="ЛИНИЯ" FontWeight="SemiBold" FontSize="10"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="4,12,4,4"/>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="X1 (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StartX, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStartXFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Y1 (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StartY, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStartYFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="X2 (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding EndX, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeEndXFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Y2 (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding EndY, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeEndYFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Тип:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{Binding LineTypeValue, Converter={StaticResource EnumToIndexConverter}, Mode=OneWay}"
+                              behaviors:ComboBoxSelectionChangedCommandBehavior.SelectionChangedCommand="{Binding ChangeLineTypeFromStringCommand}"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}">
+                        <ComboBoxItem Content="Сплошная"/>
+                        <ComboBoxItem Content="Штриховая"/>
+                        <ComboBoxItem Content="Штрихпунктирная"/>
+                        <ComboBoxItem Content="Штрихпунктирная с двумя штрихами"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Толщина (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StrokeThickness, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStrokeThicknessFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Цвет:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StrokeColor, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStrokeColorCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for Rectangle properties -->
+        <DataTemplate DataType="{x:Type vm:RectanglePropertiesViewModel}">
+            <StackPanel>
+                <TextBlock Text="ПРЯМОУГОЛЬНИК" FontWeight="SemiBold" FontSize="10"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="4,12,4,4"/>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="X (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding X, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeXFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Y (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Y, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeYFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Ширина (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Width, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeWidthFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Высота (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Height, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeHeightFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Тип:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{Binding LineTypeValue, Converter={StaticResource EnumToIndexConverter}, Mode=OneWay}"
+                              behaviors:ComboBoxSelectionChangedCommandBehavior.SelectionChangedCommand="{Binding ChangeLineTypeFromStringCommand}"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}">
+                        <ComboBoxItem Content="Сплошная"/>
+                        <ComboBoxItem Content="Штриховая"/>
+                        <ComboBoxItem Content="Штрихпунктирная"/>
+                        <ComboBoxItem Content="Штрихпунктирная с двумя штрихами"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Толщина (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StrokeThickness, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStrokeThicknessFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Цвет обводки:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding StrokeColor, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeStrokeColorCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Заливка:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding FillColor, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeFillColorCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+            </StackPanel>
+        </DataTemplate>
+
+        <!-- DataTemplate for Text properties -->
+        <DataTemplate DataType="{x:Type vm:TextPropertiesViewModel}">
+            <StackPanel>
+                <TextBlock Text="ТЕКСТ" FontWeight="SemiBold" FontSize="10"
+                           Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="4,12,4,4"/>
+                <TextBlock Text="Содержимое:" Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="4,8,4,2"/>
+                <TextBox Text="{Binding Content, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                         behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeContentCommand}"
+                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="60"
+                         Background="{DynamicResource WindowBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource BorderBrush}"/>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="X (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding X, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeXFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Y (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Y, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeYFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Шрифт (мм):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding FontSize, Converter={StaticResource MicronsToMmConverter}, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeFontSizeFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Шрифт:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              SelectedValue="{Binding FontName, Mode=OneWay}"
+                              behaviors:ComboBoxSelectionChangedCommandBehavior.SelectionChangedCommand="{Binding ChangeFontNameFromStringCommand}"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}">
+                        <ComboBoxItem Content="ГОСТ А"/>
+                        <ComboBoxItem Content="ГОСТ Б"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Тип:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{Binding TextTypeValue, Converter={StaticResource EnumToIndexConverter}, Mode=OneWay}"
+                              behaviors:ComboBoxSelectionChangedCommandBehavior.SelectionChangedCommand="{Binding ChangeTextTypeFromStringCommand}"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}">
+                        <ComboBoxItem Content="Текст"/>
+                        <ComboBoxItem Content="Размер"/>
+                        <ComboBoxItem Content="Допуск"/>
+                        <ComboBoxItem Content="Примечание"/>
+                        <ComboBoxItem Content="Обозначение"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Поворот (°):" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Rotation, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeRotationFromStringCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Выравн.:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1"
+                              SelectedIndex="{Binding TextAlignment, Converter={StaticResource TextAlignmentToIndexConverter}, Mode=OneWay}"
+                              behaviors:ComboBoxSelectionChangedCommandBehavior.SelectionChangedCommand="{Binding ChangeTextAlignmentCommand}"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"
+                              BorderBrush="{DynamicResource BorderBrush}">
+                        <ComboBoxItem Content="Слева"/>
+                        <ComboBoxItem Content="По центру"/>
+                        <ComboBoxItem Content="Справа"/>
+                    </ComboBox>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Перенос:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <CheckBox Grid.Column="1"
+                              IsChecked="{Binding TextWrapping, Mode=OneWay}"
+                              Command="{Binding ChangeTextWrappingCommand}"
+                              Content="{Binding TextWrapping, Mode=OneWay, StringFormat={}MultiLine? {0}}"
+                              VerticalAlignment="Center"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Цвет:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Foreground, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeForegroundCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Ключ:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1"
+                             Text="{Binding Key, Mode=OneWay, UpdateSourceTrigger=LostFocus}"
+                             behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeKeyCommand}"
+                             Background="{DynamicResource WindowBackgroundBrush}"
+                             Foreground="{DynamicResource TextPrimaryBrush}"
+                             BorderBrush="{DynamicResource BorderBrush}"/>
+                </Grid>
+                <Grid Margin="4,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="80"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="Изменяемое:" Grid.Column="0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"
+                               VerticalAlignment="Center"/>
+                    <CheckBox Grid.Column="1"
+                              IsChecked="{Binding IsEditable, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                              Click="OnTextIsEditableClick"
+                              Background="{DynamicResource WindowBackgroundBrush}"
+                              Foreground="{DynamicResource TextPrimaryBrush}"/>
+                </Grid>
+                <TextBlock Text="По умолчанию:" Foreground="{DynamicResource TextSecondaryBrush}"
+                           Margin="4,8,4,2"/>
+                <TextBox Text="{Binding DefaultValue, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"
+                         behaviors:TextBoxLostFocusCommandBehavior.LostFocusCommand="{Binding ChangeDefaultValueCommand}"
+                         TextWrapping="Wrap" AcceptsReturn="True" MinHeight="40"
+                         Background="{DynamicResource WindowBackgroundBrush}"
+                         Foreground="{DynamicResource TextPrimaryBrush}"
+                         BorderBrush="{DynamicResource BorderBrush}"/>
+            </StackPanel>
+        </DataTemplate>
+    </UserControl.Resources>
+    <StackPanel>
+        <!-- Заглушка при отсутствии выделения -->
+        <TextBlock Text="Выберите объект для" Foreground="{DynamicResource TextDisabledBrush}"
+                   FontStyle="Italic" TextWrapping="Wrap" Margin="4,8">
+            <TextBlock.Visibility>
+                <Binding Path="IsSingleSelection" Converter="{StaticResource NotConverter}"/>
+            </TextBlock.Visibility>
+        </TextBlock>
+        <TextBlock Text="редактирования свойств" Foreground="{DynamicResource TextDisabledBrush}"
+                   FontStyle="Italic" TextWrapping="Wrap" Margin="4,0,4,8">
+            <TextBlock.Visibility>
+                <Binding Path="IsSingleSelection" Converter="{StaticResource NotConverter}"/>
+            </TextBlock.Visibility>
+        </TextBlock>
+
+        <!-- Multi-selection -->
+        <TextBlock Text="{Binding SelectionCount, StringFormat=Выделено объектов: {0}}"
+                   Foreground="{DynamicResource TextSecondaryBrush}"
+                   FontWeight="SemiBold" FontSize="12"
+                   Margin="4,12,4,4">
+            <TextBlock.Visibility>
+                <Binding Path="IsSingleSelection" Converter="{StaticResource NotConverter}"/>
+            </TextBlock.Visibility>
+        </TextBlock>
+
+        <!-- Ошибка валидации -->
+        <TextBlock Text="{Binding ValidationError}" Foreground="#F44336"
+                   FontWeight="SemiBold" FontSize="11" TextWrapping="Wrap"
+                   Margin="8,4"
+                   Visibility="{Binding ValidationError, Converter={StaticResource NotNullToVisibility}}"/>
+
+        <!-- Line properties panel -->
+        <ContentControl Content="{Binding LineVM}"
+                        Visibility="{Binding IsLineSelected, Converter={StaticResource BoolToVisibility}}"/>
+
+        <!-- Rectangle properties panel -->
+        <ContentControl Content="{Binding RectVM}"
+                        Visibility="{Binding IsRectangleSelected, Converter={StaticResource BoolToVisibility}}"/>
+
+        <!-- Text properties panel -->
+        <ContentControl Content="{Binding TextVM}"
+                        Visibility="{Binding IsTextSelected, Converter={StaticResource BoolToVisibility}}"/>
+    </StackPanel>
+</UserControl>

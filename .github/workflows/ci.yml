@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  DOTNET_VERSION: '10.0.x'
+  SOLUTION_PATH: 'src/DotElectric.TemplateEditor.slnx'
+  TEST_PROJECT: 'src/DotElectric.TemplateEditor.Tests/DotElectric.TemplateEditor.Tests.csproj'
+
+jobs:
+  build:
+    name: Build & Test
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        cache: true
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+
+    - name: Run Tests
+      run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+
+    - name: Check Coverage
+      shell: pwsh
+      run: |
+        $report = Get-ChildItem -Recurse "TestResults/**/coverage.cobertura.xml" | Select-Object -First 1
+        if (-not $report) { throw "No coverage report found" }
+        [xml]$xml = Get-Content $report.FullName
+        $coverage = [math]::Round($xml.coverage.project[0].metrics.lineRate * 100, 1)
+        $threshold = 75
+        if ($coverage -lt $threshold) {
+            throw "Coverage $coverage% is below threshold of $threshold%"
+        }
+        Write-Host "Coverage: $coverage% (threshold: $threshold%) ✅"
+
+    - name: Install reportgenerator
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
+
+    - name: Generate coverage HTML
+      run: reportgenerator "-reports:TestResults/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
+
+    - name: Upload Coverage HTML
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-html
+        path: coveragereport/
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: TestResults/
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report
+        path: TestResults/**/*.cobertura.xml
+
+  analyze:
+    name: Static Analysis
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Cache NuGet packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.nuget/packages
+        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
+        restore-keys: |
+          ${{ runner.os }}-nuget-
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        cache: true
+
+    - name: Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+    - name: Build with analyzers
+      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release /warnaserror
