@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - H5: No-op `Свойства (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
 
 ### Added
+- CI workflow: GitHub Actions (build, test, coverage gate 75%) на `windows-latest`
 - Sprint STA: `WpfContext` helper — STA-thread dispatcher for WPF unit tests
 - Sprint STA: `TextBoxLostFocusCommandBehaviorTests` — 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)
 - Sprint STA: `ComboBoxSelectionChangedCommandBehaviorTests` — 10 tests (DP get/set, OnSelectionChanged via STA)
