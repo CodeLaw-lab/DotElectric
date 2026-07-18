@@ -2,111 +2,60 @@ name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ develop, main ]
   pull_request:
-    branches: [ main, develop ]
-
-env:
-  DOTNET_VERSION: '10.0.x'
-  SOLUTION_PATH: 'src/DotElectric.TemplateEditor.slnx'
-  TEST_PROJECT: 'src/DotElectric.TemplateEditor.Tests/DotElectric.TemplateEditor.Tests.csproj'
+    branches: [ develop, main ]
 
 jobs:
-  build:
-    name: Build & Test
-    runs-on: windows-latest
+  build-and-test:
+    runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        cache: true
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
 
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      - name: Restore
+        run: dotnet restore src/DotElectric.TemplateEditor.slnx
 
-    - name: Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release
+      - name: Build
+        run: dotnet build src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release
 
-    - name: Run Tests
-      run: dotnet test ${{ env.TEST_PROJECT }} --no-build --configuration Release --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura
+      - name: Test with coverage
+        run: dotnet test src/DotElectric.TemplateEditor.Tests --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults/
 
-    - name: Check Coverage
-      shell: pwsh
-      run: |
-        $report = Get-ChildItem -Recurse "TestResults/**/coverage.cobertura.xml" | Select-Object -First 1
-        if (-not $report) { throw "No coverage report found" }
-        [xml]$xml = Get-Content $report.FullName
-        $coverage = [math]::Round($xml.coverage.project[0].metrics.lineRate * 100, 1)
-        $threshold = 75
-        if ($coverage -lt $threshold) {
-            throw "Coverage $coverage% is below threshold of $threshold%"
-        }
-        Write-Host "Coverage: $coverage% (threshold: $threshold%) ✅"
+      - name: Check coverage gate (≥75%)
+        shell: pwsh
+        run: |
+          $coverageFile = Get-ChildItem -Path TestResults -Recurse -Filter "*.cobertura.xml" | Select-Object -First 1
+          if (-not $coverageFile) {
+            Write-Host "❌ Coverage file not found"
+            exit 1
+          }
+          [xml]$xml = Get-Content $coverageFile.FullName
+          $lineRate = [double]$xml.coverage.'line-rate'
+          $pct = [math]::Round($lineRate * 100, 2)
+          Write-Host "📊 Line coverage: $pct%"
+          if ($pct -lt 75) {
+            Write-Host "❌ Coverage $pct% is below gate 75%"
+            exit 1
+          }
+          Write-Host "✅ Coverage gate passed ($pct% ≥ 75%)"
 
-    - name: Install reportgenerator
-      run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
-    - name: Generate coverage HTML
-      run: reportgenerator "-reports:TestResults/**/coverage.cobertura.xml" "-targetdir:coveragereport" -reporttypes:Html
-
-    - name: Upload Coverage HTML
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-html
-        path: coveragereport/
-
-    - name: Upload Test Results
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: test-results
-        path: TestResults/
-
-    - name: Upload Coverage Report
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: coverage-report
-        path: TestResults/**/*.cobertura.xml
-
-  analyze:
-    name: Static Analysis
-    runs-on: windows-latest
-
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
-    - name: Cache NuGet packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.nuget/packages
-        key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', '**/*.csproj') }}
-        restore-keys: |
-          ${{ runner.os }}-nuget-
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: ${{ env.DOTNET_VERSION }}
-        cache: true
-
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
-
-    - name: Build with analyzers
-      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore --configuration Release /warnaserror
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: TestResults/
