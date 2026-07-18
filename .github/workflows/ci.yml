@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     steps:
       - name: Checkout
@@ -23,7 +23,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/Directory.Packages.props') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
 
@@ -34,7 +34,7 @@ jobs:
         run: dotnet build src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release
 
       - name: Test with coverage
-        run: dotnet test src/DotElectric.TemplateEditor.Tests --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults/
+        run: dotnet test src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults/
 
       - name: Check coverage gate (≥75%)
         shell: pwsh
