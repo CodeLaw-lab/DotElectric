@@ -10,6 +10,8 @@
 
 **README encoding fix v2 завершён.** Повторное исправление кодировки README.md (UTF-8 double-encoding / mojibake).
 
+**CI workflow завершён.** GitHub Actions (build, test, coverage gate 75%) на `windows-latest`.
+
 ### Ключевые результаты
 | Область | Было | Стало |
 |---------|------|-------|
@@ -1412,5 +1414,14 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 **Проблема:** README.md снова содержал UTF-8 double-encoding — русский текст и эмодзи отображались как mojibake.
 **Исправление:** Селективное декодирование строк 14–401 через UTF-8 → CP1251 → UTF-8. Строки 1–13 не затронуты.
 **Файл:** `README.md`
+**Build:** 0 errors, 0 warnings
+**Tests:** 1840 passed, 1 pre-existing skip
+
+## Pipeline — CI/CD GitHub Actions (18.07.2026)
+
+### Feature CI workflow
+**Проблема:** Отсутствовал CI/CD — PR не проверялись автоматически, coverage не контролировался.
+**Исправление:** Добавлен `.github/workflows/ci.yml` — build + test + coverage gate 75% на `windows-latest` с NuGet кэшированием.
+**Файл:** `.github/workflows/ci.yml`
 **Build:** 0 errors, 0 warnings
 **Tests:** 1840 passed, 1 pre-existing skip
