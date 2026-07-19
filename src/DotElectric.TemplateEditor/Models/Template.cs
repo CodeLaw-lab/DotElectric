@@ -47,6 +47,41 @@ public class Template
     }
 
     /// <summary>
+    /// Создать глубокую копию шаблона.
+    /// </summary>
+    public Template Clone()
+    {
+        var metadata = new Metadata
+        {
+            Name = Metadata.Name,
+            Description = Metadata.Description,
+            Author = Metadata.Author,
+            CreatedDate = Metadata.CreatedDate,
+            ModifiedDate = Metadata.ModifiedDate
+        };
+
+        var sheet = new Sheet
+        {
+            Format = Sheet.Format,
+            WidthMicrons = Sheet.WidthMicrons,
+            HeightMicrons = Sheet.HeightMicrons,
+            Orientation = Sheet.Orientation
+        };
+
+        var clone = new Template(metadata, sheet)
+        {
+            Version = Version
+        };
+
+        foreach (var obj in Objects)
+        {
+            clone.Objects.Add(obj.Clone());
+        }
+
+        return clone;
+    }
+
+    /// <summary>
     /// Создать шаблон с заданными параметрами.
     /// </summary>
     /// <param name="metadata">Метаданные.</param>

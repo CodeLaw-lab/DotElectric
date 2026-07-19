@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.Windows.Documents;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
@@ -209,6 +210,17 @@ public class MainViewModelTests : IDisposable
         Assert.Equal(3, _viewModel.OpenedTabs.Count);
     }
 
+    [Fact]
+    public void NewTabCommand_MultipleTabs_AllHaveUniqueIds()
+    {
+        _viewModel.NewTabCommand.Execute("A4");
+        _viewModel.NewTabCommand.Execute("A3");
+        _viewModel.NewTabCommand.Execute("A2");
+
+        var ids = _viewModel.OpenedTabs.Select(t => t.TabId).Distinct().ToList();
+        Assert.Equal(3, ids.Count);
+    }
+
     // ===== NewTabWithLastFormat =====
 
     [Fact]
@@ -338,6 +350,31 @@ public class MainViewModelTests : IDisposable
         // No exception
     }
 
+    // ===== Autosave Tick Handler =====
+
+    [Fact]
+    public async Task AutosaveTickHandler_WhenNoActiveTab_DoesNotThrow()
+    {
+        var exception = await Record.ExceptionAsync(
+            () => _autosaveService.AutosaveAllTabsAsync(_viewModel.OpenedTabs, TestContext.Current.CancellationToken));
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public async Task AutosaveTickHandler_WhenAutosaveFails_DoesNotThrow()
+    {
+        _viewModel.NewTabCommand.Execute("A4");
+        var tab = _viewModel.OpenedTabs[0];
+        tab.MarkDirty();
+
+        _mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()))
+            .Throws(new InvalidOperationException("Autosave failed"));
+
+        var exception = await Record.ExceptionAsync(
+            () => _autosaveService.AutosaveAllTabsAsync(_viewModel.OpenedTabs, TestContext.Current.CancellationToken));
+        Assert.Null(exception);
+    }
+
     // ===== SaveAsAsync =====
 
     [Fact]
@@ -378,6 +415,39 @@ public class MainViewModelTests : IDisposable
         _viewModel.PrintCommand.Execute(null);
 
         Assert.Equal("Печать доступна через меню печати", editor.StatusMessage);
+    }
+
+    // ===== PreviewPrint =====
+
+    [Fact]
+    public void PrintPreviewCommand_WhenNoActiveTab_DoesNotThrow()
+    {
+        var exception = Record.Exception(() => _viewModel.PreviewPrintCommand.Execute(null));
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void PrintPreviewCommand_WhenActiveTabExists_Executes()
+    {
+        _viewModel.NewTabCommand.Execute("A4");
+        var tab = _viewModel.OpenedTabs[0];
+        _viewModel.SelectedTab = tab;
+
+        _mockPrintDocumentGenerator.Setup(g => g.Generate(It.IsAny<Template>()))
+            .Returns(new FixedDocument());
+
+        _viewModel.PreviewPrintCommand.Execute(null);
+
+        _mockPrintDocumentGenerator.Verify(g => g.Generate(tab.Template), Times.Once);
+    }
+
+    // ===== OpenSettings =====
+
+    [Fact]
+    public void OpenSettingsCommand_Executes_DoesNotThrow()
+    {
+        var exception = Record.Exception(() => _viewModel.OpenSettingsCommand.Execute(null));
+        Assert.Null(exception);
     }
 
     // ===== Exit =====

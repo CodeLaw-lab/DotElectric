@@ -92,6 +92,18 @@ public readonly struct PointMicrons
     public static bool operator !=(PointMicrons left, PointMicrons right)
         => !left.Equals(right);
 
+    /// <summary>
+    /// Оператор сложения двух точек (покомпонентно).
+    /// </summary>
+    public static PointMicrons operator +(PointMicrons left, PointMicrons right)
+        => new(left.MicronsX + right.MicronsX, left.MicronsY + right.MicronsY);
+
+    /// <summary>
+    /// Оператор вычитания двух точек (покомпонентно).
+    /// </summary>
+    public static PointMicrons operator -(PointMicrons left, PointMicrons right)
+        => new(left.MicronsX - right.MicronsX, left.MicronsY - right.MicronsY);
+
     /// <inheritdoc/>
     public override string ToString()
         => $"({Coordinate.FormatMm(MicronsX)}, {Coordinate.FormatMm(MicronsY)}) мм";

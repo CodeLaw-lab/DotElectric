@@ -1,0 +1,126 @@
+================================================================================
+  COVERAGE & TEST REPORT — DotElectric.TemplateEditor
+  Generated: 2026-07-19
+================================================================================
+
+1. TEST RESULTS
+================================================================================
+  Total tests : 1913
+  Passed      : 1912
+  Failed      : 0
+  Skipped     : 1 (pre-existing)
+
+  Skipped test:
+    - TemplateServiceRoundTripTests.Validate_DuplicateIds_ReturnsError
+      (pre-existing skip, expected)
+
+2. CODE COVERAGE SUMMARY
+================================================================================
+  Line coverage   : 74.29%  (4841 / 6516 lines covered)
+  Branch coverage : 68.66%  (1922 / 2799 branches covered)
+
+  COVERAGE GATE (≥75%): ❌ NOT MET (off by 0.71 pp)
+
+3. COVERAGE BY CLASS (NON-WPF, < 75%)
+================================================================================
+  Class                                              Line%    Branch%   File
+  -------------------------------------------------  -------  --------  ----------------------------
+  WpfDialogFileService                               11.1%    0.0%      Services/
+  CanvasInputRouter                                  11.3%    16.0%     Behaviors/
+  PreviewLineChangedBehavior                         12.8%    2.8%      Behaviors/
+  FontMetrics                                        40.2%    36.4%     Models/
+  TemplateObjectBase                                 42.8%    100.0%    Models/
+  MarkerPosition                                     44.1%    33.3%     Behaviors/
+  TemplateLibraryService                             35.1%    16.7%     Services/
+  TemplateLibraryViewModel                           50.7%    50.0%     ViewModels/
+  NonZeroToVisibilityConverter                       53.8%    30.0%     Converters/
+  CustomSheetDialogViewModel                         63.0%    80.0%     ViewModels/
+  TextPropertiesViewModel                            64.4%    62.2%     ViewModels/
+  PrintService                                       64.7%    70.8%     Services/
+  ValidateObjectLineType                             64.7%    87.5%     Services/TemplateValidator
+  ValidateUniqueIds                                  72.2%    83.3%     Services/TemplateValidator
+
+4. COVERAGE BY CLASS (0% — WPF VIEWS / CODE-BEHIND)
+================================================================================
+  These are WPF UI components that are not unit-testable without STA thread:
+  - App.xaml.cs (OnStartup, OnExit, exception handlers)
+  - MainWindow.xaml.cs (PreviewKeyDown handler)
+  - EditorCanvas.xaml.cs (scroll/loaded/unloaded handlers, PrintVisualProvider)
+  - EditorCanvasBehavior.cs + EditorCanvasState.cs
+  - GridNodesLayer.cs (OnRender, DPs)
+  - PropertiesPanelContent.xaml.cs
+  - PrintPreviewWindow.xaml.cs
+  - SettingsView.xaml.cs
+  - CustomSheetDialog.xaml.cs
+  - TemplateLibraryView.xaml.cs
+  - TabItemMiddleClickBehavior.cs
+  - CoordinateTransform.cs
+  - ShortcutRegistry.cs
+  - FontNameToFamilyConverter.cs
+  - IsObjectSelectedConverter.cs
+  - WpfDialogHostService.cs, WpfDispatcherService.cs, WpfMessageBoxProvider.cs
+  - ThemeDictionaryManager.cs, PrintDialogFactory.cs, PrintDialogWrapper.cs
+  - WpfApplicationLifecycle.cs
+
+5. ANALYSIS — COVERAGE GAP
+================================================================================
+  Current line coverage: 74.29%
+  Target:                ≥75.00%
+  Gap:                   0.71 percentage points (~46 additional covered lines needed)
+
+  The main contributors to the coverage gap are WPF code-behind files and
+  behaviors that require STA thread for testing. These account for the
+  majority of uncovered lines (estimates: ~250-300 lines).
+
+  RECOMMENDED ACTIONS (priority order):
+
+  A. Add tests for testable low-coverage classes (~100 lines potential gain):
+     1. FontMetrics (40.2%) — Add instance method tests through IFontMetrics
+        interface
+     2. TemplateObjectBase (42.8%) — Test Clone(), Move(), ContainsPoint()
+        on base class directly
+     3. NonZeroToVisibilityConverter (53.8%) — Add ConvertBack null/edge tests
+     4. CustomSheetDialogViewModel (63.0%) — Test SetQuickFormat command
+     5. TemplateLibraryService (35.1%) — Add search/filter tests
+     6. TextPropertiesViewModel (64.4%) — Add edge case tests for remaining
+        branches
+
+  B. STA-thread tests for WPF behaviors (~30 lines potential gain):
+     - CanvasInputRouter, PreviewLineChangedBehavior, MarkerPosition
+     - Requires WpfContext helper (already exists in Tests/Helpers/WpfContext.cs)
+
+  C. Branch coverage improvement (~60 branches gap to 75%):
+     - EditorViewModel (60.2% branch) — test branching in undo/redo, error paths
+     - ZoomPanManager (87.5% branch) — boundary condition tests
+     - StatusBarManager (50% branch) — test both branches of grid delegates
+
+6. EXISTING TEST COUNTS BY CATEGORY (1912 active tests)
+================================================================================
+  Category              Approx. Count
+  --------------------- -------------
+  ViewModel Tests       ~450+ (EditorVM, PropertiesVM, sub-VMs, managers)
+  Tool Tests            ~200+ (Select, Pan, Resize, Line, Rect, Text)
+  Model Tests           ~300+ (Line, Rect, Text, Sheet, Coordinate, etc.)
+  Converter Tests       ~156+ (all 27 converters)
+  Service Tests         ~200+ (TemplateService, Print, Autosave, etc.)
+  Behavior Tests        ~53+ (TextBox, ComboBox, Zoom, MarkerPosition)
+  Integration Tests     ~49+ (round-trip, hit-test)
+  STA/WpfContext Tests  ~45+ (behavior handlers via WpfContext)
+
+7. CONCLUSION
+================================================================================
+  All 1912 active tests pass (0 failures).
+  1 test is pre-existing skipped (Validate_DuplicateIds_ReturnsError).
+
+  ⚠ COVERAGE GATE NOT MET: 74.29% < 75.00% threshold (gap: 0.71 pp).
+
+  To close the gap, focus on:
+  1) Adding unit tests for testable low-coverage classes (FontMetrics,
+     TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogVM)
+  2) Adding STA-based behavior tests (CanvasInputRouter, PreviewLineChanged,
+     MarkerPosition)
+  3) Improving branch coverage in EditorViewModel and StatusBarManager
+
+  Branch coverage (68.66%) is notably lower than line coverage — conditional
+  logic in ViewModels and services needs more edge-case test coverage.
+================================================================================

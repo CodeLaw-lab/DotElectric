@@ -188,13 +188,109 @@ public class NonZeroToVisibilityConverterTests
 {
     private readonly NonZeroToVisibilityConverter _converter = new();
 
-    [Theory]
-    [InlineData(0, Visibility.Collapsed)]
-    [InlineData(1, Visibility.Visible)]
-    public void Convert_ReturnsExpected(object value, Visibility expected)
+    [Fact]
+    public void Convert_IntZero_ReturnsCollapsed()
     {
-        var result = _converter.Convert(value, typeof(Visibility), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
+        var result = _converter.Convert(0, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_IntPositive_ReturnsVisible()
+    {
+        var result = _converter.Convert(1, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Visible, result);
+    }
+
+    [Fact]
+    public void Convert_IntNegative_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(-1, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_LongZero_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(0L, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_LongPositive_ReturnsVisible()
+    {
+        var result = _converter.Convert(5L, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Visible, result);
+    }
+
+    [Fact]
+    public void Convert_LongNegative_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(-3L, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_DoubleZero_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(0.0, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_DoublePositive_ReturnsVisible()
+    {
+        var result = _converter.Convert(2.5, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Visible, result);
+    }
+
+    [Fact]
+    public void Convert_DoubleNegative_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(-1.0, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_FloatZero_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(0.0f, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_FloatPositive_ReturnsVisible()
+    {
+        var result = _converter.Convert(3.0f, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Visible, result);
+    }
+
+    [Fact]
+    public void Convert_FloatNegative_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(-2.0f, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_Null_ReturnsCollapsed()
+    {
+        var result = _converter.Convert(null, typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void Convert_UnsupportedType_ReturnsCollapsed()
+    {
+        var result = _converter.Convert("not a number", typeof(Visibility), null, CultureInfo.InvariantCulture);
+        Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(Visibility.Visible, typeof(int), null, CultureInfo.InvariantCulture));
     }
 }
 
@@ -596,18 +692,6 @@ public class ZeroToVisibilityConverterExtendedTests
     {
         var result = _converter.Convert(value, typeof(Visibility), null, CultureInfo.InvariantCulture);
         Assert.Equal(expected, result);
-    }
-}
-
-public class NonZeroToVisibilityConverterExtendedTests
-{
-    private readonly NonZeroToVisibilityConverter _converter = new();
-
-    [Fact]
-    public void Convert_NegativeInt_ReturnsCollapsed()
-    {
-        var result = _converter.Convert(-1, typeof(Visibility), null, CultureInfo.InvariantCulture);
-        Assert.Equal(Visibility.Collapsed, result);
     }
 }
 
