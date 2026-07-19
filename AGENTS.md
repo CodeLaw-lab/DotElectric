@@ -2,6 +2,8 @@
 
 ## Current Focus
 
+**Coverage Improvement завершён.** Покрытие тестами увеличено с ~59-67% до 75.15% (~195 новых тестов, 2035 total). Порог CI gate 75% достигнут.
+
 **Архитектурные исправления H1–H5 завершены.** 5 высокоприоритетных проблем устранены: async-void в AutosaveTick, статический ValidationService (→ IValidationService), мёртвый код DialogServiceFactory, утечка PrintVisualProvider, no-op MenuItem F4.
 
 **Архитектурный рефакторинг (A–D) завершён.** 18 замечаний из Архитектурного анализа устранены.
@@ -35,7 +37,7 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 1840 passed, 1 pre-existing skip
+**Tests:** 2035 passed, 1 pre-existing skip
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -181,10 +183,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D завершён — рефакторинг)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement завершены)
 
-- **Tests:** 1840 (0 failures, 1 pre-existing skip)
-- **Coverage:** ~82% line-rate
+- **Tests:** 2035 (0 failures, 1 pre-existing skip)
+- **Coverage:** 75.15% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
@@ -199,6 +201,26 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **EditorCanvasBehavior:** 78 строк (AttachedProperty + stubs), 3 файла: State, Transform, Router
 - **FontMetrics:** `IFontMetrics` + `FontMetrics.Default` static Singleton (DI-registered)
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
+
+## Sprint — Coverage Improvement (19.07.2026)
+
+### Pipeline: Увеличение покрытия до ≥75%
+**Проблема:** Фактическое покрытие составляло ~59-67% (оценка 82% была неточной). CI gate требовал ≥75%.
+**Исправление:** Добавлено ~195 тестов в 6 зонах + 2 retry-цикла. Ключевые добавления:
+- **Commands:** 16 тестов на null guards + edge cases (AddObjectCommand, DeleteObjectCommand, ChangePropertyCommand, BatchCommand)
+- **Tools Reset():** 9 тестов на DrawingLineTool/DrawingRectangleTool/TextTool.Reset()
+- **Grid:** 8 тестов на ComputeDisplayStep/GenerateGridNodes edge cases
+- **Services:** 8 тестов на TemplateService, AutosaveService, PrintDocumentGenerator, DialogService
+- **Models:** 15+ тестов на Template.Clone(), Sheet.FromFormat(), Coordinate, PointMicrons операторы
+- **MainViewModel:** 6 тестов на AutosaveTickHandler, PrintPreviewCommand, OpenSettingsCommand
+- **Retry 1:** FontMetrics (22 теста, instance+IFontMetrics), TemplateObjectBase (43 теста, Move/Clone/CaptureResizeState/ContainsPoint), NonZeroToVisibilityConverter (15 тестов), CustomSheetDialogViewModel (23 теста)
+- **Retry 2:** ShortcutRegistry (22 теста, 100% покрытие)
+- **Production fixes:** Template.Clone() deep copy, PointMicrons operator+/-, исправлен синтаксис TemplateTests.cs
+
+**Файлы:** 15+ test files, Models/Template.cs, Models/PointMicrons.cs
+**Build:** 0 errors, 0 warnings
+**Tests:** 2035 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.15% line-rate ✅ (порог 75% достигнут)
 
 ## Sprint 37 — Selection fixes + visual feedback
 

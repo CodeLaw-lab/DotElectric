@@ -145,6 +145,53 @@ public class CoordinateTests
         Assert.Equal("0", result);
     }
 
+    // ===== ParseMm — edge cases =====
+
+    [Fact]
+    public void ParseMm_NullInput_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentException>(() => Coordinate.ParseMm(null!));
+    }
+
+    [Fact]
+    public void ParseMm_EmptyInput_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => Coordinate.ParseMm(string.Empty));
+    }
+
+    [Fact]
+    public void ParseMm_WhitespaceInput_ThrowsArgumentException()
+    {
+        Assert.Throws<ArgumentException>(() => Coordinate.ParseMm("   "));
+    }
+
+    [Fact]
+    public void ParseMm_InvalidFormat_ThrowsFormatException()
+    {
+        Assert.Throws<FormatException>(() => Coordinate.ParseMm("abc"));
+    }
+
+    [Fact]
+    public void ParseMm_ValidInput_ReturnsCorrectMicrons()
+    {
+        var result = Coordinate.ParseMm("42.5");
+        Assert.Equal(42500, result);
+    }
+
+    [Fact]
+    public void ParseMm_IntegerString_ReturnsCorrectMicrons()
+    {
+        var result = Coordinate.ParseMm("10");
+        Assert.Equal(10000, result);
+    }
+
+    [Fact]
+    public void ParseMm_NegativeString_ReturnsCorrectMicrons()
+    {
+        var result = Coordinate.ParseMm("-3.14");
+        Assert.Equal(-3140, result);
+    }
+
     // ===== SerializeMicrons / DeserializeMicrons =====
 
     [Fact]
