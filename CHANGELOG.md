@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - H3: `DialogServiceFactory` dead code removed from `IDialogService.cs`
 - H4: `PrintVisualProvider` nulled in `EditorViewModel.Dispose()` (dangling reference cleanup)
 - H5: No-op `Свойства (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
+- Documentation: исправлены 27 ошибок в 9 md-файлах — битые ссылки на archive, EditorConstants → PhysicalConstants/EditorSettings, устаревшие метрики, XAML-биндинги в docs/09, placeholder URL, фактические ошибки в README, docs/19 динамика покрытия
 
 ### Added
 - Sprint STA: `WpfContext` helper — STA-thread dispatcher for WPF unit tests
@@ -69,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 28: Split `CommonConverters.cs` into 16 individual converter files
 - Sprint 28: Renamed `ITemplateObject` → `TemplateObjectBase` across 50+ files
 - Sprint 27: `EditorViewModel` reduced from ~1037 to ~700 lines (-32%)
+- Documentation: XAML-биндинги в docs/09_UI_решения.md обновлены до manager-свойств (после R3.1/A.2)
 
 ### Fixed
 - Sprint 41: Drag delta accumulation (was `obj.MicronsX + delta`, now `initialPos + delta`)
@@ -83,11 +85,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 27: Fixed `ResizeHandle` namespace import
 
 ### Metrics
-- **Tests:** 1780 (0 failures, 1 pre-existing skip)
-- **Coverage:** ~82% line-rate (estimated)
+- **Tests:** 1840 (0 failures, 1 pre-existing skip)
+- **Coverage:** 75.15% line-rate (2035 tests total, CI gate 75%)
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
-- **EditorViewModel:** ~1194 lines (9 managers, ~60 forwarding properties)
+- **EditorViewModel:** ~784 lines (9 managers, post R3.1 de-bloat)
 - **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext
 
 ---

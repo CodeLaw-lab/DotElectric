@@ -42,7 +42,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 src/
 ├── DotElectric.TemplateEditor/          # Main WPF application
 │   ├── Commands/                        # Undo/Redo commands
-│   ├── Constants/                       # EditorConstants.cs
+│   ├── Constants/                       # PhysicalConstants, EditorSettings
 │   ├── Converters/                      # Value converters (16 files)
 │   ├── Helpers/                         # Utility classes
 │   ├── Models/                          # Domain models (microns)
@@ -52,17 +52,16 @@ src/
 │   ├── ViewModels/                      # MVVM ViewModels
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
-│   ├── Constants/                       # EditorConstants.cs
 │   └── WpfCommands/                     # WPF command routing (ToolCommands)
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (~1300+ tests)
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (~1840+ tests)
 ```
 
 ### Coding Standards
 - Use `long` for all coordinates (microns), never `double`
 - Follow C# naming conventions (`TemplateObjectBase`, not `ITemplateObject`)
-- Use `EditorConstants` for all thresholds and limits
+- Use `PhysicalConstants` and `EditorSettings` for all thresholds and limits
 - MVVM: ViewModels should not know about WPF types
-- Commands implement `DotElectric.TemplateEditor.Commands.ICommand` (NOT `System.Windows.Input.ICommand`)
+- Commands implement `DotElectric.TemplateEditor.Commands.IUndoCommand` (NOT `System.Windows.Input.ICommand`)
 - All DI services are Singleton; use `IEditorViewModelFactory` for EditorViewModel
 
 ### Testing
@@ -85,7 +84,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add symbol editor panel
 fix: correct line hit-testing tolerance
-refactor: extract magic numbers to EditorConstants
+refactor: extract magic numbers to PhysicalConstants/EditorSettings
 docs: update AGENTS.md with Sprint 29 metrics
 test: add CustomResizeCommand tests
 ```
@@ -101,7 +100,7 @@ test: add CustomResizeCommand tests
 Sprints are 1-week cycles tracked in `docs/`:
 - `docs/47_План_развития_Этап2.md` — Roadmap
 - `docs/00_Индекс_документов.md` — Document index
-- `docs/fix_*.md` — Detailed fix documents (Sprint 37-52)
+- `AGENTS.md` — Detailed sprint reports (All Common Mistakes and fixes)
 
 ## Common Mistakes to Avoid
 
