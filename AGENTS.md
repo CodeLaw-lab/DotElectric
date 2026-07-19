@@ -141,16 +141,9 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 - `docs/03_Спецификация_требований_Этап1.md` — Detailed architecture and API
 - `docs/00_Индекс_документов.md` — Document index
-- `docs/archive/42_Отчёт_Спринт25_Рефакторинг_моделей.md` — Sprint 25 (model refactoring, archived)
-- `docs/archive/44_Отчёт_Спринт24_Покрытие_Тестов.md` — Sprint 24 (test coverage, archived)
-- `docs/archive/fixes/fix_C7_CenterCanvas_PortraitOffset.md` — Fix C7 (CenterCanvas + InlineTextEditor, archived)
-- `docs/archive/fixes/fix_S38_LineType_PropertiesPanel_Undo.md` — Sprint 38 (LineType panel + coordinates + undo, archived)
-- `docs/archive/fixes/fix_S39_Rectangle_HitTest_BorderOnly.md` — Sprint 39 (Rectangle border-only hit-test, archived)
-- `docs/archive/fixes/fix_S40_KeyboardShortcuts_SelectionMarkers.md` — Sprint 40 (keyboard shortcuts + selection markers, archived)
-- `docs/archive/fixes/fix_S41_DragMove_DeltaAccumulation_TextINPC.md` — Sprint 41 (drag delta drift + Text INPC, archived)
-- `docs/archive/fixes/fix_S44_PropertiesPanel_Resize_Update.md` — Sprint 44 (PropertiesPanel INPC subscribe + Text INPC, archived)
-- `docs/archive/fixes/fix_S45_PanTool_DeltaAccumulation.md` — Sprint 45 (pan delta drift via RenderTransform, archived)
-- `docs/archive/fixes/fix_S51_Text_Improvements_Fonts_Rotation.md` — Sprint 51/52 (fonts, immediate edit, free rotation, archived)
+
+Актуальные описания всех изменений, Common Mistakes и архитектурных решений — в этом документе (AGENTS.md).
+Архивные sprint-отчёты и fix-документы удалены из git для оптимизации репозитория.
 
 ## Common Mistakes to Avoid
 
