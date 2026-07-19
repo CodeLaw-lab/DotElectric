@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Pipeline: увеличение покрытия тестами до 75.15% (было ~59-67%)
+- ~195 новых тестов: Commands null guards, Tools Reset(), Grid edge cases, Services, Models, MainViewModel, FontMetrics, TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogViewModel, ShortcutRegistry
+- Template.Clone() — deep copy с Metadata, Sheet и Objects
+- PointMicrons operator+ и operator- (компонентное сложение/вычитание)
+
+### Changed
+- AGENTS.md: обновлены счётчики тестов (2035) и покрытие (75.15%)
+
 ### Fixed
 - README.md: повторное исправление кодировки (UTF-8 double-encoding / mojibake)
 - README.md: исправлена кодировка (UTF-8 double-encoding / mojibake) — восстановлены русский текст и эмодзи
@@ -15,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - H3: `DialogServiceFactory` dead code removed from `IDialogService.cs`
 - H4: `PrintVisualProvider` nulled in `EditorViewModel.Dispose()` (dangling reference cleanup)
 - H5: No-op `Свойства (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
+- TemplateTests.cs: исправлен синтаксис (лишняя закрывающая скобка)
 
 ### Added
 - CI workflow: GitHub Actions (build, test, coverage gate 75%) на `windows-latest`
@@ -86,8 +96,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 27: Fixed `ResizeHandle` namespace import
 
 ### Metrics
-- **Tests:** 1780 (0 failures, 1 pre-existing skip)
-- **Coverage:** ~82% line-rate (estimated)
+- **Tests:** 2035 (0 failures, 1 pre-existing skip)
+- **Coverage:** 75.15% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
 - **EditorViewModel:** ~1194 lines (9 managers, ~60 forwarding properties)

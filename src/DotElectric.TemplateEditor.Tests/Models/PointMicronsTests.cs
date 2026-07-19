@@ -112,6 +112,50 @@ public class PointMicronsTests
     }
 
     [Fact]
+    public void AdditionOperator_ReturnsCorrectSum()
+    {
+        var a = new PointMicrons(1000, 2000);
+        var b = new PointMicrons(3000, 4000);
+        var result = a + b;
+
+        Assert.Equal(4000, result.MicronsX);
+        Assert.Equal(6000, result.MicronsY);
+    }
+
+    [Fact]
+    public void AdditionOperator_WithZero_ReturnsSame()
+    {
+        var a = new PointMicrons(5000, 7000);
+        var zero = new PointMicrons(0, 0);
+        var result = a + zero;
+
+        Assert.Equal(a.MicronsX, result.MicronsX);
+        Assert.Equal(a.MicronsY, result.MicronsY);
+    }
+
+    [Fact]
+    public void SubtractionOperator_ReturnsCorrectDifference()
+    {
+        var a = new PointMicrons(10000, 20000);
+        var b = new PointMicrons(3000, 4000);
+        var result = a - b;
+
+        Assert.Equal(7000, result.MicronsX);
+        Assert.Equal(16000, result.MicronsY);
+    }
+
+    [Fact]
+    public void SubtractionOperator_NegativeResult_WorksCorrectly()
+    {
+        var a = new PointMicrons(1000, 2000);
+        var b = new PointMicrons(5000, 1000);
+        var result = a - b;
+
+        Assert.Equal(-4000, result.MicronsX);
+        Assert.Equal(1000, result.MicronsY);
+    }
+
+    [Fact]
     public void ReadOnlyStruct_CannotModifyAfterCreation()
     {
         var point = new PointMicrons(1000, 2000);

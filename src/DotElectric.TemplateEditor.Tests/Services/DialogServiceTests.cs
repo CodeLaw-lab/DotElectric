@@ -156,6 +156,43 @@ public class DialogServiceTests
         Assert.Equal(MsgrButtons.YesNo, _mockMessageBox.LastButtons);
         Assert.Equal(MsgrIcon.Question, _mockMessageBox.LastIcon);
     }
+
+    [Fact]
+    public async Task ShowUnsavedChangesDialogAsync_EmptyFileName_DoesNotThrow()
+    {
+        _mockMessageBox.NextResult = MsgrResult.Yes;
+
+        var result = await _dialogService.ShowUnsavedChangesDialogAsync(string.Empty);
+
+        Assert.Equal(UnsavedChangesResult.Save, result);
+        Assert.Contains("Сохранить изменения", _mockMessageBox.LastMessage);
+    }
+
+    [Fact]
+    public void ShowConfirmation_EmptyMessage_DoesNotThrow()
+    {
+        _mockMessageBox.NextResult = MsgrResult.Yes;
+
+        var result = _dialogService.ShowConfirmation(string.Empty);
+
+        Assert.True(result);
+        Assert.Equal(string.Empty, _mockMessageBox.LastMessage);
+    }
+
+    [Fact]
+    public void ShowError_NullMessage_DoesNotThrow()
+    {
+        var ex = Record.Exception(() => _dialogService.ShowError(null!));
+        Assert.Null(ex);
+    }
+
+    [Fact]
+    public void ShowFatalError_EmptyMessage_DoesNotThrow()
+    {
+        var ex = Record.Exception(() => _dialogService.ShowFatalError(string.Empty));
+        Assert.Null(ex);
+        Assert.Equal("Критическая ошибка", _mockMessageBox.LastCaption);
+    }
 }
 
 /// <summary>

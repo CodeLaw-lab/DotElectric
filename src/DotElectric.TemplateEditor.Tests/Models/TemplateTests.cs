@@ -96,6 +96,71 @@ public class TemplateTests
         var template = new Template();
         Assert.Equal(5000, template.DefaultGrid.StepMicrons);
     }
+
+    [Fact]
+    public void Clone_ReturnsNewInstance_NotSameReference()
+    {
+        var template = new Template();
+        template.Metadata.Name = "Original";
+        template.Objects.Add(new Line(0, 0, 1000, 1000));
+
+        var clone = template.Clone();
+
+        Assert.NotSame(template, clone);
+        Assert.NotSame(template.Metadata, clone.Metadata);
+        Assert.NotSame(template.Sheet, clone.Sheet);
+        Assert.NotSame(template.Objects, clone.Objects);
+    }
+
+    [Fact]
+    public void Clone_CopiesAllObjects_CountMatches()
+    {
+        var template = new Template();
+        template.Objects.Add(new Line(0, 0, 1000, 1000));
+        template.Objects.Add(new Rectangle(0, 0, 2000, 2000));
+        template.Objects.Add(new Text(5000, 5000, "Hello", 5000));
+
+        var clone = template.Clone();
+
+        Assert.Equal(template.Objects.Count, clone.Objects.Count);
+    }
+
+    [Fact]
+    public void Clone_CopiesProperties_CorrectValues()
+    {
+        var template = new Template();
+        template.Version = "2.0";
+        template.Metadata.Name = "Test";
+        template.Metadata.Author = "Author";
+        template.Sheet = Sheet.FromFormat("A4");
+
+        var clone = template.Clone();
+
+        Assert.Equal(template.Version, clone.Version);
+        Assert.Equal(template.Metadata.Name, clone.Metadata.Name);
+        Assert.Equal(template.Metadata.Author, clone.Metadata.Author);
+        Assert.Equal(template.Sheet.Format, clone.Sheet.Format);
+        Assert.Equal(template.Sheet.WidthMicrons, clone.Sheet.WidthMicrons);
+        Assert.Equal(template.Sheet.HeightMicrons, clone.Sheet.HeightMicrons);
+    }
+
+    [Fact]
+    public void Clone_DeepCopiesObjects_ModificationsIndependent()
+    {
+        var template = new Template();
+        var line = new Line(0, 0, 1000, 1000);
+        template.Objects.Add(line);
+
+        var clone = template.Clone();
+
+        // Modify original
+        line.Move(5000, 5000);
+        template.Objects.Add(new Rectangle(0, 0, 1000, 1000));
+
+        Assert.Single(clone.Objects);
+        Assert.Equal(0, clone.Objects[0].MicronsX);
+        Assert.Equal(2, template.Objects.Count);
+    }
 }
 
 public class SheetTests
@@ -126,6 +191,28 @@ public class SheetTests
     {
         var sheet = Sheet.FromFormat("a3");
         Assert.Equal("A3", sheet.Format);
+    }
+
+    [Theory]
+    [InlineData("A0", SheetOrientation.Landscape, 1189_000, 841_000)]
+    [InlineData("A1", SheetOrientation.Landscape, 841_000, 594_000)]
+    [InlineData("A2", SheetOrientation.Landscape, 594_000, 420_000)]
+    [InlineData("A3", SheetOrientation.Landscape, 420_000, 297_000)]
+    [InlineData("A4", SheetOrientation.Portrait, 210_000, 297_000)]
+    [InlineData("A4×2", SheetOrientation.Portrait, 210_000, 594_000)]
+    [InlineData("A3×2", SheetOrientation.Portrait, 297_000, 840_000)]
+    [InlineData("A2×2", SheetOrientation.Portrait, 420_000, 1_188_000)]
+    [InlineData("A1×2", SheetOrientation.Portrait, 594_000, 1_682_000)]
+    [InlineData("A0×2", SheetOrientation.Portrait, 841_000, 2_378_000)]
+    public void FromFormat_AllStandardFormats_ReturnsCorrectDimensions(
+        string format, SheetOrientation expectedOrientation, long expectedWidth, long expectedHeight)
+    {
+        var sheet = Sheet.FromFormat(format);
+
+        Assert.Equal(format, sheet.Format);
+        Assert.Equal(expectedOrientation, sheet.Orientation);
+        Assert.Equal(expectedWidth, sheet.WidthMicrons);
+        Assert.Equal(expectedHeight, sheet.HeightMicrons);
     }
 
     [Fact]
@@ -257,6 +344,35 @@ public class GridSettingsTests
         Assert.False(settings.Enabled);
         Assert.False(settings.SnapEnabled);
         Assert.False(settings.Visible);
+        Assert.Equal(10000, settings.StepMicrons);
+    }
+
+    [Fact]
+    public void DefaultConstructor_Defaults_AreCorrect()
+    {
+        var settings = new GridSettings();
+
+        Assert.True(settings.Enabled);
+        Assert.True(settings.SnapEnabled);
+        Assert.True(settings.Visible);
+        Assert.Equal(5000, settings.StepMicrons);
+    }
+
+    [Fact]
+    public void Constructor_CustomValues_CanBeSetViaProperties()
+    {
+        var settings = new GridSettings();
+
+        settings.Enabled = false;
+        Assert.False(settings.Enabled);
+
+        settings.SnapEnabled = false;
+        Assert.False(settings.SnapEnabled);
+
+        settings.Visible = false;
+        Assert.False(settings.Visible);
+
+        settings.StepMicrons = 10000;
         Assert.Equal(10000, settings.StepMicrons);
     }
 }

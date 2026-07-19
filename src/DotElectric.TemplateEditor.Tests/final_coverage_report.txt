@@ -1,0 +1,30 @@
+================================================================================
+  FINAL COVERAGE REPORT — DotElectric.TemplateEditor
+  Date: 2026-07-19 11:57
+================================================================================
+
+=== TEST RESULTS ===
+  Total tests : 2036
+  Passed      : 2035
+  Failed      : 0
+  Skipped     : 1  (pre-existing: Validate_DuplicateIds_ReturnsError)
+
+=== COVERAGE METRICS ===
+  Lines covered  : 4897
+  Lines valid    : 6516
+  Line coverage  : 75.15%  (line-rate = 0.7515)
+
+  Branches covered : 1943
+  Branches valid   : 2799
+  Branch coverage  : 69.41%  (branch-rate = 0.6941)
+
+=== THRESHOLD CHECK ===
+  Required line coverage : ≥ 75%
+  Actual   line coverage : 75.15%
+  RESULT: ✅ PASS — Coverage meets the 75% threshold.
+
+=== NOTES ===
+  - 1 pre-existing skipped test (Validate_DuplicateIds_ReturnsError) — not a regression
+  - Branch coverage (69.41%) is informational only; CI gate is on line coverage
+  - Coverage file: TestResults\c902066e-1edf-44f6-b1fa-cf6ffeee90fc\coverage.cobertura.xml
+================================================================================

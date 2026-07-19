@@ -681,6 +681,189 @@ public class CommandTests
         Assert.Same(line, objects[0]);
     }
 
+    // ===== AddObjectCommand null guards =====
+
+    [Fact]
+    public void AddObjectCommand_Constructor_NullCollection_ThrowsArgumentNullException()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        Assert.Throws<ArgumentNullException>(() => new AddObjectCommand(null!, line));
+    }
+
+    [Fact]
+    public void AddObjectCommand_Constructor_NullObject_ThrowsArgumentNullException()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        Assert.Throws<ArgumentNullException>(() => new AddObjectCommand(collection, null!));
+    }
+
+    // ===== DeleteObjectCommand edge cases =====
+
+    [Fact]
+    public void DeleteObjectCommand_Constructor_NullCollection_ThrowsArgumentNullException()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        Assert.Throws<ArgumentNullException>(() => new DeleteObjectCommand(null!, line));
+    }
+
+    [Fact]
+    public void DeleteObjectCommand_Constructor_NullObject_ThrowsArgumentNullException()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        Assert.Throws<ArgumentNullException>(() => new DeleteObjectCommand(collection, null!));
+    }
+
+    [Fact]
+    public void DeleteObjectCommand_Undo_BeforeExecute_DoesNotThrow()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line = new Line(0, 0, 1000, 1000);
+        collection.Add(line);
+        var cmd = new DeleteObjectCommand(collection, line);
+
+        var exception = Record.Exception(() => cmd.Undo());
+        Assert.Null(exception);
+    }
+
+    [Fact]
+    public void DeleteObjectCommand_Execute_ObjectNotInCollection_DoesNotThrow()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line = new Line(0, 0, 1000, 1000);
+        // line is intentionally NOT added to collection
+        var cmd = new DeleteObjectCommand(collection, line);
+
+        var exception = Record.Exception(() => cmd.Execute());
+        Assert.Null(exception);
+    }
+
+    // ===== ChangePropertyCommand<T> null guards =====
+
+    [Fact]
+    public void ChangePropertyCommand_Constructor_NullGetter_ThrowsArgumentNullException()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        Assert.Throws<ArgumentNullException>(() =>
+            new ChangePropertyCommand<long>(
+                null!,
+                v => line.StartMicronsX = v,
+                5000,
+                "Test"));
+    }
+
+    [Fact]
+    public void ChangePropertyCommand_Constructor_NullSetter_ThrowsArgumentNullException()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        Assert.Throws<ArgumentNullException>(() =>
+            new ChangePropertyCommand<long>(
+                () => line.StartMicronsX,
+                null!,
+                5000,
+                "Test"));
+    }
+
+    [Fact]
+    public void ChangePropertyCommand_Constructor_NullPropertyName_ThrowsArgumentNullException()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        Assert.Throws<ArgumentNullException>(() =>
+            new ChangePropertyCommand<long>(
+                () => line.StartMicronsX,
+                v => line.StartMicronsX = v,
+                5000,
+                null!));
+    }
+
+    [Fact]
+    public void ChangePropertyCommand_SecondConstructor_NullSetter_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new ChangePropertyCommand<long>(
+                1000L,
+                null!,
+                5000L,
+                "Test"));
+    }
+
+    [Fact]
+    public void ChangePropertyCommand_SecondConstructor_NullPropertyName_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            new ChangePropertyCommand<long>(
+                1000L,
+                v => { },
+                5000L,
+                null!));
+    }
+
+    // ===== BatchCommand edge cases =====
+
+    [Fact]
+    public void BatchCommand_Constructor_NullCommands_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => new BatchCommand(null!));
+    }
+
+    [Fact]
+    public void BatchCommand_GetRestoredObjects_ReturnsDeleteObjectCommandObjects()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line = new Line(0, 0, 1000, 1000);
+        collection.Add(line);
+        var deleteCmd = new DeleteObjectCommand(collection, line);
+        var batch = new BatchCommand(new[] { deleteCmd }, "Test");
+
+        var restored = batch.GetRestoredObjects();
+
+        Assert.Single(restored);
+        Assert.Same(line, restored[0]);
+    }
+
+    [Fact]
+    public void BatchCommand_GetRestoredObjects_NoDeleteCommands_ReturnsEmpty()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line = new Line(0, 0, 1000, 1000);
+        var addCmd = new AddObjectCommand(collection, line);
+        var batch = new BatchCommand(new[] { addCmd }, "Test");
+
+        var restored = batch.GetRestoredObjects();
+
+        Assert.Empty(restored);
+    }
+
+    [Fact]
+    public void BatchCommand_GetRestoredObjects_MixedCommands_ReturnsOnlyDeleteCommands()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line1 = new Line(0, 0, 1000, 1000);
+        var line2 = new Line(0, 0, 2000, 2000);
+        collection.Add(line1);
+        collection.Add(line2);
+        var deleteCmd = new DeleteObjectCommand(collection, line1);
+        var addCmd = new AddObjectCommand(collection, new Rectangle(0, 0, 500, 500));
+        var batch = new BatchCommand(new IUndoCommand[] { deleteCmd, addCmd }, "Test");
+
+        var restored = batch.GetRestoredObjects();
+
+        Assert.Single(restored);
+        Assert.Same(line1, restored[0]);
+    }
+
+    [Fact]
+    public void BatchCommand_Undo_BeforeExecute_DoesNotThrow()
+    {
+        var collection = new ObservableCollection<TemplateObjectBase>();
+        var line = new Line(0, 0, 1000, 1000);
+        var addCmd = new AddObjectCommand(collection, line);
+        var batch = new BatchCommand(new[] { addCmd }, "Test");
+
+        var exception = Record.Exception(() => batch.Undo());
+        Assert.Null(exception);
+        Assert.Empty(collection);
+    }
+
     private class TestMockCommand : IUndoCommand
     {
         public string Name => "Mock Command";
