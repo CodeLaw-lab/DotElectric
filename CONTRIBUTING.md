@@ -43,7 +43,7 @@ src/
 ├── DotElectric.TemplateEditor/          # Main WPF application
 │   ├── Commands/                        # Undo/Redo commands
 │   ├── Constants/                       # PhysicalConstants, EditorSettings
-│   ├── Converters/                      # Value converters (16 files)
+│   ├── Converters/                      # Value converters (28 files)
 │   ├── Helpers/                         # Utility classes
 │   ├── Models/                          # Domain models (microns)
 │   │   └── Objects/                     # TemplateObjectBase, Rectangle, Line, Text
@@ -52,8 +52,8 @@ src/
 │   ├── ViewModels/                      # MVVM ViewModels
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
-│   └── WpfCommands/                     # WPF command routing (ToolCommands)
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (~1840+ tests)
+│   └── Messages/                        # WeakReferenceMessenger сообщения
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2035 tests, 1840 passed)
 ```
 
 ### Coding Standards
@@ -66,10 +66,10 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: 80%+ line-rate
+- Target coverage: ≥75% line-rate (CI gate, actual ~75.15%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
-- Behaviors should be tested via unit tests (not just integration)
+- Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
 
 ## Git Workflow
 
@@ -100,25 +100,23 @@ test: add CustomResizeCommand tests
 Sprints are 1-week cycles tracked in `docs/`:
 - `docs/47_План_развития_Этап2.md` — Roadmap
 - `docs/00_Индекс_документов.md` — Document index
-- `AGENTS.md` — Detailed sprint reports (All Common Mistakes and fixes)
+- `AGENTS.md` — Sprint history, architecture reference, and Common Mistakes
+- `.opencode/CODING_STANDARDS.md` — Full coding rules (AI agents only, not committed)
 
 ## Common Mistakes to Avoid
 
+Основные правила для разработчика (полный список — в `.opencode/CODING_STANDARDS.md` для AI-агентов):
+
 1. Don't use `double` for coordinates — use microns (`long`)
 2. Don't create new Shape on every MouseMove — update properties instead
-3. Don't do hit-testing on MouseMove — only on MouseDown
-4. Don't use Grid/StackPanel in EditorCanvas — use Canvas
-5. Always use `Mode=OneWay` when binding to readonly properties
-6. IsDirty must be set by commands (`MarkDirty()`), NOT manually
-7. Preview shapes: create once, update properties only, then re-assign reference
-8. EditorViewModel — instantiate via `IEditorViewModelFactory`, NOT `new` directly
-9. Drag delta from `_initialPositions[obj]`, NOT current `obj.MicronsX` (already updated)
-10. Pan delta from Window-relative coordinates, NOT `e.GetPosition(canvas)` (RenderTransform shift)
-11. After Undo/Redo — always purge orphaned objects from `SelectedObjects`
-12. Rectangle hit-test — use border-band approach, NOT full AABB
-13. `PreviewKeyDown` for tool switching — check `ModifierKeys.None` before handling V/L/R/T
-14. `GetClipboardContents()` — clone objects on EVERY call, not only during `Copy()`
-15. Type guard in SetProperty helper — use `is not` pattern, NEVER direct cast `((Line)SelectedObject!)`
+3. Always use `Mode=OneWay` when binding to readonly properties
+4. IsDirty must be set by commands (`MarkDirty()`), NOT manually
+5. EditorViewModel — instantiate via `IEditorViewModelFactory`, NOT `new` directly
+6. All services must be registered in `App.xaml.cs`
+7. Commands implement `IUndoCommand` (NOT `System.Windows.Input.ICommand`)
+8. Test code: no `Thread.Sleep`, use `IDateTimeProvider`
+9. All new classes should be `sealed`
+10. ViewModels must NOT contain WPF types (Dispatcher, UIElement, Visual)
 
 ## Resources
 
