@@ -379,8 +379,10 @@
             </Rectangle>
 
             <!-- Inline-редактирование текста -->
-            <TextBox x:Name="InlineTextEditor"
-                     Text="{Binding InlineEditManager.InlineEditText, UpdateSourceTrigger=PropertyChanged}"
+             <TextBox x:Name="InlineTextEditor"
+                      behaviors:AutoFocusOnVisibleBehavior.IsEnabled="True"
+                      LostFocus="InlineTextEditor_LostFocus"
+                      Text="{Binding InlineEditManager.InlineEditText, UpdateSourceTrigger=PropertyChanged}"
                      Visibility="{Binding InlineEditManager.InlineEditingText, Converter={StaticResource NotNullToVisibility}}"
                      AcceptsReturn="{Binding InlineEditManager.InlineEditingText.TextWrapping}"
                      TextWrapping="{Binding InlineEditManager.InlineEditingText.TextWrapping, Converter={StaticResource BoolToTextWrappingConverter}}"

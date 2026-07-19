@@ -105,6 +105,14 @@ public partial class EditorCanvas : UserControl
         }
     }
 
+    private void InlineTextEditor_LostFocus(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is EditorViewModel vm && vm.InlineEditManager.IsEditing)
+        {
+            vm.CommitInlineEditingCommand.Execute(null);
+        }
+    }
+
     private sealed class CanvasPrintVisualProvider : IPrintVisualProvider
     {
         private readonly Canvas _canvas;

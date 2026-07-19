@@ -31,7 +31,7 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 1840 passed, 1 pre-existing skip
+**Tests:** 1852 passed, 1 pre-existing skip
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -172,7 +172,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ## Current State (Sprint R1–R4 + R3.1 + A–D завершён — рефакторинг)
 
-- **Tests:** 1840 (0 failures, 1 pre-existing skip)
+- **Tests:** 1852 (0 failures, 1 pre-existing skip)
 - **Coverage:** ~82% line-rate
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
@@ -1343,7 +1343,43 @@ Tests:  1780 passed, 1 skip
 - `Tests/ViewModels/EditorViewModelTests.cs` — pixel→micron asserts
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 1840 passed, 1 pre-existing skip
+**Tests:** 1852 passed, 1 pre-existing skip
+
+## Sprint 60 — Fix inline text editing (auto-focus, Escape/LostFocus routing, ShortcutRegistry guard)
+
+### 6 исправлений
+
+**Fix 60-1: AutoFocusOnVisibleBehavior**
+- Новый attached behavior: при `IsEnabled=True` и `IsVisibleChanged` → `element.Focus()` + `SelectAll()` для TextBox
+- Через `Dispatcher.BeginInvoke(DispatcherPriority.Loaded)` — layout должен завершиться
+- Отписка от `IsVisibleChanged` при `IsEnabled→false`
+
+**Fix 60-2: EditorCanvas.xaml — InlineTextEditor**
+- Добавлен `behaviors:AutoFocusOnVisibleBehavior.IsEnabled="True"`
+- Добавлен `LostFocus="InlineTextEditor_LostFocus"`
+
+**Fix 60-3: EditorCanvas.xaml.cs — LostFocus→Commit**
+- `InlineTextEditor_LostFocus`: если `IsEditing`, вызывает `CommitInlineEditingCommand`
+- Безопасность: `Commit()` проверяет `InlineEditingText==null`
+
+**Fix 60-4/5: CanvasInputRouter — guards**
+- `RoutePreviewKeyDown` и `RouteKeyDown`: если `InlineEditManager.IsEditing` → `return`
+- Escape/Enter при редактировании не уходят в инструменты
+
+**Fix 60-6: ShortcutRegistry — guard**
+- `TryHandle`: если `InlineEditManager.IsEditing` → `return false`
+- V/L/R/T/E при редактировании не переключают инструменты
+
+### Новые тесты
+- `ShortcutRegistryTests.cs` — 7 тестов (V/L/R/T/E/ShiftE при IsEditing + положительный контроль)
+- `AutoFocusOnVisibleBehaviorTests.cs` — 5 тестов (DP get/set + registration check)
+
+### Common Mistakes (new)
+66. `RouteKeyDown` must have the same `IsEditing` guard as `RoutePreviewKeyDown`. Without it, key events during inline editing reach the active tool and can clear selection, switch tools, or delete objects.
+67. `ShortcutRegistry.TryHandle` must check `editor.InlineEditManager.IsEditing` before processing shortcuts. Without the guard, V/L/R/T/E hotkeys during inline editing switch tools or rotate objects instead of being handled by the TextBox.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 1852 passed, 1 pre-existing skip
 
 ## Pipeline — Автоматизированный цикл разработки (18.07.2026)
 
