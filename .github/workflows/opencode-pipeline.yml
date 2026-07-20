@@ -1,4 +1,4 @@
-name: OpenCode Pipeline
+﻿name: OpenCode Pipeline
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ env:
 jobs:
   build-and-test:
     name: Build & Test
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: github.event_name == 'pull_request'
 
     steps:
@@ -70,10 +70,11 @@ jobs:
 
   opencode-review:
     name: OpenCode Review
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: |
       github.event_name == 'pull_request' &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      secrets.ANTHROPIC_API_KEY != ''
 
     steps:
       - uses: actions/checkout@v4
@@ -102,11 +103,12 @@ jobs:
 
   opencode-pipeline:
     name: OpenCode Pipeline
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: |
-      github.event_name == 'issue_comment' &&
-      contains(github.event.comment.body, '/pipeline') ||
-      github.event_name == 'workflow_dispatch'
+      (github.event_name == 'issue_comment' &&
+       contains(github.event.comment.body, '/pipeline') ||
+       github.event_name == 'workflow_dispatch') &&
+      secrets.ANTHROPIC_API_KEY != ''
 
     steps:
       - uses: actions/checkout@v4
