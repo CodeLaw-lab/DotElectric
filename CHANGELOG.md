@@ -1,4 +1,4 @@
-﻿﻿﻿# Changelog
+﻿# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -26,6 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - H5: No-op `РЎРІРѕР№СЃС‚РІР° (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
 - TemplateTests.cs: РёСЃРїСЂР°РІР»РµРЅ СЃРёРЅС‚Р°РєСЃРёСЃ (Р»РёС€РЅСЏСЏ Р·Р°РєСЂС‹РІР°СЋС‰Р°СЏ СЃРєРѕР±РєР°)
 - Documentation: РёСЃРїСЂР°РІР»РµРЅС‹ 27 РѕС€РёР±РѕРє РІ 9 md-С„Р°Р№Р»Р°С… вЂ” Р±РёС‚С‹Рµ СЃСЃС‹Р»РєРё РЅР° archive, EditorConstants в†’ PhysicalConstants/EditorSettings, СѓСЃС‚Р°СЂРµРІС€РёРµ РјРµС‚СЂРёРєРё, XAML-Р±РёРЅРґРёРЅРіРё РІ docs/09, placeholder URL, С„Р°РєС‚РёС‡РµСЃРєРёРµ РѕС€РёР±РєРё РІ README, docs/19 РґРёРЅР°РјРёРєР° РїРѕРєСЂС‹С‚РёСЏ
+- Sprint 60: Inline text editing — AutoFocusOnVisibleBehavior, CanvasInputRouter guards (Escape/Enter during edit), ShortcutRegistry guard (V/L/R/T/E blocked during edit)
+- Sprint 60: `RouteKeyDown` guard for `IsEditing` (matching existing `RoutePreviewKeyDown` guard)
+- Sprint 60: LostFocus → Commit for inline text editor
+- Sprint 61: Text rotation marker fix — `GetLayoutTransformOffset()` in Text.cs accounts for WPF `LayoutTransform` bounding box offset at non-zero angles
+- Sprint 61: `HitTestHelper.GetTextHandle()` simplified to use `Text.RotatedCorner0-3` directly
+- Sprint 61: Updated TextTests.cs (4 new tests) and HitTestHelperTests.cs (stale rotated text test points)
 
 ### Added
 - CI workflow: GitHub Actions (build, test, coverage gate 75%) РЅР° `windows-latest`
@@ -98,8 +104,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 27: Fixed `ResizeHandle` namespace import
 
 ### Metrics
-- **Tests:** 2035 (0 failures, 1 pre-existing skip)
-- **Coverage:** 75.15% line-rate вњ…
+- **Tests:** 2069 (0 failures, 1 pre-existing skip)
+- **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
 - **EditorViewModel:** ~784 lines (9 managers, post R3.1 de-bloat)
