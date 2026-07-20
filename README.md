@@ -1,4 +1,4 @@
-﻿# DotElectric Template Editor
+# DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
 **Тестов:** 2035, 0 сбоев, 1 предопределённый skip
@@ -6,8 +6,8 @@
 **Покрытие:** 75.15% line-rate (CI gate 75%)
 **Последнее обновление:** 19.07.2026 — Coverage Improvement: 75.15% (+195 тестов)
 
-[![CI](https://github.com/your-org/dotElectric/actions/workflows/ci.yml/badge.svg)](https://github.com/your-org/dotElectric/actions)
-[![Coverage](https://img.shields.io/badge/coverage-75%25-green)](https://github.com/your-org/dotElectric/actions)
+[![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
+[![Coverage](https://img.shields.io/badge/coverage-75%25-green)](https://github.com/anomalyco/dotelectric/actions)
 
 ---
 
@@ -168,7 +168,7 @@ dotElectric/
 
 ```bash
 # Клонирование репозитория
-git clone https://github.com/your-org/dotElectric.git
+git clone https://github.com/anomalyco/dotelectric.git
 cd dotElectric
 
 # Сборка
@@ -177,7 +177,7 @@ dotnet build src/DotElectric.TemplateEditor.slnx
 # Запуск
 dotnet run --project src/DotElectric.TemplateEditor/DotElectric.TemplateEditor
 
-# Тесты (покрытие >= 70%)
+# Тесты (покрытие >= 75%)
 dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 ```
 
@@ -228,13 +228,13 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - Scrollbar синхронизация
 
 #### Сетка
-- Шаг 1–50 мм, отображение узлов и линий
+- Шаг 0.5–10 мм, отображение узлов
 - Привязка к сетке
 - MinPixelSpacing — скрытие сетки при высокой плотности
 
 #### Печать
 - Ctrl+P — системный диалог печати
-- Прямая печать (без предпросмотра)
+- Предпросмотр печати (Ctrl+Shift+P) — DocumentViewer с FullPage
 
 #### UI
 - Material Design, темы Light/Dark (F9, с сохранением)
