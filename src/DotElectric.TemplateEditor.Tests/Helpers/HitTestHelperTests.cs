@@ -275,9 +275,9 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_Rotation90_PointInside_ReturnsTrue()
     {
         var text = new Text(0, 0, "Test", 3500) { RotationAngle = 90 };
-        // CW 90°: corners at (0, H), (0, H-W), (-H, H), (-H, H-W)
-        // AABB: X∈[-H, 0], Y∈[H-W, H] → center at (-H/2, H-W/2)
-        var point = new PointMicrons(-1750, 0);
+        // With LayoutTransform offset at 90°: center = (-minX, H+minY) = (H, H)
+        // Visual center maps to (H/2, 0) in model space (W=7000, H=3500 → (1750, 0))
+        var point = new PointMicrons(1750, 0);
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
 
@@ -293,8 +293,9 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_Rotation180_PointInside_ReturnsTrue()
     {
         var text = new Text(10000, 10000, "Test", 3500) { RotationAngle = 180 };
-        // 180° вокруг (X, Y+H): X in [X-W, X], Y in [Y+H, Y+2*H]
-        var point = new PointMicrons(6000, 15000);
+        // With LayoutTransform offset at 180°: center = (X-W, Y) for W=7000, H=3500
+        // Visual center maps to (X-W/2, Y+H/2) = (17000-3500, 10000+1750) = (13500, 11750)
+        var point = new PointMicrons(13500, 11750);
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
 
@@ -310,9 +311,9 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_Rotation270_PointInside_ReturnsTrue()
     {
         var text = new Text(10000, 10000, "Test", 3500) { RotationAngle = 270 };
-        // CW 270°: corners at (10000, 13500), (10000, 20500), (13500, 13500), (13500, 20500)
-        // Center: (11750, 17000)
-        var point = new PointMicrons(11750, 17000);
+        // With LayoutTransform offset at 270°: center = (X, Y+H-W) for W=7000, H=3500
+        // = (10000, 6500). Visual center maps to (X+H/2, Y+H/2) = (11750, 10000)
+        var point = new PointMicrons(11750, 10000);
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
 
@@ -790,9 +791,10 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_90DegreeRotation_PointInside_ReturnsTrue()
     {
         var text = new Text(0, 0, "Test", 5000, rotationAngle: 90);
-        // CW 90°: corners at (0, H), (-H, H), (0, H-W), (-H, H-W)
-        // AABB: X∈[-H, 0], Y∈[H, H-W] → center at (-H/2, H-W/2)
-        var point = new PointMicrons(-2500, 0);
+        // W=10000, H=5000. LayoutTransform offset at 90°: minX=-H=-5000, minY=0.
+        // Rotation center = (X-minX, Y+H+minY) = (5000, 5000).
+        // Visual center = center + rotated (W/2, H/2) = (5000-2500, 5000-5000) = (2500, 0).
+        var point = new PointMicrons(2500, 0);
 
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
@@ -801,8 +803,10 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_180DegreeRotation_PointInside_ReturnsTrue()
     {
         var text = new Text(10000, 10000, "Test", 5000, rotationAngle: 180);
-        var textWidth = (long)("Test".Length * 5000 * 0.6);
-        var point = new PointMicrons(10000 - textWidth / 2, 10000 + 8000);
+        // W=10000, H=5000. LayoutTransform offset at 180°: minX=-W=-10000, minY=-H=-5000.
+        // Rotation center = (X-minX, Y+H+minY) = (20000, 10000).
+        // Visual center = center + rotated (W/2, H/2) = (20000-5000, 10000+2500) = (15000, 12500).
+        var point = new PointMicrons(15000, 12500);
 
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
@@ -811,9 +815,10 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_270DegreeRotation_PointInside_ReturnsTrue()
     {
         var text = new Text(10000, 10000, "Test", 5000, rotationAngle: 270);
-        // CW 270°: corners at (10000, 15000), (10000, 25000), (15000, 15000), (15000, 25000)
-        // Center: (12500, 20000)
-        var point = new PointMicrons(12500, 20000);
+        // W=10000, H=5000. LayoutTransform offset at 270°: minX=0, minY=-W=-10000.
+        // Rotation center = (X-minX, Y+H+minY) = (10000, 5000).
+        // Visual center = center + rotated (W/2, H/2) = (10000+2500, 5000+5000) = (12500, 10000).
+        var point = new PointMicrons(12500, 10000);
 
         Assert.True(HitTestHelper.HitTestText(text, point));
     }
@@ -858,7 +863,9 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_180DegreeRotation_OutsideReturnsFalse()
     {
         var text = new Text(10000, 10000, "Test", 5000, rotationAngle: 180);
-        var point = new PointMicrons(11000, 11000);
+        // Bounding box after offset: X∈[10000, 20000], Y∈[10000, 15000].
+        // Point (5000, 5000) is clearly below-left of the shifted box.
+        var point = new PointMicrons(5000, 5000);
 
         Assert.False(HitTestHelper.HitTestText(text, point));
     }
@@ -867,7 +874,9 @@ public class HitTestHelperTests : IDisposable
     public void HitTestText_270DegreeRotation_OutsideReturnsFalse()
     {
         var text = new Text(10000, 10000, "Test", 5000, rotationAngle: 270);
-        var point = new PointMicrons(11000, 11000);
+        // Bounding box after offset: X∈[10000, 15000], Y∈[5000, 15000].
+        // Point (5000, 20000) is clearly above-left of the shifted box.
+        var point = new PointMicrons(5000, 20000);
 
         Assert.False(HitTestHelper.HitTestText(text, point));
     }

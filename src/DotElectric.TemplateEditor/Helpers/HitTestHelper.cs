@@ -166,25 +166,14 @@ public static class HitTestHelper
     /// </summary>
     private static ResizeHandle? GetTextHandle(Text text, PointMicrons point)
     {
-        var w = text.WidthMicrons;
-        var h = text.HeightMicrons;
-        var angleRad = text.RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
-
-        var topY = text.MicronsY + text.HeightMicrons;
-
-        long CornerX(long localX, long localY) =>
-            text.MicronsX + (long)Math.Round(localX * cosA - localY * sinA);
-        long CornerY(long localX, long localY) =>
-            topY - (long)Math.Round(localX * sinA + localY * cosA);
-
+        // Используем RotatedCorner0-3 из модели — они включают LayoutTransform offset,
+        // что гарантирует консистентность позиций маркеров (XAML) и hit-test хэндлов.
         var handles = new[]
         {
-            (ResizeHandle.TopLeft,     CornerX(0, 0), CornerY(0, 0)),
-            (ResizeHandle.TopRight,    CornerX(w, 0), CornerY(w, 0)),
-            (ResizeHandle.BottomLeft,  CornerX(0, h), CornerY(0, h)),
-            (ResizeHandle.BottomRight, CornerX(w, h), CornerY(w, h)),
+            (ResizeHandle.TopLeft,     text.RotatedCorner0X, text.RotatedCorner0Y),
+            (ResizeHandle.TopRight,    text.RotatedCorner1X, text.RotatedCorner1Y),
+            (ResizeHandle.BottomLeft,  text.RotatedCorner2X, text.RotatedCorner2Y),
+            (ResizeHandle.BottomRight, text.RotatedCorner3X, text.RotatedCorner3Y),
         };
 
         foreach (var (handle, hx, hy) in handles)
