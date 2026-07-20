@@ -473,26 +473,26 @@ public class TextTests : IDisposable
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
-
-        // At 90° CW (standard CCW matrix in Y-down = CW):
-        // corner0 = (X, Y+H)                     = pivot
-        // corner1 = (X + W*cos90, Y+H - W*sin90) = (X, Y+H - W)
-        // corner2 = (X - H*sin90, Y+H - H*cos90) = (X - H, Y+H)
-        // corner3 = (X + W*cos90 - H*sin90, Y+H - W*sin90 - H*cos90) = (X - H, Y+H - W)
+        var (minX, minY) = ExpectedOffset(w, h, 90);
         var cos90 = Math.Cos(Math.PI / 2);
         var sin90 = Math.Sin(Math.PI / 2);
 
-        Assert.Equal(1000, text.RotatedCorner0X);
-        Assert.Equal(2000 + h, text.RotatedCorner0Y);
+        // With LayoutTransform offset (-minX, +minY) applied to anchor (X, Y+H):
+        // corner0 = (X - minX, Y+H + minY)
+        Assert.Equal(1000 - minX, text.RotatedCorner0X);
+        Assert.Equal(2000 + h + minY, text.RotatedCorner0Y);
 
-        Assert.Equal(1000 + (long)Math.Round(w * cos90), text.RotatedCorner1X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin90), text.RotatedCorner1Y);
+        // corner1 = (X + W*cos - minX, Y+H - W*sin + minY)
+        Assert.Equal(1000 + (long)Math.Round(w * cos90) - minX, text.RotatedCorner1X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin90) + minY, text.RotatedCorner1Y);
 
-        Assert.Equal(1000 - (long)Math.Round(h * sin90), text.RotatedCorner2X);
-        Assert.Equal(2000 + h - (long)Math.Round(h * cos90), text.RotatedCorner2Y);
+        // corner2 = (X - H*sin - minX, Y+H - H*cos + minY)
+        Assert.Equal(1000 - (long)Math.Round(h * sin90) - minX, text.RotatedCorner2X);
+        Assert.Equal(2000 + h - (long)Math.Round(h * cos90) + minY, text.RotatedCorner2Y);
 
-        Assert.Equal(1000 + (long)Math.Round(w * cos90 - h * sin90), text.RotatedCorner3X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin90 + h * cos90), text.RotatedCorner3Y);
+        // corner3 = (X + W*cos - H*sin - minX, Y+H - W*sin - H*cos + minY)
+        Assert.Equal(1000 + (long)Math.Round(w * cos90 - h * sin90) - minX, text.RotatedCorner3X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin90 + h * cos90) + minY, text.RotatedCorner3Y);
     }
 
     [Fact]
@@ -502,17 +502,18 @@ public class TextTests : IDisposable
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 180);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 180);
         var cos180 = Math.Cos(Math.PI);
         var sin180 = Math.Sin(Math.PI);
 
-        Assert.Equal(1000, text.RotatedCorner0X);
-        Assert.Equal(2000 + h, text.RotatedCorner0Y);
+        Assert.Equal(1000 - minX, text.RotatedCorner0X);
+        Assert.Equal(2000 + h + minY, text.RotatedCorner0Y);
 
-        Assert.Equal(1000 + (long)Math.Round(w * cos180), text.RotatedCorner1X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin180), text.RotatedCorner1Y);
+        Assert.Equal(1000 + (long)Math.Round(w * cos180) - minX, text.RotatedCorner1X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin180) + minY, text.RotatedCorner1Y);
 
-        Assert.Equal(1000 - (long)Math.Round(h * sin180), text.RotatedCorner2X);
-        Assert.Equal(2000 + h - (long)Math.Round(h * cos180), text.RotatedCorner2Y);
+        Assert.Equal(1000 - (long)Math.Round(h * sin180) - minX, text.RotatedCorner2X);
+        Assert.Equal(2000 + h - (long)Math.Round(h * cos180) + minY, text.RotatedCorner2Y);
     }
 
     [Fact]
@@ -522,20 +523,19 @@ public class TextTests : IDisposable
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 270);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 270);
         var cos270 = Math.Cos(3 * Math.PI / 2);
         var sin270 = Math.Sin(3 * Math.PI / 2);
 
-        Assert.Equal(1000, text.RotatedCorner0X);
-        Assert.Equal(2000 + h, text.RotatedCorner0Y);
+        Assert.Equal(1000 - minX, text.RotatedCorner0X);
+        Assert.Equal(2000 + h + minY, text.RotatedCorner0Y);
 
         // At 270° CW (standard CCW matrix in Y-down = CW): sin270=-1
-        // corner1: (X, Y+H - W*(-1)) = (X, Y+H+W)
-        Assert.Equal(1000 + (long)Math.Round(w * cos270), text.RotatedCorner1X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin270), text.RotatedCorner1Y);
+        Assert.Equal(1000 + (long)Math.Round(w * cos270) - minX, text.RotatedCorner1X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin270) + minY, text.RotatedCorner1Y);
 
-        // corner2: (X - H*(-1), Y+H - H*0) = (X+H, Y+H)
-        Assert.Equal(1000 - (long)Math.Round(h * sin270), text.RotatedCorner2X);
-        Assert.Equal(2000 + h - (long)Math.Round(h * cos270), text.RotatedCorner2Y);
+        Assert.Equal(1000 - (long)Math.Round(h * sin270) - minX, text.RotatedCorner2X);
+        Assert.Equal(2000 + h - (long)Math.Round(h * cos270) + minY, text.RotatedCorner2Y);
     }
 
     // === ContainsPoint with corrected metrics ===
@@ -564,23 +564,25 @@ public class TextTests : IDisposable
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 45);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 45);
         var cos45 = Math.Cos(Math.PI / 4);
         var sin45 = Math.Sin(Math.PI / 4);
 
-        Assert.Equal(1000, text.RotatedCorner0X);
-        Assert.Equal(2000 + h, text.RotatedCorner0Y);
+        // Corner0 = anchor + offset = (X - minX, Y+H + minY)
+        Assert.Equal(1000 - minX, text.RotatedCorner0X);
+        Assert.Equal(2000 + h + minY, text.RotatedCorner0Y);
 
-        // Corner 1 (local W, 0): X = X + W·cos45, Y = Y+H - W·sin45
-        Assert.Equal(1000 + (long)Math.Round(w * cos45), text.RotatedCorner1X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin45), text.RotatedCorner1Y);
+        // Corner 1 (local W, 0): X = X + W·cos45 - minX, Y = Y+H - W·sin45 + minY
+        Assert.Equal(1000 + (long)Math.Round(w * cos45) - minX, text.RotatedCorner1X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin45) + minY, text.RotatedCorner1Y);
 
-        // Corner 2 (local 0, H): X = X - H·sin45, Y = Y+H - H·cos45
-        Assert.Equal(1000 - (long)Math.Round(h * sin45), text.RotatedCorner2X);
-        Assert.Equal(2000 + h - (long)Math.Round(h * cos45), text.RotatedCorner2Y);
+        // Corner 2 (local 0, H): X = X - H·sin45 - minX, Y = Y+H - H·cos45 + minY
+        Assert.Equal(1000 - (long)Math.Round(h * sin45) - minX, text.RotatedCorner2X);
+        Assert.Equal(2000 + h - (long)Math.Round(h * cos45) + minY, text.RotatedCorner2Y);
 
-        // Corner 3 (local W, H): X = X + W·cos45 - H·sin45, Y = Y+H - W·sin45 - H·cos45
-        Assert.Equal(1000 + (long)Math.Round(w * cos45 - h * sin45), text.RotatedCorner3X);
-        Assert.Equal(2000 + h - (long)Math.Round(w * sin45 + h * cos45), text.RotatedCorner3Y);
+        // Corner 3 (local W, H): X = X + W·cos45 - H·sin45 - minX, Y = Y+H - W·sin45 - H·cos45 + minY
+        Assert.Equal(1000 + (long)Math.Round(w * cos45 - h * sin45) - minX, text.RotatedCorner3X);
+        Assert.Equal(2000 + h - (long)Math.Round(w * sin45 + h * cos45) + minY, text.RotatedCorner3Y);
     }
 
     [Fact]
@@ -590,13 +592,22 @@ public class TextTests : IDisposable
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 90);
 
-        // With CW 90° rotation (standard CCW matrix), corners are at:
-        // (0, H), (0, H-W), (-H, H), (-H, H-W)
-        // AABB center: (-H/2, H - W/2) — must hit with inverse transform
+        // With LayoutTransform offset, actual rotation center is at:
+        // centerX = X - minX, centerY = Y + H + minY
+        // Visual center: local (W/2, H/2) rotated, then mapped to model space.
+        var centerX = 0 - minX;
+        var centerY = 0 + h + minY;
+        var angleRad = 90 * Math.PI / 180.0;
+        var localCx = w / 2.0 * Math.Cos(angleRad) - h / 2.0 * Math.Sin(angleRad);
+        var localCy = w / 2.0 * Math.Sin(angleRad) + h / 2.0 * Math.Cos(angleRad);
+        var visualCenter = new PointMicrons(
+            (long)(centerX + localCx),
+            (long)(centerY - localCy));
 
-        var center = new PointMicrons(-h / 2, h - w / 2);
-        Assert.True(text.ContainsPoint(center));
+        Assert.True(text.ContainsPoint(visualCenter),
+            $"Visual center {visualCenter} should hit text at 90°");
 
         // Point clearly outside the rotated AABB must NOT hit
         var outside = new PointMicrons(h + 1000, h + w + 1000);
@@ -610,15 +621,119 @@ public class TextTests : IDisposable
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 90);
 
-        // With CW 90° rotation (standard CCW matrix in Y-down), corners are at:
-        // (0, H), (0, H-W), (-H, H), (-H, H-W)
-        // Bounding box: X∈[-H, 0], Y∈[H-W, H] (model Y↑)
+        // With LayoutTransform offset: center = (-minX, H + minY).
+        // At 90°: offset = (+H, 0). Center = (H, H).
+        // Corners (local Y-down): (0,0)→(0,0), (W,0)→(0,W), (0,H)→(-H,0), (W,H)→(-H,W)
+        // Model: center + rotated_x, center_y - rotated_y
+        var centerX = 0 - minX;   // = H
+        var centerY = 0 + h + minY; // = H
+
         var bb = text.GetBoundingBox();
+        // All 4 corners' model X: centerX+0, centerX+0, centerX-H, centerX-H → [centerX-H, centerX]
+        // All 4 corners' model Y: centerY-0, centerY-W, centerY-0, centerY-W → [centerY-W, centerY]
+        Assert.Equal(centerX - h, bb.Left);
+        Assert.Equal(centerY - w, bb.Bottom);
+        Assert.Equal(centerX, bb.Right);
+        Assert.Equal(centerY, bb.Top);
+    }
 
-        Assert.Equal(-h, bb.Left);
-        Assert.Equal(h - w, bb.Bottom);
-        Assert.Equal(0, bb.Right);
-        Assert.Equal(h, bb.Top);
+    // === New verification tests for LayoutTransform offset fix ===
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(45)]
+    [InlineData(90)]
+    [InlineData(135)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void RotatedCorner_WithOffset_MatchesVisualLayoutTransformPosition(int angle)
+    {
+        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
+        var w = text.WidthMicrons;
+        var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, angle);
+
+        // Corner0 = anchor + offset = (MicronsX - minX, MicronsY + H + minY)
+        Assert.Equal(text.MicronsX - minX, text.RotatedCorner0X);
+        Assert.Equal(text.MicronsY + h + minY, text.RotatedCorner0Y);
+    }
+
+    [Theory]
+    [InlineData(45)]
+    [InlineData(90)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void ContainsPoint_Rotated_HitsVisualCenter(int angle)
+    {
+        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
+        var w = text.WidthMicrons;
+        var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, angle);
+
+        var centerX = text.MicronsX - minX;
+        var centerY = text.MicronsY + h + minY;
+        var angleRad = angle * Math.PI / 180.0;
+        var localCx = w / 2.0 * Math.Cos(angleRad) - h / 2.0 * Math.Sin(angleRad);
+        var localCy = w / 2.0 * Math.Sin(angleRad) + h / 2.0 * Math.Cos(angleRad);
+        var visualCenter = new PointMicrons(
+            (long)(centerX + localCx),
+            (long)(centerY - localCy));
+
+        Assert.True(text.ContainsPoint(visualCenter),
+            $"Visual center {visualCenter} should hit text at {angle}°");
+    }
+
+    [Fact]
+    public void GetBoundingBox_Rotated90Deg_IncludesLayoutTransformOffset()
+    {
+        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
+        var w = text.WidthMicrons;
+        var h = text.HeightMicrons;
+        var (minX, minY) = ExpectedOffset(w, h, 90);
+
+        // At 90°: offset = (+H, 0). Center = (10000+H, 20000+H).
+        // Corners (local Y-down): (0,0)→(0,0), (W,0)→(0,W), (0,H)→(-H,0), (W,H)→(-H,W)
+        // Model: center + rotated_x, center_y - rotated_y
+        var centerX = text.MicronsX - minX;  // 10000 + H
+        var centerY = text.MicronsY + h + minY;  // 20000 + H
+
+        var bb = text.GetBoundingBox();
+        // All 4 corners' model X: centerX+0, centerX+0, centerX-H, centerX-H → [centerX-H, centerX]
+        // All 4 corners' model Y: centerY-0, centerY-W, centerY-0, centerY-W → [centerY-W, centerY]
+        Assert.Equal(centerX - h, bb.Left);
+        Assert.Equal(centerY - w, bb.Bottom);
+        Assert.Equal(centerX, bb.Right);
+        Assert.Equal(centerY, bb.Top);
+    }
+
+    [Fact]
+    public void RotatedCorner_0Deg_OffsetIsZero()
+    {
+        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: 0);
+
+        // At 0°: offset = (0, 0). Corner0 = (MicronsX, MicronsY+H) — unchanged.
+        Assert.Equal(10000, text.RotatedCorner0X);
+        Assert.Equal(20000 + text.HeightMicrons, text.RotatedCorner0Y);
+    }
+
+    // === Helper: compute expected LayoutTransform offset (minX, minY) ===
+
+    private static (long offsetX, long offsetY) ExpectedOffset(long w, long h, int angle)
+    {
+        var rad = angle * Math.PI / 180.0;
+        var cosA = Math.Cos(rad);
+        var sinA = Math.Sin(rad);
+        var c1x = w * cosA; var c1y = w * sinA;
+        var c2x = -h * sinA; var c2y = h * cosA;
+        var c3x = w * cosA - h * sinA; var c3y = w * sinA + h * cosA;
+        var minX = Math.Min(0, Math.Min(Math.Min(c1x, c2x), c3x));
+        var minY = Math.Min(0, Math.Min(Math.Min(c1y, c2y), c3y));
+        return ((long)Math.Round(minX), (long)Math.Round(minY));
     }
 }

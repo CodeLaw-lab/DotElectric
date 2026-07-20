@@ -178,8 +178,8 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ## Current State (Sprint R1вЂ“R4 + R3.1 + AвЂ“D + Coverage Improvement Р·Р°РІРµСЂС€РµРЅС‹)
 
-- **Tests:** 2035 (0 failures, 1 pre-existing skip)
-- **Coverage:** 75.15% line-rate вњ…
+- **Tests:** 2069 (0 failures, 1 pre-existing skip)
+- **Coverage:** 75.3% line-rate вњ…
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions вЂ” build + test + coverage-gate 75% + NuGet РєСЌС€
 - **EditorViewModel:** ~784 СЃС‚СЂРѕРє (РґРµ-bloat: в€’410 СЃС‚СЂРѕРє, 25 forwarding-СЃРІРѕР№СЃС‚РІ СѓРґР°Р»РµРЅРѕ, 4 INPC-РѕР±СЂР°Р±РѕС‚С‡РёРєР° СѓРґР°Р»РµРЅС‹)
@@ -1403,6 +1403,7 @@ Tests:  1780 passed, 1 skip
 ### Common Mistakes (new)
 66. `RouteKeyDown` must have the same `IsEditing` guard as `RoutePreviewKeyDown`. Without it, key events during inline editing reach the active tool and can clear selection, switch tools, or delete objects.
 67. `ShortcutRegistry.TryHandle` must check `editor.InlineEditManager.IsEditing` before processing shortcuts. Without the guard, V/L/R/T/E hotkeys during inline editing switch tools or rotate objects instead of being handled by the TextBox.
+68. WPF `LayoutTransform` offset on rotated elements — WPF positions a `LayoutTransform`-ed element so the **top-left of the transformed bounding box** (not the local origin `(0,0)`) lands at the layout position. For `Text` with `RotateTransform(angle, 0, 0)`, this creates an offset `(-minX, +minY)` where `minX = min(0, W·cosθ, −H·sinθ, W·cosθ−H·sinθ)` and `minY = min(0, W·sinθ, H·cosθ, W·sinθ+H·cosθ)`. Model formulas (`RotatedCorner0-3`, `ContainsPoint`, `GetBoundingBox`) MUST apply this offset to match the visual position. At 0° the offset is (0,0) — no change. `HitTestHelper.GetTextHandle` must use `Text.RotatedCorner0-3` directly (not recompute corners) to stay consistent.
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2035 passed, 1 pre-existing skip
@@ -1476,3 +1477,26 @@ Conductor (primary) в†’ РґРµР»РµРіРёСЂСѓРµС‚ subagent'
 **Р¤Р°Р№Р»:** `.github/workflows/ci.yml`
 **Build:** 0 errors, 0 warnings
 **Tests:** 2035 passed, 1 pre-existing skip
+
+## Sprint 61 — Text rotation marker fix (LayoutTransform offset)
+
+### Fix S61-1: Rotated text markers offset at non-zero angles
+
+**Проблема:** Маркеры выделения текста (4 квадрата по углам) корректно отображались только при угле поворота 0°. При других углах (45°, 90°, 135°, 180°, 270°) маркеры были смещены относительно реальных углов повёрнутого текста.
+
+**Причина:** `TextBlock` использует WPF `LayoutTransform = RotateTransform(angle, 0, 0)`. WPF позиционирует трансформированный элемент так, что **верхний левый угол трансформированного bounding box** (а НЕ origin `(0,0)`) попадает в точку layout position `(Canvas.Left, Canvas.Top)`. Это создаёт смещение `(-minX, +minY)` между anchor `(MicronsX, MicronsY+HeightMicrons)` и фактическим центром вращения. Модельные формулы `RotatedCorner0-3`, `ContainsPoint()`, `GetBoundingBox()` не учитывали это смещение.
+
+**Исправление:**
+- `Text.cs` — добавлен `GetLayoutTransformOffset()` private helper, вычисляющий `(minX, minY)` — верхний левый угол трансформированного bounding box в локальных Y-down координатах. `RotatedCorner0-3` (8 свойств), `ContainsPoint()`, `GetBoundingBox()` обновлены с применением offset `(-minX, +minY)`.
+- `HitTestHelper.cs` — `GetTextHandle()` упрощён: использует `text.RotatedCorner0-3` напрямую (single source of truth) вместо независимого вычисления углов без offset.
+- Тесты: `TextTests.cs` (обновлены ожидаемые значения + 4 новых теста), `HitTestHelperTests.cs` (обновлены stale test points для rotated text hit-testing).
+
+**Файлы:**
+- `Models/Objects/Text.cs` — GetLayoutTransformOffset + RotatedCorner0-3 + ContainsPoint + GetBoundingBox
+- `Helpers/HitTestHelper.cs` — GetTextHandle simplified
+- `Tests/Models/Objects/TextTests.cs` — updated + new tests
+- `Tests/Helpers/HitTestHelperTests.cs` — updated test points
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2069 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.3% line-rate ✅
