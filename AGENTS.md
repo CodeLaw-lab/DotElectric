@@ -2,6 +2,8 @@
 
 ## Current Focus
 
+**CI build/test configuration mismatch fixed.** `--configuration Release` added to Build step in `opencode-pipeline.yml` — Test was using `--configuration Release --no-build` but Build produced Debug binaries, causing CI test failures.
+
 **Coverage Improvement Р·Р°РІРµСЂС€С‘РЅ.** РџРѕРєСЂС‹С‚РёРµ С‚РµСЃС‚Р°РјРё СѓРІРµР»РёС‡РµРЅРѕ СЃ ~59-67% РґРѕ 75.15% (~195 РЅРѕРІС‹С… С‚РµСЃС‚РѕРІ, 2035 total). РџРѕСЂРѕРі CI gate 75% РґРѕСЃС‚РёРіРЅСѓС‚.
 
 **РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Рµ РёСЃРїСЂР°РІР»РµРЅРёСЏ H1вЂ“H5 Р·Р°РІРµСЂС€РµРЅС‹.** 5 РІС‹СЃРѕРєРѕРїСЂРёРѕСЂРёС‚РµС‚РЅС‹С… РїСЂРѕР±Р»РµРј СѓСЃС‚СЂР°РЅРµРЅС‹: async-void РІ AutosaveTick, СЃС‚Р°С‚РёС‡РµСЃРєРёР№ ValidationService (в†’ IValidationService), РјС‘СЂС‚РІС‹Р№ РєРѕРґ DialogServiceFactory, СѓС‚РµС‡РєР° PrintVisualProvider, no-op MenuItem F4.

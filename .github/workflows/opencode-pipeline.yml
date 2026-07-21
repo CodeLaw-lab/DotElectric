@@ -25,7 +25,7 @@ jobs:
         run: dotnet restore src/DotElectric.TemplateEditor.slnx
 
       - name: Build
-        run: dotnet build src/DotElectric.TemplateEditor.slnx --no-restore --warnaserror
+        run: dotnet build src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release --warnaserror
 
       - name: Run tests with coverage
         run: |
