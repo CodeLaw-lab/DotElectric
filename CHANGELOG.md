@@ -34,6 +34,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 61: Updated TextTests.cs (4 new tests) and HitTestHelperTests.cs (stale rotated text test points)
 
 ### Added
+- Sprint 62: STA-based unit tests for TabItemMiddleClickBehavior (12 tests) — middle-click-close, button filtering, sender validation, event subscription lifecycle
+- Sprint 62: STA-based unit tests for PreviewLineChangedBehavior (11 tests) — register/unregister, update preview shapes, null preview handling, PropertyChanged flow
 - CI workflow: GitHub Actions (build, test, coverage gate 75%) РЅР° `windows-latest`
 - Sprint STA: `WpfContext` helper вЂ” STA-thread dispatcher for WPF unit tests
 - Sprint STA: `TextBoxLostFocusCommandBehaviorTests` вЂ” 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)

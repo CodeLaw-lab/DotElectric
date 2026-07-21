@@ -31,7 +31,7 @@ public static class TabItemMiddleClickBehavior
         obj.SetValue(EnableMiddleClickToCloseProperty, value);
     }
 
-    private static void OnEnableMiddleClickToCloseChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    internal static void OnEnableMiddleClickToCloseChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is TabControl tabControl)
         {
@@ -46,7 +46,7 @@ public static class TabItemMiddleClickBehavior
         }
     }
 
-    private static void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
+    internal static void OnPreviewMouseUp(object sender, MouseButtonEventArgs e)
     {
         if (sender is not TabControl tabControl) return;
         

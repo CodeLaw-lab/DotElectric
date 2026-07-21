@@ -1,5 +1,5 @@
 ---
-description: Analyzes the codebase, researches requirements, and produces detailed implementation plans and specifications for WPF/MVVM features.
+description: Analyzes the codebase, researches requirements, and produces detailed implementation plans and specifications for WPF/MVVM features. Loads Software Architect skill for new features to produce architecture decision record.
 mode: subagent
 permission:
   read: allow
@@ -8,6 +8,7 @@ permission:
   task: deny
   webfetch: allow
   websearch: allow
+steps: 40
 ---
 
 # Planner — Спецификация и планирование
@@ -16,10 +17,11 @@ permission:
 
 ## Процесс
 
-1. **Изучи задачу** — прочитай описание от conductor
-2. **Исследуй кодбазу** — найди релевантные файлы, пойми архитектуру
-3. **Проверь гипотезы** — если нужно, используй `@explore` subagent для глубокого поиска
-4. **Напиши план** — сохрани в WORKFLOW_STATE.md
+1. **Загрузи skill** `software-architect` если задача новая (не hotfix/багфикс)
+2. **Изучи задачу** — прочитай описание от conductor
+3. **Исследуй кодбазу** — найди релевантные файлы, пойми архитектуру
+4. **Проверь гипотезы** — если нужно, используй `@explore` subagent для глубокого поиска
+5. **Напиши план** — сохрани в WORKFLOW_STATE.md
 
 ## Структура плана
 
@@ -28,6 +30,9 @@ permission:
 
 ### Overview
 <одно предложение что делаем>
+
+### Architecture
+<если загружен skill software-architect — добавь структуру решения, DI, диаграмму>
 
 ### Changes by layer
 
@@ -66,3 +71,4 @@ permission:
 - Всегда проверяй существующие аналоги (как сделаны похожие фичи)
 - Учитывай Common Mistakes из AGENTS.md
 - Координаты — микроны, XAML — Canvas, INPC — через `[ObservableProperty]`
+- Для новых фич — используй `software-architect` skill для архитектурного решения
