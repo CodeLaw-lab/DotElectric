@@ -176,7 +176,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta вЂ” compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset вЂ” causing runaway acceleration.
 
-## Current State (Sprint R1вЂ“R4 + R3.1 + AвЂ“D + Coverage Improvement + Sprint 60вЂ“61 Р·Р°РІРµСЂС€РµРЅС‹)
+## Current State (Sprint R1вЂ“R4 + R3.1 + AвЂ“D + Coverage Improvement + Sprint 60вЂ“62 Р·Р°РІРµСЂС€РµРЅС‹)
 
 - **Tests:** 2092 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate вњ…
