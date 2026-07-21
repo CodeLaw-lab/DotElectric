@@ -86,7 +86,7 @@ public class CommandTests
     // ===== Move via ChangePropertyCommand<(long,long)> =====
 
     [Fact]
-    public void MoveObjectCommand_Execute_ChangesPosition()
+    public void ChangePropertyCommand_Move_Execute_ChangesPosition()
     {
         var line = new Line(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<(long X, long Y)>(
@@ -104,7 +104,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void MoveObjectCommand_Undo_RestoresOriginalPosition()
+    public void ChangePropertyCommand_Move_Undo_RestoresOriginalPosition()
     {
         var line = new Line(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<(long X, long Y)>(
@@ -123,7 +123,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void MoveObjectCommand_Name_IsCorrect()
+    public void ChangePropertyCommand_Move_Name_IsCorrect()
     {
         var line = new Line(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<(long X, long Y)>(
@@ -137,7 +137,7 @@ public class CommandTests
     // ===== Resize via ChangePropertyCommand<ResizeState> =====
 
     [Fact]
-    public void ResizeObjectCommand_Execute_ChangesSize()
+    public void ChangePropertyCommand_Resize_Execute_ChangesSize()
     {
         var rect = new Rectangle(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<ResizeState>(
@@ -153,7 +153,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void ResizeObjectCommand_Undo_RestoresOriginalSize()
+    public void ChangePropertyCommand_Resize_Undo_RestoresOriginalSize()
     {
         var rect = new Rectangle(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<ResizeState>(
@@ -170,7 +170,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void ResizeObjectCommand_Name_IsCorrect()
+    public void ChangePropertyCommand_Resize_Name_IsCorrect()
     {
         var rect = new Rectangle(0, 0, 1000, 1000);
         var cmd = new ChangePropertyCommand<ResizeState>(
@@ -229,7 +229,7 @@ public class CommandTests
     // ===== Rotate via ChangePropertyCommand<int> =====
 
     [Fact]
-    public void RotateObjectCommand_Execute_Plus90_ChangesAngle()
+    public void ChangePropertyCommand_Rotate_Execute_Plus90_ChangesAngle()
     {
         var text = new Text(0, 0, "Test", 2500, rotationAngle: 0);
         var cmd = new ChangePropertyCommand<int>(
@@ -244,7 +244,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void RotateObjectCommand_Execute_Minus90_ChangesAngle()
+    public void ChangePropertyCommand_Rotate_Execute_Minus90_ChangesAngle()
     {
         var text = new Text(0, 0, "Test", 2500, rotationAngle: 0);
         var cmd = new ChangePropertyCommand<int>(
@@ -259,7 +259,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void RotateObjectCommand_Undo_RestoresOriginalAngle()
+    public void ChangePropertyCommand_Rotate_Undo_RestoresOriginalAngle()
     {
         var text = new Text(0, 0, "Test", 2500, rotationAngle: 90);
         var cmd = new ChangePropertyCommand<int>(
@@ -275,7 +275,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void RotateObjectCommand_Name_IsCorrect()
+    public void ChangePropertyCommand_Rotate_Name_IsCorrect()
     {
         var text = new Text(0, 0, "Test", 2500, rotationAngle: 0);
         var cmd = new ChangePropertyCommand<int>(
@@ -366,7 +366,7 @@ public class CommandTests
     // ===== Move via ChangePropertyCommand<(long,long)> с явными координатами =====
 
     [Fact]
-    public void MoveObjectCommand_ExplicitConstructor_ExecuteMovesToNewPosition()
+    public void ChangePropertyCommand_Move_ExplicitConstructor_ExecuteMovesToNewPosition()
     {
         var rect = new Rectangle(10000, 10000, 5000, 5000);
         var cmd = new ChangePropertyCommand<(long X, long Y)>(
@@ -382,7 +382,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void MoveObjectCommand_ExplicitConstructor_UndoRestoresOldPosition()
+    public void ChangePropertyCommand_Move_ExplicitConstructor_UndoRestoresOldPosition()
     {
         var rect = new Rectangle(10000, 10000, 5000, 5000);
         var cmd = new ChangePropertyCommand<(long X, long Y)>(
@@ -399,7 +399,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void MoveObjectCommand_ExplicitConstructor_CallsMarkDirtyOnExecute()
+    public void ChangePropertyCommand_Move_ExplicitConstructor_CallsMarkDirtyOnExecute()
     {
         var markDirtyCalled = false;
         var rect = new Rectangle(10000, 10000, 5000, 5000);
@@ -416,7 +416,7 @@ public class CommandTests
     }
 
     [Fact]
-    public void MoveObjectCommand_ExplicitConstructor_CallsMarkDirtyOnUndo()
+    public void ChangePropertyCommand_Move_ExplicitConstructor_CallsMarkDirtyOnUndo()
     {
         var markDirtyCalled = false;
         var rect = new Rectangle(10000, 10000, 5000, 5000);

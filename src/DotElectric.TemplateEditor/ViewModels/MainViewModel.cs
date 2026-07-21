@@ -3,8 +3,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Messages;
-using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.ViewModels.Abstractions;
 using DotElectric.TemplateEditor.Views;
 using Microsoft.Extensions.Logging;
 
@@ -16,19 +16,16 @@ namespace DotElectric.TemplateEditor.ViewModels;
 /// </summary>
 public partial class MainViewModel : ObservableObject, IDisposable
 {
-    private readonly ITemplateService _templateService;
-    private readonly IFileService _fileService;
-    private readonly IDialogService _dialogService;
+    private readonly ITabOperationsService _tabOperations;
     private readonly ISettingsService _settingsService;
     private readonly IThemeService _themeService;
     private readonly ITemplateLibraryService _templateLibraryService;
-    private readonly IPrintService _printService;
-    private readonly IPrintDocumentGenerator _printDocumentGenerator;
+    private readonly IDialogService _dialogService;
     private readonly IDialogHostService _dialogHostService;
     private readonly IApplicationLifecycle _applicationLifecycle;
     private readonly ILogger<MainViewModel> _logger;
-    private readonly IEditorViewModelFactory _editorViewModelFactory;
     private readonly AutosaveService _autosaveService;
+    private readonly IPrintDocumentGenerator _printDocumentGenerator;
     private bool _isDisposed;
 
     private async Task OnAutosaveTickHandler()
@@ -68,38 +65,31 @@ public partial class MainViewModel : ObservableObject, IDisposable
     // === РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ ===
 
     public MainViewModel(
-        ITemplateService templateService,
-        IFileService fileService,
-        IDialogService dialogService,
+        ITabOperationsService tabOperations,
         ISettingsService settingsService,
         IThemeService themeService,
         ITemplateLibraryService templateLibraryService,
-        IPrintService printService,
-        IPrintDocumentGenerator printDocumentGenerator,
+        IDialogService dialogService,
         IDialogHostService dialogHostService,
         IApplicationLifecycle applicationLifecycle,
         ILogger<MainViewModel> logger,
-        IEditorViewModelFactory editorViewModelFactory,
-        AutosaveService autosaveService)
+        AutosaveService autosaveService,
+        IPrintDocumentGenerator printDocumentGenerator)
     {
-        _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
-        _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
-        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
+        _tabOperations = tabOperations ?? throw new ArgumentNullException(nameof(tabOperations));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
         _themeService = themeService ?? throw new ArgumentNullException(nameof(themeService));
         _templateLibraryService = templateLibraryService ?? throw new ArgumentNullException(nameof(templateLibraryService));
-        _printService = printService ?? throw new ArgumentNullException(nameof(printService));
-        _printDocumentGenerator = printDocumentGenerator ?? throw new ArgumentNullException(nameof(printDocumentGenerator));
+        _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _dialogHostService = dialogHostService ?? throw new ArgumentNullException(nameof(dialogHostService));
         _applicationLifecycle = applicationLifecycle ?? throw new ArgumentNullException(nameof(applicationLifecycle));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _editorViewModelFactory = editorViewModelFactory ?? throw new ArgumentNullException(nameof(editorViewModelFactory));
         _autosaveService = autosaveService ?? throw new ArgumentNullException(nameof(autosaveService));
+        _printDocumentGenerator = printDocumentGenerator ?? throw new ArgumentNullException(nameof(printDocumentGenerator));
 
         TemplateLibraryVm = new TemplateLibraryViewModel(
             templateLibraryService,
-            OnTemplateDoubleClicked,
-            fileService);
+            OnTemplateDoubleClicked);
 
         // РџРѕРґРїРёСЃРєР° РЅР° СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ Р·Р°РєСЂС‹С‚РёРё РІРєР»Р°РґРѕРє (РѕС‚ EditorViewModel)
         WeakReferenceMessenger.Default.Register<CloseTabRequestMessage>(this, (r, m) =>
@@ -130,20 +120,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     private void OnTemplateDoubleClicked(TemplateInfo templateInfo)
     {
-        try
+        var editor = _tabOperations.OpenFromFilePath(templateInfo.FullPath);
+        if (editor != null)
         {
-            var template = _templateService.Load(templateInfo.FullPath);
-            if (template != null)
-            {
-                var editorVm = _editorViewModelFactory.CreateWithFilePath(template, templateInfo.FullPath, printService: _printService);
-                OpenedTabs.Add(editorVm);
-                SelectedTab = editorVm;
-            }
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё С€Р°Р±Р»РѕРЅР° РёР· Р±РёР±Р»РёРѕС‚РµРєРё: {FilePath}", templateInfo.FullPath);
-            _dialogService.ShowError($"РћС€РёР±РєР° Р·Р°РіСЂСѓР·РєРё С€Р°Р±Р»РѕРЅР°: {ex.Message}");
+            OpenedTabs.Add(editor);
+            SelectedTab = editor;
         }
     }
 
@@ -158,57 +139,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void NewTab(string? format = null)
     {
         var rawFormat = format ?? _settingsService.Get("LastUsedSheetFormat", "A3");
-
-        // РџР°СЂСЃРёРј С„РѕСЂРјР°С‚ Рё РѕСЂРёРµРЅС‚Р°С†РёСЋ РёР· СЃС‚СЂРѕРєРё РІРёРґР° "A4P", "A3L", "A4", "A3"
-        var fmt = ParseSheetFormat(rawFormat, out var orientation);
-
-        // Р•СЃР»Рё РѕСЂРёРµРЅС‚Р°С†РёСЏ РЅРµ СѓРєР°Р·Р°РЅР° вЂ” РёСЃРїРѕР»СЊР·СѓРµРј РїРѕСЃР»РµРґРЅСЋСЋ СЃРѕС…СЂР°РЅС‘РЅРЅСѓСЋ РёР»Рё РґРµС„РѕР»С‚РЅСѓСЋ РґР»СЏ С„РѕСЂРјР°С‚Р°
-        if (orientation == null)
-        {
-            var orientStr = _settingsService.Get("LastUsedSheetOrientation", "Landscape");
-            orientation = Enum.TryParse<SheetOrientation>(orientStr, true, out var parsed)
-                ? parsed
-                : Sheet.GetDefaultOrientation(fmt);
-        }
-
-        _settingsService.Set("LastUsedSheetFormat", fmt);
-        _settingsService.Set("LastUsedSheetOrientation", orientation.Value.ToString());
-
-        var template = _templateService.CreateNew(fmt, orientation.Value);
-        var editor = _editorViewModelFactory.Create(template, printService: _printService);
+        var lastOrient = _settingsService.Get("LastUsedSheetOrientation", "Landscape");
+        var editor = _tabOperations.CreateNewTab(rawFormat, null, lastOrient);
         OpenedTabs.Add(editor);
         SelectedTab = editor;
-    }
-
-    /// <summary>
-    /// РџР°СЂСЃРёС‚ СЃС‚СЂРѕРєСѓ С„РѕСЂРјР°С‚Р° Рё РІРѕР·РІСЂР°С‰Р°РµС‚ Р±Р°Р·РѕРІС‹Р№ С„РѕСЂРјР°С‚ + РѕСЂРёРµРЅС‚Р°С†РёСЋ (РµСЃР»Рё СѓРєР°Р·Р°РЅР°).
-    /// РџСЂРёРјРµСЂС‹: "A4" в†’ ("A4", null), "A4P" в†’ ("A4", Portrait), "A4L" в†’ ("A4", Landscape)
-    /// </summary>
-    private static string ParseSheetFormat(string rawFormat, out SheetOrientation? orientation)
-    {
-        orientation = null;
-
-        if (string.IsNullOrEmpty(rawFormat) || rawFormat.Length < 2)
-            return rawFormat;
-
-        // РџРѕСЃР»РµРґРЅРёР№ СЃРёРјРІРѕР» вЂ” СЃСѓС„С„РёРєСЃ РѕСЂРёРµРЅС‚Р°С†РёРё
-        var suffix = rawFormat[^1].ToString().ToUpperInvariant();
-        var baseFormat = rawFormat[..^1];
-
-        if (suffix == "P")
-        {
-            orientation = SheetOrientation.Portrait;
-            return baseFormat;
-        }
-
-        if (suffix == "L")
-        {
-            orientation = SheetOrientation.Landscape;
-            return baseFormat;
-        }
-
-        // РќРµС‚ СЃСѓС„С„РёРєСЃР° вЂ” РІРµСЂРЅСѓС‚СЊ РєР°Рє РµСЃС‚СЊ
-        return rawFormat;
     }
 
     /// <summary>
@@ -218,7 +152,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void NewTabWithLastFormat()
     {
         var fmt = _settingsService.Get("LastUsedSheetFormat", "A3");
-        NewTab(fmt);
+        var orient = _settingsService.Get("LastUsedSheetOrientation", "Landscape");
+        var editor = _tabOperations.CreateNewTab(null, fmt, orient);
+        OpenedTabs.Add(editor);
+        SelectedTab = editor;
     }
 
     /// <summary>
@@ -239,9 +176,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
             if (result == true && dialogVm.WidthMm > 0 && dialogVm.HeightMm > 0)
             {
-                var sheet = Sheet.Custom(dialogVm.WidthMm, dialogVm.HeightMm);
-                var template = _templateService.CreateFromSheet(sheet);
-                var editor = _editorViewModelFactory.Create(template, printService: _printService);
+                var editor = _tabOperations.CreateNewCustomTab(dialogVm.WidthMm, dialogVm.HeightMm);
                 OpenedTabs.Add(editor);
                 SelectedTab = editor;
             }
@@ -253,20 +188,11 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task OpenFileAsync()
     {
-        var filePath = _fileService.OpenFileDialog("DotElectric Template|*.tdel");
-        if (string.IsNullOrEmpty(filePath)) return;
-
-        try
+        var editor = await _tabOperations.OpenFileAsync();
+        if (editor != null)
         {
-            var template = _templateService.Load(filePath);
-            var editor = _editorViewModelFactory.CreateWithFilePath(template, filePath, printService: _printService);
             OpenedTabs.Add(editor);
             SelectedTab = editor;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»: {FilePath}", filePath);
-            _dialogService.ShowError($"РќРµ СѓРґР°Р»РѕСЃСЊ РѕС‚РєСЂС‹С‚СЊ С„Р°Р№Р»: {ex.Message}");
         }
     }
 
@@ -277,7 +203,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private async Task SaveAsync()
     {
         if (SelectedTab == null) return;
-        await SaveTabAsync(SelectedTab);
+        await _tabOperations.SaveTabAsync(SelectedTab);
     }
 
     /// <summary>
@@ -287,51 +213,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private async Task SaveAllAsync()
     {
         foreach (var tab in OpenedTabs.ToList())
-            await SaveTabAsync(tab);
-    }
-
-    /// <summary>
-    /// РЎРѕС…СЂР°РЅРёС‚СЊ РєРѕРЅРєСЂРµС‚СѓСЋ РІРєР»Р°РґРєСѓ.
-    /// </summary>
-    private async Task SaveTabAsync(EditorViewModel tab)
-    {
-        if (tab == null) return;
-
-        var path = tab.DirtyStateManager.FilePath;
-        try
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                path = _fileService.SaveFileDialog("DotElectric Template|*.tdel", tab.DirtyStateManager.DisplayName);
-                if (string.IsNullOrEmpty(path)) return;
-            }
-
-            // РџРµСЂРµРґ СЃРѕС…СЂР°РЅРµРЅРёРµРј вЂ” РІР°Р»РёРґР°С†РёСЏ
-            var errors = _templateService.Validate(tab.Template).ToList();
-            if (errors.Count > 0)
-            {
-                var errorText = string.Join("\n", errors);
-                var result = await _dialogService.ShowUnsavedChangesDialogAsync(
-                    $"Р’ С€Р°Р±Р»РѕРЅРµ РµСЃС‚СЊ РѕС€РёР±РєРё:\n{errorText}\n\nР’СЃС‘ СЂР°РІРЅРѕ СЃРѕС…СЂР°РЅРёС‚СЊ?");
-                if (result != UnsavedChangesResult.Save)
-                    return;
-            }
-
-            // Р‘СЌРєР°Рї РїРµСЂРµРґ СЃРѕС…СЂР°РЅРµРЅРёРµРј (РµСЃР»Рё С„Р°Р№Р» СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚)
-            if (!string.IsNullOrEmpty(tab.DirtyStateManager.FilePath) && System.IO.File.Exists(tab.DirtyStateManager.FilePath))
-            {
-                _fileService.CreateBackup(tab.DirtyStateManager.FilePath);
-            }
-
-            _templateService.Save(tab.Template, path);
-            tab.DirtyStateManager.FilePath = path;
-            tab.ClearDirty();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С„Р°Р№Р»: {FilePath}", path ?? tab.DirtyStateManager.FilePath);
-            _dialogService.ShowError($"РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С„Р°Р№Р»: {ex.Message}");
-        }
+            await _tabOperations.SaveTabAsync(tab);
     }
 
     /// <summary>
@@ -341,21 +223,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private async Task SaveAsAsync()
     {
         if (SelectedTab == null) return;
-
-        var path = _fileService.SaveFileDialog("DotElectric Template|*.tdel", SelectedTab.DirtyStateManager.DisplayName);
-        if (string.IsNullOrEmpty(path)) return;
-
-        try
-        {
-            _templateService.Save(SelectedTab.Template, path);
-            SelectedTab.DirtyStateManager.FilePath = path;
-            SelectedTab.ClearDirty();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С„Р°Р№Р» (Save As): {FilePath}", path);
-            _dialogService.ShowError($"РќРµ СѓРґР°Р»РѕСЃСЊ СЃРѕС…СЂР°РЅРёС‚СЊ С„Р°Р№Р»: {ex.Message}");
-        }
+        await _tabOperations.SaveAsAsync(SelectedTab);
     }
 
     /// <summary>
@@ -366,13 +234,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
     {
         if (tab == null) return;
 
-        if (tab.DirtyStateManager.IsDirty)
-        {
-            var result = await _dialogService.ShowUnsavedChangesDialogAsync(tab.DirtyStateManager.DisplayName);
-            if (result == UnsavedChangesResult.Cancel) return;
-            if (result == UnsavedChangesResult.Save)
-                await SaveTabAsync(tab);
-        }
+        if (!await _tabOperations.PromptAndSaveIfDirtyAsync(tab))
+            return;
 
         OpenedTabs.Remove(tab);
         tab.Dispose();
@@ -432,7 +295,6 @@ public partial class MainViewModel : ObservableObject, IDisposable
     private void PreviewPrint()
     {
         if (SelectedTab == null) return;
-
         try
         {
             var document = _printDocumentGenerator.Generate(SelectedTab.Template);
@@ -442,8 +304,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "РћС€РёР±РєР° РїСЂРё РіРµРЅРµСЂР°С†РёРё РїСЂРµРґРїСЂРѕСЃРјРѕС‚СЂР° РїРµС‡Р°С‚Рё");
-            _dialogService.ShowError($"РћС€РёР±РєР° РїСЂРµРґРїСЂРѕСЃРјРѕС‚СЂР°: {ex.Message}");
+            _logger.LogError(ex, "Error generating print preview");
+            _dialogService.ShowError($"Print preview error: {ex.Message}");
         }
     }
 

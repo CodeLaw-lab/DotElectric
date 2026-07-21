@@ -1,5 +1,6 @@
 using System.Reflection;
 using DotElectric.TemplateEditor.Models;
+using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tests.ViewModels;
@@ -32,7 +33,7 @@ public class MainViewModelFormatParsingTests
         SheetOrientation expectedOrientation)
     {
         // ParseSheetFormat — private static метод, вызываем через反射
-        var method = typeof(MainViewModel).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(TabOperationsService).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(method);
 
         var parameters = new object?[] { input, null };
@@ -52,7 +53,7 @@ public class MainViewModelFormatParsingTests
     [InlineData("A4X2", "A4X2")]
     public void ParseSheetFormat_WithoutSuffix_ReturnsFormatAndNullOrientation(string input, string expectedFormat)
     {
-        var method = typeof(MainViewModel).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(TabOperationsService).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(method);
 
         var parameters = new object?[] { input, null };
@@ -67,7 +68,7 @@ public class MainViewModelFormatParsingTests
     [InlineData("A")]
     public void ParseSheetFormat_ShortInput_ReturnsAsIs(string input)
     {
-        var method = typeof(MainViewModel).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(TabOperationsService).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(method);
 
         var parameters = new object?[] { input, null };
@@ -80,7 +81,7 @@ public class MainViewModelFormatParsingTests
     [Fact]
     public void ParseSheetFormat_NullInput_ReturnsNull()
     {
-        var method = typeof(MainViewModel).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
+        var method = typeof(TabOperationsService).GetMethod("ParseSheetFormat", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(method);
 
         var parameters = new object?[] { null, null };

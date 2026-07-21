@@ -2,19 +2,7 @@
 
 ## Current Focus
 
-**CI build/test configuration mismatch fixed.** `--configuration Release` added to Build step in `opencode-pipeline.yml` — Test was using `--configuration Release --no-build` but Build produced Debug binaries, causing CI test failures.
-
-**Coverage Improvement Р·Р°РІРµСЂС€С‘РЅ.** РџРѕРєСЂС‹С‚РёРµ С‚РµСЃС‚Р°РјРё СѓРІРµР»РёС‡РµРЅРѕ СЃ ~59-67% РґРѕ 75.15% (~195 РЅРѕРІС‹С… С‚РµСЃС‚РѕРІ, 2035 total). РџРѕСЂРѕРі CI gate 75% РґРѕСЃС‚РёРіРЅСѓС‚.
-
-**РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Рµ РёСЃРїСЂР°РІР»РµРЅРёСЏ H1вЂ“H5 Р·Р°РІРµСЂС€РµРЅС‹.** 5 РІС‹СЃРѕРєРѕРїСЂРёРѕСЂРёС‚РµС‚РЅС‹С… РїСЂРѕР±Р»РµРј СѓСЃС‚СЂР°РЅРµРЅС‹: async-void РІ AutosaveTick, СЃС‚Р°С‚РёС‡РµСЃРєРёР№ ValidationService (в†’ IValidationService), РјС‘СЂС‚РІС‹Р№ РєРѕРґ DialogServiceFactory, СѓС‚РµС‡РєР° PrintVisualProvider, no-op MenuItem F4.
-
-**РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Р№ СЂРµС„Р°РєС‚РѕСЂРёРЅРі (AвЂ“D) Р·Р°РІРµСЂС€С‘РЅ.** 18 Р·Р°РјРµС‡Р°РЅРёР№ РёР· РђСЂС…РёС‚РµРєС‚СѓСЂРЅРѕРіРѕ Р°РЅР°Р»РёР·Р° СѓСЃС‚СЂР°РЅРµРЅС‹.
-
-**Print Preview СЂРµР°Р»РёР·РѕРІР°РЅ.** Ctrl+Shift+P РѕС‚РєСЂС‹РІР°РµС‚ DocumentViewer СЃ FixedDocument.
-
-**README encoding fix v2 Р·Р°РІРµСЂС€С‘РЅ.** РџРѕРІС‚РѕСЂРЅРѕРµ РёСЃРїСЂР°РІР»РµРЅРёРµ РєРѕРґРёСЂРѕРІРєРё README.md (UTF-8 double-encoding / mojibake).
-
-**CI workflow Р·Р°РІРµСЂС€С‘РЅ.** GitHub Actions (build, test, coverage gate 75%) РЅР° `windows-latest`.
+**РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Р№ СЂРµС„Р°РєС‚РѕСЂРёРЅРі P2 Р·Р°РІРµСЂС€С‘РЅ.** РЎРѕР·РґР°РЅ `ITabOperationsService` — С„Р°СЃР°Рґ РґР»СЏ РѕРїРµСЂР°С†РёР№ СЃ РІРєР»Р°РґРєР°РјРё (NewTab, OpenFile, Save, SaveAs), СЃРѕРєСЂР°С‚РёРІС€РёР№ РєРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ `MainViewModel` СЃ 13 РґРѕ 10 Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№. РРЅС‚РµСЂС„РµР№СЃ СЂР°Р·РјРµС‰С‘РЅ РІ `ViewModels.Abstractions` РІРѕ РёР·Р±РµР¶Р°РЅРёРµ С†РёРєР»РёС‡РµСЃРєРёС… Р·Р°РІРёСЃРёРјРѕСЃС‚РµР№. РџРµСЂРµРёРјРµРЅРѕРІР°РЅС‹ 14 С‚РµСЃС‚РѕРІ РєРѕРјР°РЅРґ РґР»СЏ РµРґРёРЅРѕРѕР±СЂР°Р·РёСЏ (`MoveObjectCommand_*` в†’ `ChangePropertyCommand_Move_*`).
 
 ### РљР»СЋС‡РµРІС‹Рµ СЂРµР·СѓР»СЊС‚Р°С‚С‹
 | РћР±Р»Р°СЃС‚СЊ | Р‘С‹Р»Рѕ | РЎС‚Р°Р»Рѕ |
@@ -1536,6 +1524,30 @@ Conductor (primary) в†’ РґРµР»РµРіРёСЂСѓРµС‚ subagent'
 **Исправление:** Добавлен тест `Clone_CopiesAllPublicProperties_ExceptId` в `TemplateTests.cs`, который через reflection проверяет, что каждое публичное свойство `Template` (кроме `Id`) имеет одинаковое значение на исходном и клонированном объекте после `Clone()`.
 **Файлы:**
 - `Tests/Services/TemplateTests.cs` — добавлен regression test
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.3% line-rate ✅
+
+## Sprint — Архитектурный рефакторинг P2 — ITabOperationsService (21.07.2026)
+
+### Feature: MainViewModel DI reduction
+**Проблема:** 13 зависимостей в конструкторе MainViewModel — потенциальный god-class.
+**Решение:** Создан ITabOperationsService — фасад для операций с вкладками (NewTab, OpenFile, Save, SaveAs). Конструктор сокращён с 13 до 10 параметров.
+
+**Файлы:**
+- `ViewModels/Abstractions/ITabOperationsService.cs` (новый)
+- `Services/TabOperationsService.cs` (новый)
+- `ViewModels/MainViewModel.cs` (рефакторинг)
+- `App.xaml.cs` (DI-регистрация)
+- `EditorViewModelFactory.cs` (sealed)
+
+### Fix: Command naming consistency
+**Проблема:** Тесты `MoveObjectCommand_*`, `RotateObjectCommand_*` не отражают реализацию через `ChangePropertyCommand<T>`.
+**Решение:** 14 тестов переименованы: `MoveObjectCommand_*` → `ChangePropertyCommand_Move_*`, и т.д.
+
+**Файлы:**
+- `Tests/Commands/CommandTests.cs`
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2094 passed (0 failures, 1 pre-existing skip)

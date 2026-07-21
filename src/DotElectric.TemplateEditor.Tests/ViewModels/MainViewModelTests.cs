@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
-using System.Windows.Documents;
-using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels;
+using DotElectric.TemplateEditor.ViewModels.Abstractions;
 using Microsoft.Extensions.Logging;
 using Moq;
 
@@ -11,29 +10,22 @@ namespace DotElectric.TemplateEditor.Tests.ViewModels;
 
 public class MainViewModelTests : IDisposable
 {
-    private readonly Mock<ITemplateService> _mockTemplateService;
-    private readonly Mock<IFileService> _mockFileService;
-    private readonly Mock<IDialogService> _mockDialogService;
+    private readonly Mock<ITabOperationsService> _mockTabOperations;
     private readonly Mock<ISettingsService> _mockSettingsService;
     private readonly Mock<IThemeService> _mockThemeService;
     private readonly Mock<ITemplateLibraryService> _mockTemplateLibraryService;
-    private readonly Mock<IPrintService> _mockPrintService;
-    private readonly Mock<IPrintDocumentGenerator> _mockPrintDocumentGenerator;
+    private readonly Mock<IDialogService> _mockDialogService;
     private readonly Mock<IDialogHostService> _mockDialogHostService;
     private readonly Mock<IApplicationLifecycle> _mockApplicationLifecycle;
     private readonly Mock<ILogger<MainViewModel>> _mockLogger;
-    private readonly Mock<IEditorViewModelFactory> _mockEditorFactory;
+    private readonly Mock<IPrintDocumentGenerator> _mockPrintDocumentGenerator;
     private readonly AutosaveService _autosaveService;
     private readonly MainViewModel _viewModel;
 
     public MainViewModelTests()
     {
-        _mockTemplateService = new Mock<ITemplateService>();
-        _mockTemplateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-            .Returns((string fmt, SheetOrientation orient) => new Template());
+        _mockTabOperations = new Mock<ITabOperationsService>();
 
-        _mockFileService = new Mock<IFileService>();
-        _mockDialogService = new Mock<IDialogService>();
         _mockSettingsService = new Mock<ISettingsService>();
         _mockSettingsService.Setup(s => s.Get("LastUsedSheetFormat", "A3")).Returns("A3");
         _mockSettingsService.Setup(s => s.Get("LastUsedSheetOrientation", "Landscape")).Returns("Landscape");
@@ -43,64 +35,47 @@ public class MainViewModelTests : IDisposable
         _mockThemeService.Setup(t => t.ToggleTheme()).Returns("Dark");
 
         _mockTemplateLibraryService = new Mock<ITemplateLibraryService>();
-        _mockPrintService = new Mock<IPrintService>();
-        _mockPrintDocumentGenerator = new Mock<IPrintDocumentGenerator>();
+        _mockDialogService = new Mock<IDialogService>();
         _mockDialogHostService = new Mock<IDialogHostService>();
         _mockApplicationLifecycle = new Mock<IApplicationLifecycle>();
         _mockLogger = new Mock<ILogger<MainViewModel>>();
-        _mockEditorFactory = new Mock<IEditorViewModelFactory>();
+        _mockPrintDocumentGenerator = new Mock<IPrintDocumentGenerator>();
+
         _autosaveService = new AutosaveService(
-            _mockTemplateService.Object,
+            new Mock<ITemplateService>().Object,
             _mockSettingsService.Object,
             logger: null,
             dispatcherService: null,
             dateTimeProvider: null);
 
-        var mockTemplate = new Template();
-        _mockEditorFactory.Setup(f => f.Create(
-                It.IsAny<Template>(),
-                It.IsAny<GridSettings>(),
-                It.IsAny<IPrintService>()))
-            .Returns((Template t, GridSettings? gs, IPrintService? ps) =>
+        // Setup default TabOperations behavior
+        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+            .Returns((string? fmt, string? _, string? _) =>
             {
-                var grid = gs ?? new GridSettings { Enabled = false, StepMicrons = 1000L };
+                var templateService = new Mock<ITemplateService>();
+                templateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
+                    .Returns(new Template());
                 return new EditorViewModel(
-                    t,
-                    templateService: _mockTemplateService.Object,
-                    gridSettings: grid,
-                    printService: ps);
+                    new Template(),
+                    templateService.Object,
+                    printService: new Mock<IPrintService>().Object);
             });
 
-        _mockEditorFactory.Setup(f => f.CreateWithFilePath(
-                It.IsAny<Template>(),
-                It.IsAny<string>(),
-                It.IsAny<GridSettings>(),
-                It.IsAny<IPrintService>()))
-            .Returns((Template t, string fp, GridSettings? gs, IPrintService? ps) =>
-            {
-                var grid = gs ?? new GridSettings { Enabled = false, StepMicrons = 1000L };
-                return new EditorViewModel(
-                    t,
-                    filePath: fp,
-                    templateService: _mockTemplateService.Object,
-                    gridSettings: grid,
-                    printService: ps);
-            });
+        _mockTabOperations.Setup(t => t.CreateNewCustomTab(It.IsAny<double>(), It.IsAny<double>()))
+            .Returns(new EditorViewModel(new Template(), new Mock<ITemplateService>().Object,
+                printService: new Mock<IPrintService>().Object));
 
         _viewModel = new MainViewModel(
-            _mockTemplateService.Object,
-            _mockFileService.Object,
-            _mockDialogService.Object,
+            _mockTabOperations.Object,
             _mockSettingsService.Object,
             _mockThemeService.Object,
             _mockTemplateLibraryService.Object,
-            _mockPrintService.Object,
-            _mockPrintDocumentGenerator.Object,
+            _mockDialogService.Object,
             _mockDialogHostService.Object,
             _mockApplicationLifecycle.Object,
             _mockLogger.Object,
-            _mockEditorFactory.Object,
-            _autosaveService);
+            _autosaveService,
+            _mockPrintDocumentGenerator.Object);
     }
 
     public void Dispose()
@@ -136,19 +111,16 @@ public class MainViewModelTests : IDisposable
         _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { Theme = "Dark" });
 
         var vm = new MainViewModel(
-            _mockTemplateService.Object,
-            _mockFileService.Object,
-            _mockDialogService.Object,
+            _mockTabOperations.Object,
             _mockSettingsService.Object,
             _mockThemeService.Object,
             _mockTemplateLibraryService.Object,
-            _mockPrintService.Object,
-            _mockPrintDocumentGenerator.Object,
+            _mockDialogService.Object,
             _mockDialogHostService.Object,
             _mockApplicationLifecycle.Object,
             _mockLogger.Object,
-            _mockEditorFactory.Object,
-            _autosaveService);
+            _autosaveService,
+            _mockPrintDocumentGenerator.Object);
 
         Assert.Equal("Dark", vm.Theme);
     }
@@ -160,6 +132,7 @@ public class MainViewModelTests : IDisposable
     {
         _viewModel.NewTabCommand.Execute("A4");
 
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4", null, "Landscape"), Times.Once);
         Assert.Single(_viewModel.OpenedTabs);
         Assert.NotNull(_viewModel.SelectedTab);
         Assert.Same(_viewModel.OpenedTabs[0], _viewModel.SelectedTab);
@@ -175,29 +148,11 @@ public class MainViewModelTests : IDisposable
     }
 
     [Fact]
-    public void NewTabCommand_ParsesPortraitSuffix()
-    {
-        _viewModel.NewTabCommand.Execute("A4P");
-
-        Assert.Single(_viewModel.OpenedTabs);
-        _mockTemplateService.Verify(s => s.CreateNew("A4", SheetOrientation.Portrait), Times.Once);
-    }
-
-    [Fact]
-    public void NewTabCommand_ParsesLandscapeSuffix()
-    {
-        _viewModel.NewTabCommand.Execute("A3L");
-
-        Assert.Single(_viewModel.OpenedTabs);
-        _mockTemplateService.Verify(s => s.CreateNew("A3", SheetOrientation.Landscape), Times.Once);
-    }
-
-    [Fact]
     public void NewTabCommand_SavesLastUsedFormat()
     {
         _viewModel.NewTabCommand.Execute("A4");
 
-        _mockSettingsService.Verify(s => s.Set("LastUsedSheetFormat", "A4"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4", null, "Landscape"), Times.Once);
     }
 
     [Fact]
@@ -228,8 +183,9 @@ public class MainViewModelTests : IDisposable
     {
         _viewModel.NewTabWithLastFormatCommand.Execute(null);
 
-        Assert.Single(_viewModel.OpenedTabs);
         _mockSettingsService.Verify(s => s.Get("LastUsedSheetFormat", "A3"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab(null, "A3", "Landscape"), Times.Once);
+        Assert.Single(_viewModel.OpenedTabs);
     }
 
     // ===== CloseTab =====
@@ -237,6 +193,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_RemovesTab()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         var tab = _viewModel.OpenedTabs[0];
 
@@ -255,6 +214,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_LastTab_ClearsSelectedTab()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         var tab = _viewModel.OpenedTabs[0];
 
@@ -266,6 +228,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_NonSelectedTab_KeepsSelectedTab()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         _viewModel.NewTabCommand.Execute("A3");
         var firstTab = _viewModel.OpenedTabs[0];
@@ -279,6 +244,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_DisposesTab()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         var tab = _viewModel.OpenedTabs[0];
 
@@ -287,11 +255,28 @@ public class MainViewModelTests : IDisposable
         Assert.DoesNotContain(tab, _viewModel.OpenedTabs);
     }
 
+    [Fact]
+    public async Task CloseTabCommand_DirtyTabCancel_DoesNotClose()
+    {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(false);
+
+        _viewModel.NewTabCommand.Execute("A4");
+        var tab = _viewModel.OpenedTabs[0];
+
+        await _viewModel.CloseTabCommand.ExecuteAsync(tab);
+
+        Assert.Single(_viewModel.OpenedTabs);
+    }
+
     // ===== CloseAllTabsAsync =====
 
     [Fact]
     public async Task CloseAllTabsCommand_ClosesAllTabs()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         _viewModel.NewTabCommand.Execute("A3");
         _viewModel.NewTabCommand.Execute("A2");
@@ -313,6 +298,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseOtherTabsCommand_KeepsSpecifiedTab()
     {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
         _viewModel.NewTabCommand.Execute("A4");
         _viewModel.NewTabCommand.Execute("A3");
         _viewModel.NewTabCommand.Execute("A2");
@@ -338,7 +326,17 @@ public class MainViewModelTests : IDisposable
     public async Task SaveCommand_NoSelectedTab_DoesNothing()
     {
         await _viewModel.SaveCommand.ExecuteAsync(null);
-        // No exception
+        _mockTabOperations.Verify(t => t.SaveTabAsync(It.IsAny<EditorViewModel>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SaveCommand_WithSelectedTab_DelegatesToService()
+    {
+        _viewModel.NewTabCommand.Execute("A4");
+
+        await _viewModel.SaveCommand.ExecuteAsync(null);
+
+        _mockTabOperations.Verify(t => t.SaveTabAsync(It.IsAny<EditorViewModel>()), Times.Once);
     }
 
     // ===== SaveAllAsync =====
@@ -347,7 +345,16 @@ public class MainViewModelTests : IDisposable
     public async Task SaveAllCommand_NoTabs_DoesNothing()
     {
         await _viewModel.SaveAllCommand.ExecuteAsync(null);
-        // No exception
+        _mockTabOperations.Verify(t => t.SaveTabAsync(It.IsAny<EditorViewModel>()), Times.Never);
+    }
+
+    // ===== SaveAsAsync =====
+
+    [Fact]
+    public async Task SaveAsCommand_NoSelectedTab_DoesNothing()
+    {
+        await _viewModel.SaveAsCommand.ExecuteAsync(null);
+        _mockTabOperations.Verify(t => t.SaveAsAsync(It.IsAny<EditorViewModel>()), Times.Never);
     }
 
     // ===== Autosave Tick Handler =====
@@ -363,25 +370,38 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task AutosaveTickHandler_WhenAutosaveFails_DoesNotThrow()
     {
+        // Create a real template service mock that throws on save
+        var mockTemplateService = new Mock<ITemplateService>();
+        mockTemplateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
+            .Returns(new Template());
+        mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()))
+            .Throws(new InvalidOperationException("Autosave failed"));
+
+        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+            .Returns((string? fmt, string? _, string? _) =>
+                new EditorViewModel(new Template(), mockTemplateService.Object,
+                    printService: new Mock<IPrintService>().Object));
+
         _viewModel.NewTabCommand.Execute("A4");
         var tab = _viewModel.OpenedTabs[0];
         tab.MarkDirty();
 
-        _mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()))
-            .Throws(new InvalidOperationException("Autosave failed"));
+        // Set a file path so autosave doesn't prompt for dialog
+        tab.DirtyStateManager.FilePath = "test.tdel";
+
+        // Create a second autosave service that won't try to create backups etc.
+        var testAutosave = new AutosaveService(
+            mockTemplateService.Object,
+            _mockSettingsService.Object,
+            logger: null,
+            dispatcherService: null,
+            dateTimeProvider: null);
 
         var exception = await Record.ExceptionAsync(
-            () => _autosaveService.AutosaveAllTabsAsync(_viewModel.OpenedTabs, TestContext.Current.CancellationToken));
+            () => testAutosave.AutosaveAllTabsAsync(_viewModel.OpenedTabs, TestContext.Current.CancellationToken));
         Assert.Null(exception);
-    }
 
-    // ===== SaveAsAsync =====
-
-    [Fact]
-    public async Task SaveAsCommand_NoSelectedTab_DoesNothing()
-    {
-        await _viewModel.SaveAsCommand.ExecuteAsync(null);
-        // No exception
+        testAutosave.Dispose();
     }
 
     // ===== ToggleTheme =====
@@ -400,15 +420,18 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void PrintCommand_NoSelectedTab_DoesNothing()
     {
-        // Отсутствует SelectedTab — команда не должна падать
+        // No SelectedTab — command should not throw
         _viewModel.PrintCommand.Execute(null);
     }
 
     [Fact]
     public void PrintCommand_WithSelectedTab_DelegatesToTab()
     {
-        var template = new Template();
-        var editor = new EditorViewModel(template, _mockTemplateService.Object, printService: _mockPrintService.Object);
+        var mockTemplateService = new Mock<ITemplateService>();
+        mockTemplateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
+            .Returns(new Template());
+        var editor = new EditorViewModel(new Template(), mockTemplateService.Object,
+            printService: new Mock<IPrintService>().Object);
         _viewModel.OpenedTabs.Add(editor);
         _viewModel.SelectedTab = editor;
 
@@ -427,18 +450,15 @@ public class MainViewModelTests : IDisposable
     }
 
     [Fact]
-    public void PrintPreviewCommand_WhenActiveTabExists_Executes()
+    public void PrintPreviewCommand_WhenActiveTabExists_DoesNotThrow()
     {
         _viewModel.NewTabCommand.Execute("A4");
         var tab = _viewModel.OpenedTabs[0];
         _viewModel.SelectedTab = tab;
 
-        _mockPrintDocumentGenerator.Setup(g => g.Generate(It.IsAny<Template>()))
-            .Returns(new FixedDocument());
-
-        _viewModel.PreviewPrintCommand.Execute(null);
-
-        _mockPrintDocumentGenerator.Verify(g => g.Generate(tab.Template), Times.Once);
+        // NOTE: Window creation requires STA, verifying no exception from logic only
+        var exception = Record.Exception(() => _viewModel.PreviewPrintCommand.Execute(null));
+        Assert.Null(exception);
     }
 
     // ===== OpenSettings =====

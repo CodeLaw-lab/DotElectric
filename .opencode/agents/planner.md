@@ -8,7 +8,7 @@ permission:
   task: deny
   webfetch: allow
   websearch: allow
-steps: 40
+steps: 55
 ---
 
 # Planner — Спецификация и планирование

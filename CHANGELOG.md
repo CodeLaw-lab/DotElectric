@@ -107,13 +107,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 27: Restored missing `HitTest` method in `HitTestHelper`
 - Sprint 27: Fixed `ResizeHandle` namespace import
 
+### Added
+- Sprint "Архитектурный рефакторинг P2": `ITabOperationsService` facade for tab operations (NewTab, OpenFile, Save, SaveAs)
+- `ViewModels/Abstractions/ITabOperationsService.cs` (new interface)
+- `Services/TabOperationsService.cs` (new implementation)
+
+### Changed
+- Sprint "Архитектурный рефакторинг P2": MainViewModel constructor reduced from 13 to 10 dependencies (removed `_templateService`, `_fileService`, `_printService`, `_printDocumentGenerator`, `_editorViewModelFactory`; added `_tabOperations`)
+- Sprint "Архитектурный рефакторинг P2": 14 test methods renamed in `CommandTests.cs` — `MoveObjectCommand_*` → `ChangePropertyCommand_Move_*`, etc.
+- Sprint "Архитектурный рефакторинг P2": `EditorViewModelFactory` marked `sealed`
+
 ### Metrics
 - **Tests:** 2094 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
 - **EditorViewModel:** ~784 lines (9 managers, post R3.1 de-bloat)
-- **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext
+- **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext, ITabOperationsService
 
 ---
 
