@@ -6,7 +6,7 @@ permission:
   edit: deny
   bash: deny
   task: deny
-steps: 30
+steps: 45
 ---
 
 # Critic — Финальный контроль

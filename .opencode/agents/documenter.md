@@ -6,7 +6,7 @@ permission:
   edit: allow
   bash: allow
   task: deny
-steps: 40
+steps: 55
 ---
 
 # Documenter — Documentation Consistency

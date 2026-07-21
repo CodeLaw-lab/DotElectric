@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotElectric.TemplateEditor.ViewModels;
 
-public class EditorViewModelFactory : IEditorViewModelFactory
+public sealed class EditorViewModelFactory : IEditorViewModelFactory
 {
     private readonly IServiceProvider _serviceProvider;
 

@@ -6,6 +6,7 @@ using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;
+using DotElectric.TemplateEditor.ViewModels.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -84,6 +85,7 @@ public partial class App : Application
                     services.AddSingleton<IApplicationLifecycle, WpfApplicationLifecycle>();
                     services.AddSingleton<IFontMetrics>(FontMetrics.Default);
                     services.AddSingleton<IEditorViewModelFactory, EditorViewModelFactory>();
+                    services.AddSingleton<ITabOperationsService, TabOperationsService>();
 
                     // Регистрация EditorViewModel (Transient — свой экземпляр на каждую вкладку)
                     services.AddTransient<EditorViewModel>();
