@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - AGENTS.md: РѕР±РЅРѕРІР»РµРЅС‹ СЃС‡С‘С‚С‡РёРєРё С‚РµСЃС‚РѕРІ (2035) Рё РїРѕРєСЂС‹С‚РёРµ (75.15%)
 
 ### Fixed
+- CI: Added missing `--configuration Release` to Build step in `opencode-pipeline.yml` — was causing test failures due to Debug/Release mismatch
 - README.md: РїРѕРІС‚РѕСЂРЅРѕРµ РёСЃРїСЂР°РІР»РµРЅРёРµ РєРѕРґРёСЂРѕРІРєРё (UTF-8 double-encoding / mojibake)
 - README.md: РёСЃРїСЂР°РІР»РµРЅР° РєРѕРґРёСЂРѕРІРєР° (UTF-8 double-encoding / mojibake) вЂ” РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅС‹ СЂСѓСЃСЃРєРёР№ С‚РµРєСЃС‚ Рё СЌРјРѕРґР·Рё
 - H1: `AutosaveService` event `Action?` в†’ `Func<Task>?` + `InvokeAsync` in `IDispatcherService` (eliminates async-void in `MainViewModel`)
