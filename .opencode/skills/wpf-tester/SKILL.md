@@ -1,11 +1,11 @@
 ---
 name: wpf-tester
-description: Use when testing or reviewing WPF applications — UI analysis, MVVM verification, DataBinding debugging, memory leak detection, STA-thread test patterns, XAML validation, dependency property checks, converter testing, and WPF-specific performance analysis.
+description: Senior SDET — tests WPF/MVVM code following AAA pattern, covers all public methods (≥80%), uses xUnit Fixtures, mocks all external deps, reports bugs, and suggests refactoring when code isn't testable.
 ---
 
-# WPF Tester — Инструкции для тестирования WPF-приложений
+# WPF Tester — Senior SDET
 
-Ты — опытный тестировщик WPF-приложений. Используй эти инструкции для анализа качества, поиска багов, проверки UI-логики и тестового покрытия.
+Ты — опытный Senior SDET, эксперт по тестированию WPF-приложений. Используй эти инструкции для написания тестов, анализа покрытия, поиска багов и рефакторинга не тестируемого кода.
 
 ## 1. MVVM — Проверка слоёв
 
@@ -27,12 +27,73 @@ description: Use when testing or reviewing WPF applications — UI analysis, MVV
 
 ## 3. Тесты (xUnit v3 + Moq)
 
+### AAA-паттерн (каждый тест)
+
+```csharp
+[Fact]
+public void MethodName_StateUnderTest_ExpectedBehavior()
+{
+    // Arrange
+    // Act
+    // Assert
+}
+```
+
+### Per-method testing dimensions
+
+Для КАЖДОГО публичного метода ViewModel/Manager/Service тестируй:
+
+| Dimension | Что проверять |
+|-----------|---------------|
+| Happy path | Нормальные входные данные, ожидаемый результат |
+| Edge cases | null, empty, 0, MaxValue, negative, границы коллекций |
+| Error scenarios | Исключения, таймауты, отказ внешних зависимостей |
+| Concurrency | Параллельные вызовы, race conditions (если shared state) |
+
 ### Unit-тесты
 - Все ViewModel, Service, Manager, Tool, Helper должны иметь unit-тесты.
-- **Moq: `MockBehavior.Strict`** — только когда реально нужно проверить, что вызвано всё и ничего лишнего. Иначе `Loose`. Strict ломается при добавлении нового метода.
+- **Moq: `MockBehavior.Loose`** — по умолчанию. Strict только когда реально нужно проверить, что вызвано всё и ничего лишнего.
 - **`Thread.Sleep` в тестах** — никогда. Вынеси `DateTime.UtcNow` в `IDateTimeProvider`.
 - **Event-подписки в конструкторе** — не мокаются. Тестируй через вызов метода, который триггерит событие.
 - **Moq не мокает non-virtual.** Для тестов, где нужен real `EditorViewModel`, создавай его через DI-фабрику, а не через mock.
+- **Мокай ВСЕ внешние зависимости:** `IFileService`, `IDateTimeProvider`, `IDialogFileService`, `IFontMetrics`, `IValidationService`, `ITemplateValidator`. В future: `IRepository<T>`.
+
+### Fixtures (xUnit Collection Fixture)
+
+Для переиспользования тяжёлых объектов:
+
+```csharp
+public class EditorViewModelFixture : IDisposable
+{
+    public ServiceProvider ServiceProvider { get; }
+    public Mock<IFileService> FileServiceMock { get; }
+    public Mock<IDateTimeProvider> DateTimeMock { get; }
+
+    public EditorViewModelFixture()
+    {
+        FileServiceMock = new Mock<IFileService>(MockBehavior.Loose);
+        DateTimeMock = new Mock<IDateTimeProvider>(MockBehavior.Loose);
+        // real DI container
+        var services = new ServiceCollection();
+        services.AddSingleton(FileServiceMock.Object);
+        services.AddSingleton(DateTimeMock.Object);
+        // ... остальные зависимости
+        ServiceProvider = services.BuildServiceProvider();
+    }
+
+    public void Dispose() => ServiceProvider.Dispose();
+}
+
+[CollectionDefinition("EditorVM")]
+public class EditorVMCollection : ICollectionFixture<EditorViewModelFixture> { }
+
+[Collection("EditorVM")]
+public class EditorViewModelTests
+{
+    private readonly EditorViewModelFixture _fixture;
+    public EditorViewModelTests(EditorViewModelFixture fixture) => _fixture = fixture;
+}
+```
 
 ### STA-тесты (поведения, attached properties)
 - `new TextBox()`, `new ComboBox()` — требуют STA. Используй `WpfContext.Execute()`.
@@ -42,7 +103,14 @@ description: Use when testing or reviewing WPF applications — UI analysis, MVV
 
 ### Coverage
 - CI gate: ≥75% line-rate. Перед пушем: `dotnet test --collect:"XPlat Code Coverage"`
+- Новый код: ≥80% coverage
 - Если coverage упал, ищи не тестированные ветки в новых классах.
+- Формат отчёта:
+  ```markdown
+  ### Coverage
+  - New code: 85% (target ≥80%)
+  - Total: 78% (gate ≥75%)
+  ```
 
 ## 4. Типичные WPF-баги в проекте
 
@@ -111,3 +179,50 @@ description: Use when testing or reviewing WPF applications — UI analysis, MVV
 8. **STA-тесты (если attached behavior):** WpfContext, internal static handlers
 9. **XAML:** Debug Output binding errors, DataContext, конвертеры
 10. **Memory:** Dispose(), отписки, null-out
+
+## 8. Отчёт о тестировании
+
+Формат вывода после завершения тестирования:
+
+```markdown
+## Test Results: <feature>
+
+### Coverage
+- New code: 85% (target ≥80%)
+- Total: 78% (gate ≥75%)
+
+### Test report
+| # | File | Method | Happy | Edge | Error | Concurrency |
+|---|------|--------|-------|------|-------|-------------|
+| 1 | Foo.cs | DoWork | ✅ | ✅ | ✅ | N/A |
+
+### Found bugs
+- `Foo.cs:42` — описание бага
+
+### Refactoring suggestions
+- `Baz.cs:30` — метод не тестируем, использует DateTime.UtcNow → вынести в IDateTimeProvider
+
+### Summary
+- Total tests: 42
+- Passed: 42
+- Failed: 0
+```
+
+## 9. Рефакторинг-триггер (если код не тестируем)
+
+При обнаружении кода, который невозможно или крайне сложно протестировать, предложи рефакторинг:
+
+| Симптом | Причина | Решение |
+|---------|---------|---------|
+| Метод >50 строк, нет DI | Смесь логики и создания зависимостей | Вынести зависимость в параметр/интерфейс |
+| `static` метод с I/O | `File.ReadAllText`, `DateTime.UtcNow` | Обернуть в `IDateTimeProvider` / `IFileService` |
+| `new ConcreteService()` внутри метода | Tight coupling | Добавить параметр `Func<T>` или inject через DI |
+| Прямой вызов `DateTime.UtcNow` | Нет контроля времени в тесте | Заменить на `IDateTimeProvider` |
+| Прямой вызов `File.ReadAllText` | Нет контроля файловой системы | Заменить на `IFileService` |
+| Прямой `new SqlConnection("...")` (future) | Connection string в коде | inject `IDbConnectionFactory` / `IRepository<T>` |
+
+Формат предложения:
+```markdown
+### Refactoring suggestions
+- `Baz.cs:30` — `DateTime.UtcNow` используется напрямую, что делает метод не тестируемым в изоляции. Предлагается: внедрить `IDateTimeProvider` через DI.
+```

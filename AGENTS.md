@@ -178,7 +178,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ## Current State (Sprint R1вЂ“R4 + R3.1 + AвЂ“D + Coverage Improvement + Sprint 60вЂ“61 Р·Р°РІРµСЂС€РµРЅС‹)
 
-- **Tests:** 2069 (0 failures, 1 pre-existing skip)
+- **Tests:** 2092 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate вњ…
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions вЂ” build + test + coverage-gate 75% + NuGet РєСЌС€
@@ -1499,4 +1499,30 @@ Conductor (primary) в†’ РґРµР»РµРіРёСЂСѓРµС‚ subagent'
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2069 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.3% line-rate ✅
+
+## Sprint 62 — STA unit tests for TabItemMiddleClickBehavior and PreviewLineChangedBehavior
+
+### Feature: TabItemMiddleClickBehaviorTests (12 tests)
+**Проблема:** TabItemMiddleClickBehavior не имел unit-тестов из-за STA-зависимости (TabControl, TabItem, MouseButtonEventArgs).
+**Исправление:** 
+- `OnEnableMiddleClickToCloseChanged`, `OnPreviewMouseUp` сделаны `internal static` (по паттерну других behavior-тестов)
+- Создан `TabItemMiddleClickBehaviorTests.cs`: 4 DP-теста (без STA) + 6 handler-тестов (STA via WpfContext.Execute) + 2 event-subscription теста
+- Тесты проверяют: middle-click на TabItem → CloseTabRequestMessage, wrong button → no-op, non-TabItem sender → no-op, subscription lifecycle
+
+### Feature: PreviewLineChangedBehaviorTests (11 tests)
+**Проблема:** PreviewLineChangedBehavior не имел unit-тестов из-за STA-зависимости (Canvas с named-элементами).
+**Исправление:**
+- `CachedElements`, `UpdatePreviewLine`, `UpdatePreviewRectangle`, `UpdatePreviewText` сделаны `internal`/`internal static`
+- Создан `PreviewLineChangedBehaviorTests.cs`: 4 Register/Unregister теста + 6 update-тестов + 1 PropertyChanged flow тест
+- Тесты проверяют: валидный preview → Visible + позиция, null preview → Collapsed, double registration → no throw
+
+**Файлы:**
+- `Behaviors/TabItemMiddleClickBehavior.cs` — 2 изменения visibility
+- `Behaviors/PreviewLineChangedBehavior.cs` — 4 изменения visibility
+- `Tests/Behaviors/TabItemMiddleClickBehaviorTests.cs` — создан (12 тестов)
+- `Tests/Behaviors/PreviewLineChangedBehaviorTests.cs` — создан (11 тестов)
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2092 passed, 1 pre-existing skip
 **Coverage:** 75.3% line-rate ✅
