@@ -6,7 +6,7 @@ permission:
   edit: deny
   bash: allow
   task: deny
-steps: 20
+steps: 35
 ---
 
 # gh-ops — GitHub Operations
@@ -78,26 +78,56 @@ git config user.name "OpenCode Pipeline"
 ```powershell
 git checkout main
 git pull origin main
-git checkout -b feature/<description>
+git checkout -b feature/<description>-<YYYYMMDD-HHmm>
+```
+ВАЖНО: Всегда создавай branch от main. НИКОГДА не создавай branch от другой feature/fix ветки.
+Уникальный суффикс (timestamp) предотвращает коллизии имён веток между разными pipeline run.
+
+### 3. Rebase перед push (предотвращение конфликтов)
+```powershell
+git fetch origin main
+git rebase origin/main
+if ($LASTEXITCODE -ne 0) {
+  # Конфликт при rebase
+  Write-Output "CONFLICT: Rebase conflict detected. Resolving..."
+  # Стратегия разрешения: для doc-файлов (AGENTS.md, CHANGELOG.md, docs/*, README.md, CONTRIBUTING.md)
+  # принимаем обе стороны — сначала theirs (main), потом наши изменения
+  git checkout --theirs -- AGENTS.md CHANGELOG.md CONTRIBUTING.md README.md docs/*.md
+  git add AGENTS.md CHANGELOG.md CONTRIBUTING.md README.md docs/*.md
+  # Для остальных файлов (production code) — принимаем наши изменения
+  git checkout --ours -- src/
+  git add src/
+  git rebase --continue
+}
 ```
 
-### 3. Commit изменений
+### 4. Commit изменений
 ```powershell
 git add <files>
 git commit -m "feat(scope): description"
 ```
 Используй Conventional Commits: `feat|fix|refactor|test|docs(scope): message`
 
-### 4. Push и создать PR
+### 5. Push и создать PR
 ```powershell
-git push origin feature/<description>
+git push origin feature/<description>-<YYYYMMDD-HHmm>
+# Если push rejected из-за non-fast-forward — используй --force-with-lease
 if ($?) {
-  gh pr create --base main --head feature/<description> --title "..." --body "..."
+  gh pr create --base main --head feature/<description>-<YYYYMMDD-HHmm> --title "..." --body "..."
 }
 ```
 
-### 5. PR body
+### 6. PR body
 Заполни шаблон из skill `github-workflow`.
+
+## Предотвращение конфликтов (правила)
+
+1. **Branch всегда от main** — никогда не создавай feature/fix branch от другой feature/fix branch
+2. **Rebase перед push** — всегда делай `git rebase origin/main` перед push
+3. **Уникальное имя branch** — добавляй timestamp суффикс: `feature/desc-YYYYMMDD-HHmm`
+4. **Один logical change per branch** — не смешивай unrelated commits (например, CI fix + feature change)
+5. **Force push** — используй `--force-with-lease` (не `--force`), чтобы не перетереть чужие коммиты
+6. **Doc-файлы разрешаем через --theirs** — при конфликте doc-файлов (AGENTS.md, CHANGELOG.md, docs/) всегда принимай main (theirs), потом поверх накладывай наши changes
 
 ## Правила
 - Не делай commit от имени conductor — используй git config user.name/email проекта
