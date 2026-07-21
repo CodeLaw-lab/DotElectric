@@ -6,7 +6,7 @@ permission:
   edit: allow
   bash: allow
   task: deny
-steps: 30
+steps: 45
 ---
 
 # DevOps — DevOps Engineer
