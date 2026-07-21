@@ -39,7 +39,7 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool РјРѕР¶РµС‚ Р±Р»РѕРєРёСЂРѕРІР°С‚СЊ zoom)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2092 passed, 1 pre-existing skip
+**Tests:** 2094 passed, 1 pre-existing skip
 
 ### H1вЂ“H5 вЂ” РђСЂС…РёС‚РµРєС‚СѓСЂРЅС‹Рµ РёСЃРїСЂР°РІР»РµРЅРёСЏ РІС‹СЃРѕРєРѕР№ РІР°Р¶РЅРѕСЃС‚Рё (14.07.2026)
 - **H1: async-void AutosaveTick** вЂ” `event Action?` в†’ `event Func<Task>?`. `IDispatcherService` РїРѕР»СѓС‡РёР» `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` РІС‹Р·С‹РІР°РµС‚ `InvokeAsync`. `MainViewModel` вЂ” `async Task` РІРјРµСЃС‚Рѕ `async void`.
@@ -58,7 +58,7 @@
 
 ### Р§С‚Рѕ РЅРµ РІРѕС€Р»Рѕ / РѕС‚Р»РѕР¶РµРЅРѕ
 - ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior вЂ” STA-С‚РµСЃС‚С‹ (С‚СЂРµР±СѓСЋС‚ РїРѕР»РЅРѕРіРѕ РІРёР·СѓР°Р»СЊРЅРѕРіРѕ РґРµСЂРµРІР°)~~ вЂ” Р РµС€РµРЅРѕ РІ Sprint 62
-- **Text markers — display cleanup (21.07.2026):** Убран избыточный Grid из DataTemplate текста. `MarkerPosition` используется для всех типов объектов (Line, Rectangle, Text). Маркеры рендерятся в отдельном ItemsControl как прямые потомки DrawingCanvas — это архитектурно корректно для абсолютного Canvas.Left/Top позиционирования.
+- **Text markers вЂ” tech debt:** РёСЃРїСЂР°РІР»РµРЅ РїРѕРІРѕСЂРѕС‚ (`RotatedCorner0вЂ“3`, `GetBoundingBox`, `HitTestHelper`), РЅРѕ РѕСЃС‚Р°СЋС‚СЃСЏ РЅРµРґРѕС‡С‘С‚С‹ РѕС‚РѕР±СЂР°Р¶РµРЅРёСЏ РјР°СЂРєРµСЂРѕРІ: `TextSelectionMarkerBehavior` РЅРµ РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ, РїСѓСЃС‚РѕР№ `<Canvas/>` РІРЅСѓС‚СЂРё DataTemplate Text, РјР°СЂРєРµСЂС‹ РІ РѕС‚РґРµР»СЊРЅРѕРј ItemsControl РІРјРµСЃС‚Рѕ РІРЅСѓС‚СЂРё DataTemplate
 - **Inline text editing вЂ” tech debt (РІСЃСЏ СЂР°Р±РѕС‚Р° СЃ С‚РµРєСЃС‚РѕРј):**
   - Escape РЅРµ РѕС‚РјРµРЅСЏР» СЂРµРґР°РєС‚РёСЂРѕРІР°РЅРёРµ вЂ” **РёСЃРїСЂР°РІР»РµРЅРѕ** (focus guard РІ CanvasInputRouter). РћСЃС‚Р°С‘С‚СЃСЏ:
     - TextBox РЅРµ РїРѕР»СѓС‡Р°РµС‚ Р°РІС‚Рѕ-С„РѕРєСѓСЃ РїРѕСЃР»Рµ double-click вЂ” РµСЃР»Рё РЅРµ РєР»РёРєРЅСѓС‚СЊ РІ TextBox, Escape СѓС…РѕРґРёС‚ РІ SelectTool (РѕС‡РёС‰Р°РµС‚ РІС‹РґРµР»РµРЅРёРµ, СЂРµРґР°РєС‚РѕСЂ РѕСЃС‚Р°С‘С‚СЃСЏ)
@@ -180,7 +180,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ## Current State (Sprint R1вЂ“R4 + R3.1 + AвЂ“D + Coverage Improvement + Sprint 60вЂ“63 Р·Р°РІРµСЂС€РµРЅС‹)
 
-- **Tests:** 2092 (0 failures, 1 pre-existing skip)
+- **Tests:** 2094 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate вњ…
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions вЂ” build + test + coverage-gate 75% + NuGet РєСЌС€
@@ -1406,7 +1406,6 @@ Tests:  1780 passed, 1 skip
 66. `RouteKeyDown` must have the same `IsEditing` guard as `RoutePreviewKeyDown`. Without it, key events during inline editing reach the active tool and can clear selection, switch tools, or delete objects.
 67. `ShortcutRegistry.TryHandle` must check `editor.InlineEditManager.IsEditing` before processing shortcuts. Without the guard, V/L/R/T/E hotkeys during inline editing switch tools or rotate objects instead of being handled by the TextBox.
 68. WPF `LayoutTransform` offset on rotated elements — WPF positions a `LayoutTransform`-ed element so the **top-left of the transformed bounding box** (not the local origin `(0,0)`) lands at the layout position. For `Text` with `RotateTransform(angle, 0, 0)`, this creates an offset `(-minX, +minY)` where `minX = min(0, W·cosθ, −H·sinθ, W·cosθ−H·sinθ)` and `minY = min(0, W·sinθ, H·cosθ, W·sinθ+H·cosθ)`. Model formulas (`RotatedCorner0-3`, `ContainsPoint`, `GetBoundingBox`) MUST apply this offset to match the visual position. At 0° the offset is (0,0) — no change. `HitTestHelper.GetTextHandle` must use `Text.RotatedCorner0-3` directly (not recompute corners) to stay consistent.
-69. CI runner OS for WPF projects — WPF targets `net10.0-windows` and requires the Windows SDK. GitHub Actions workflows MUST use `runs-on: windows-latest`. Using `ubuntu-latest` will fail with `EnableWindowsTargeting` error. Always verify `runs-on:` matches the project target framework. Both CI workflows (ci.yml, opencode-pipeline.yml) have a warning comment: `# WARNING: WPF (net10.0-windows) requires Windows runner`.
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2035 passed, 1 pre-existing skip
@@ -1501,7 +1500,7 @@ Conductor (primary) в†’ РґРµР»РµРіРёСЂСѓРµС‚ subagent'
 - `Tests/Helpers/HitTestHelperTests.cs` — updated test points
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2092 passed, 1 pre-existing skip
+**Tests:** 2069 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
 
 ## Sprint 62 — STA unit tests for TabItemMiddleClickBehavior and PreviewLineChangedBehavior
@@ -1529,26 +1528,15 @@ Conductor (primary) в†’ РґРµР»РµРіРёСЂСѓРµС‚ subagent'
 **Build:** 0 errors, 0 warnings
 **Tests:** 2092 passed, 1 pre-existing skip
 **Coverage:** 75.3% line-rate ✅
-## Sprint 63 — CI runner OS fix (21.07.2026)
 
-### Fix CI-1: opencode-pipeline.yml runner OS mismatch
+## Sprint 63 — Template.Clone() regression test
 
-**Проблема:** Workflow `opencode-pipeline.yml` был настроен на `runs-on: ubuntu-latest`, но проект требует `net10.0-windows` (WPF). `dotnet restore` падал с ошибкой: `To build a project targeting Windows on this operating system, set the EnableWindowsTargeting property to true.`
-
-**Исправление:**
-- `runs-on: ubuntu-latest` → `runs-on: windows-latest` в `build-and-test` job
-- Удалены job'ы `opencode-review` и `opencode-pipeline` (требуют `ANTHROPIC_API_KEY`, который отсутствует)
-- Удалены неиспользуемые триггеры `issue_comment` и `workflow_dispatch`
-- В оба CI-файла (`ci.yml`, `opencode-pipeline.yml`) добавлен WARNING-комментарий о платформенном ограничении
-
-**Профилактика:**
-- Common Mistake #69 добавлен
-- Комментарий-предупреждение в каждом CI-файле
-
+### Feature: Clone_CopiesAllPublicProperties_ExceptId regression test
+**Проблема:** `Template.Clone()` может потерять консистентность при добавлении новых свойств в будущем — нет теста, проверяющего, что все публичные свойства (кроме `Id`) скопированы.
+**Исправление:** Добавлен тест `Clone_CopiesAllPublicProperties_ExceptId` в `TemplateTests.cs`, который через reflection проверяет, что каждое публичное свойство `Template` (кроме `Id`) имеет одинаковое значение на исходном и клонированном объекте после `Clone()`.
 **Файлы:**
-- `.github/workflows/opencode-pipeline.yml` — runner + удаление OpenCode jobs
-- `.github/workflows/ci.yml` — комментарий-предупреждение
+- `Tests/Services/TemplateTests.cs` — добавлен regression test
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2092 passed, 1 pre-existing skip
+**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅

@@ -53,7 +53,7 @@ src/
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
 │   └── Messages/                        # WeakReferenceMessenger сообщения
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2092 tests, 1 pre-existing skip)
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2094 tests, 1 pre-existing skip)
 ```
 
 ### Coding Standards
@@ -66,7 +66,7 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: ≥75% line-rate (CI gate, actual ~75.15%)
+- Target coverage: ≥75% line-rate (CI gate, actual ~75.3%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers

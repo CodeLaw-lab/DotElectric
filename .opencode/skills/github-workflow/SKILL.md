@@ -10,14 +10,38 @@ description: Use when performing git and GitHub operations — branch management
 ## 1. Branch naming
 
 ```
-feature/<short-description>   # новая функциональность
-fix/<short-description>        # исправление бага
-refactor/<short-description>   # рефакторинг
-test/<short-description>       # добавление тестов
-docs/<short-description>       # документация
+feature/<short-description>-<YYYYMMDD-HHmm>   # новая функциональность
+fix/<short-description>-<YYYYMMDD-HHmm>        # исправление бага
+refactor/<short-description>-<YYYYMMDD-HHmm>   # рефакторинг
+test/<short-description>-<YYYYMMDD-HHmm>       # добавление тестов
+docs/<short-description>-<YYYYMMDD-HHmm>       # документация
 ```
 
-Всегда создавай branch от `main` (или `master`, смотря что актуально).
+Уникальный суффикс (timestamp) предотвращает коллизии имён веток.
+
+ВАЖНО: Всегда создавай branch от `main`. НИКОГДА не создавай branch от другой feature/fix branch — это гарантирует, что в ветке будут только твои коммиты, без мусора из других веток.
+
+## 1.5 Rebase before push (обязательно)
+
+Перед любым push выполни rebase на последний main, чтобы избежать конфликтов:
+
+```powershell
+git fetch origin main
+git rebase origin/main
+```
+
+Если rebase вызвал конфликт:
+1. Для **doc-файлов** (AGENTS.md, CHANGELOG.md, CONTRIBUTING.md, README.md, docs/*.md): прими `--theirs` (main — более свежие), потом поверх наложи свои изменения
+2. Для **production кода** (src/): прими `--ours` (свои изменения) — твой код новее
+3. После разрешения: `git add <file>` и `git rebase --continue`
+
+```powershell
+# Пример: разрешение конфликтов при rebase
+git checkout --theirs -- AGENTS.md CHANGELOG.md README.md docs/*.md
+git checkout --ours -- src/
+git add .
+git rebase --continue
+```
 
 ## 2. Commits
 
@@ -160,8 +184,27 @@ gh pr merge <number> --rebase
 
 ## 7. Чеклист перед PR
 
-- [ ] Branch создан от main
+- [ ] Branch создан от main (не от другой feature/fix branch)
+- [ ] Выполнен `git rebase origin/main` — нет конфликтов
 - [ ] Commits следуют Conventional Commits
 - [ ] Все изменения закоммичены (git status чист)
 - [ ] PR body заполнен по шаблону
 - [ ] gh CLI авторизован (`gh auth status`)
+- [ ] Build: `dotnet build` — 0 errors
+- [ ] Tests: `dotnet test` — all pass
+
+## 8. Conflict prevention (правила для pipeline)
+
+### Почему возникают конфликты
+1. **Shared doc-файлы**: AGENTS.md, CHANGELOG.md, docs/* — каждый pipeline run их модифицирует
+2. **Нет rebase перед push**: ветка устарела относительно main
+3. **Branch от feature-branch**: в ветке оказываются чужие коммиты
+4. **Unrelated commits**: CI fix + feature change в одной ветке — конфликт при merge
+
+### Как предотвратить
+1. **Unique branch name**: добавляй timestamp суффикс (`feature/desc-YYYYMMDD-HHmm`)
+2. **Rebase всегда**: `git rebase origin/main` перед каждым push
+3. **Branch от main**: никогда не создавай ветку от другой feature/fix
+4. **Один логический change**: один pipeline run = один logical change = одна ветка
+5. **Force push с осторожностью**: используй `--force-with-lease`, не `--force`
+6. **Doc-файлы разрешаем через --theirs**: main всегда актуальнее по документации

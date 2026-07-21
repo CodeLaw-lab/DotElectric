@@ -7,7 +7,7 @@ permission:
   edit: deny
   bash: deny
 color: primary
-steps: 50
+steps: 65
 ---
 
 # Conductor — Pipeline Orchestrator
@@ -112,7 +112,7 @@ question: ...
 5. Если да → Phase 2. Если нет → спроси что изменить → planner дорабатывает
 
 ### Phase 2: Implement
-1. Запусти `gh-ops` создать feature-branch
+1. Запусти `gh-ops` создать feature-branch от `main` (НЕ от другой feature-branch)
 2. Запусти `implementor` с планом
 3. Проверь результат (build?)
 4. Если ошибка → до 3 retry. Если всё → Phase 3
@@ -163,10 +163,14 @@ question: ...
 2. Проверь результат
 3. Переход к Phase 8
 
-### Phase 8: PR
-1. Запусти `gh-ops` — commit, push, PR
-2. Дай пользователю ссылку на PR
-3. Заверши pipeline
+### Phase 8: PR (с предотвращением конфликтов)
+1. **Rebase**: перед push убедись, что `gh-ops` выполнит `git rebase origin/main`
+2. **Conflict resolution**: если rebase вызвал конфликт:
+   - doc-файлы (AGENTS.md, CHANGELOG.md, docs/*.md, README.md, CONTRIBUTING.md) → `--theirs` (main актуальнее)
+   - production код (src/) → `--ours` (наши изменения)
+3. Запусти `gh-ops` — commit, rebase, push, PR
+4. Дай пользователю ссылку на PR
+5. Заверши pipeline
 
 ## Retry policy
 - Каждый retry-цикл: до 3 попыток
@@ -215,3 +219,20 @@ question: ...
 - Не запускает тесты (это tester)
 - Не редактирует документацию сам (это documenter)
 - Только читает CONSISTENCY_REPORT.md и принимает решение о PASS/FAIL
+
+## Conflict prevention (общие правила)
+
+### Корневые причины конфликтов
+1. **Shared doc-файлы** — AGENTS.md, CHANGELOG.md, docs/* — каждый pipeline run их модифицирует
+2. **Нет rebase перед push** — ветка устаревает относительно main между pipeline run
+3. **Branch от feature-branch** — в ветку попадают чужие unrelated коммиты
+4. **Нет unique ID в имени ветки** — два pipeline run с одинаковой темой перезатирают друг друга
+5. **CI/workflow mix** — исправление CI и фича в одной ветке
+
+### Правила для Conductor
+1. **Phase 2**: всегда указывай gh-ops создавать branch от main (флаг `--from-main`)
+2. **Phase 8**: всегда требуй rebase перед push (не пропускай этот шаг)
+3. **Branch naming**: используй шаблон `feature/<desc>-<timestamp>` с unique ID
+4. **Один run = одна ветка**: не смешивай unrelated изменения
+5. **Doc conflicts**: стратегия `--theirs` для doc-файлов, `--ours` для production кода
+6. **Force push**: только `--force-with-lease`, никогда `--force`
