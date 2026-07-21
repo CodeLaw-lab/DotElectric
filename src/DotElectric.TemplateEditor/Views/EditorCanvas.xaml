@@ -188,47 +188,45 @@
 
         <!-- Шаблон текста -->
         <DataTemplate DataType="{x:Type models:Text}">
-            <Grid>
-                <TextBlock FontFamily="{Binding FontName, Converter={StaticResource FontNameToFamilyConverter}}"
-                           TextWrapping="{Binding TextWrapping, Converter={StaticResource BoolToTextWrappingConverter}}"
-                           TextAlignment="{Binding TextAlignment, Converter={StaticResource StringToTextAlignmentConverter}}"
-                           >
-                    <TextBlock.FontSize>
-                        <MultiBinding Converter="{StaticResource MicronsToPixelConverter}">
-                            <Binding Path="FontSizeMicrons"/>
-                            <Binding Path="DataContext.ZoomPanManager.Zoom" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                        </MultiBinding>
-                    </TextBlock.FontSize>
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Foreground" Value="{Binding Foreground, Converter={StaticResource HexToBrushConverter}}"/>
-                            <Style.Triggers>
-                                <DataTrigger Value="True">
-                                    <DataTrigger.Binding>
-                                        <MultiBinding Converter="{StaticResource IsObjectSelectedConverter}">
-                                            <Binding/>
-                                            <Binding Path="DataContext.SelectionManager.SelectedObjects" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                            <Binding Path="DataContext.SelectionVersion" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
-                                        </MultiBinding>
-                                    </DataTrigger.Binding>
-                                    <Setter Property="Foreground" Value="#0078D4"/>
-                                    <Setter Property="FontWeight" Value="Bold"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                    <TextBlock.Text>
-                        <Binding Path="Content"/>
-                    </TextBlock.Text>
-                    <TextBlock.LayoutTransform>
-                        <RotateTransform>
-                            <RotateTransform.Angle>
-                                <Binding Path="RotationAngle"/>
-                            </RotateTransform.Angle>
-                        </RotateTransform>
-                    </TextBlock.LayoutTransform>
-                </TextBlock>
-            </Grid>
+            <TextBlock FontFamily="{Binding FontName, Converter={StaticResource FontNameToFamilyConverter}}"
+                       TextWrapping="{Binding TextWrapping, Converter={StaticResource BoolToTextWrappingConverter}}"
+                       TextAlignment="{Binding TextAlignment, Converter={StaticResource StringToTextAlignmentConverter}}"
+                       >
+                <TextBlock.FontSize>
+                    <MultiBinding Converter="{StaticResource MicronsToPixelConverter}">
+                        <Binding Path="FontSizeMicrons"/>
+                        <Binding Path="DataContext.ZoomPanManager.Zoom" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                    </MultiBinding>
+                </TextBlock.FontSize>
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Foreground" Value="{Binding Foreground, Converter={StaticResource HexToBrushConverter}}"/>
+                        <Style.Triggers>
+                            <DataTrigger Value="True">
+                                <DataTrigger.Binding>
+                                    <MultiBinding Converter="{StaticResource IsObjectSelectedConverter}">
+                                        <Binding/>
+                                        <Binding Path="DataContext.SelectionManager.SelectedObjects" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                        <Binding Path="DataContext.SelectionVersion" RelativeSource="{RelativeSource AncestorType=UserControl}"/>
+                                    </MultiBinding>
+                                </DataTrigger.Binding>
+                                <Setter Property="Foreground" Value="#0078D4"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+                <TextBlock.Text>
+                    <Binding Path="Content"/>
+                </TextBlock.Text>
+                <TextBlock.LayoutTransform>
+                    <RotateTransform>
+                        <RotateTransform.Angle>
+                            <Binding Path="RotationAngle"/>
+                        </RotateTransform.Angle>
+                    </RotateTransform>
+                </TextBlock.LayoutTransform>
+            </TextBlock>
         </DataTemplate>
 
     </UserControl.Resources>
