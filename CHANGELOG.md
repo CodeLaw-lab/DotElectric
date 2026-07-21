@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Sprint 63: Regression test `Clone_CopiesAllPublicProperties_ExceptId` for `Template.Clone()` — reflection-based check against future property drift
 - Pipeline: СѓРІРµР»РёС‡РµРЅРёРµ РїРѕРєСЂС‹С‚РёСЏ С‚РµСЃС‚Р°РјРё РґРѕ 75.15% (Р±С‹Р»Рѕ ~59-67%)
 - ~195 РЅРѕРІС‹С… С‚РµСЃС‚РѕРІ: Commands null guards, Tools Reset(), Grid edge cases, Services, Models, MainViewModel, FontMetrics, TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogViewModel, ShortcutRegistry
 - Template.Clone() вЂ” deep copy СЃ Metadata, Sheet Рё Objects
@@ -31,14 +32,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 60: `RouteKeyDown` guard for `IsEditing` (matching existing `RoutePreviewKeyDown` guard)
 - Sprint 60: LostFocus → Commit for inline text editor
 - Sprint 61: Text rotation marker fix — `GetLayoutTransformOffset()` in Text.cs accounts for WPF `LayoutTransform` bounding box offset at non-zero angles
-- Text markers — display cleanup: redundant `<Grid>` removed from Text DataTemplate, markers rendered directly in ItemsControl as Canvas children
 - Sprint 61: `HitTestHelper.GetTextHandle()` simplified to use `Text.RotatedCorner0-3` directly
 - Sprint 61: Updated TextTests.cs (4 new tests) and HitTestHelperTests.cs (stale rotated text test points)
 
 ### Added
 - Sprint 62: STA-based unit tests for TabItemMiddleClickBehavior (12 tests) — middle-click-close, button filtering, sender validation, event subscription lifecycle
 - Sprint 62: STA-based unit tests for PreviewLineChangedBehavior (11 tests) — register/unregister, update preview shapes, null preview handling, PropertyChanged flow
-- Sprint 63: CI runner OS fix — `opencode-pipeline.yml` changed from `ubuntu-latest` to `windows-latest` (WPF requires Windows)
 - CI workflow: GitHub Actions (build, test, coverage gate 75%) РЅР° `windows-latest`
 - Sprint STA: `WpfContext` helper вЂ” STA-thread dispatcher for WPF unit tests
 - Sprint STA: `TextBoxLostFocusCommandBehaviorTests` вЂ” 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)
@@ -106,11 +105,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 37: Preview shapes not appearing (reference not re-assigned)
 - Sprint 37: Canvas not resizing on zoom (missing OnPropertyChanged)
 - Sprint 27: Restored missing `HitTest` method in `HitTestHelper`
-- Sprint 63: CI opencode-pipeline.yml runner OS — changed from `ubuntu-latest` to `windows-latest` (WPF requires Windows SDK)
 - Sprint 27: Fixed `ResizeHandle` namespace import
 
 ### Metrics
-- **Tests:** 2092 (0 failures, 1 pre-existing skip)
+- **Tests:** 2094 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
