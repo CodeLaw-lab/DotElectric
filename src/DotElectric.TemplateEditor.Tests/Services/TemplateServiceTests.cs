@@ -140,6 +140,13 @@ public class TemplateServiceTests
     }
 
     [Fact]
+    public void Save_WithNullFilePath_ThrowsArgumentException()
+    {
+        var template = _service.CreateNew("A4");
+        Assert.Throws<ArgumentException>(() => _service.Save(template, null!));
+    }
+
+    [Fact]
     public void Save_CreatesDirectoryIfNotExists()
     {
         var template = _service.CreateNew("A4");

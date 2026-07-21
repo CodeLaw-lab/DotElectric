@@ -131,6 +131,77 @@ public class AutosaveServiceTests : IDisposable
     }
 
     [Fact]
+    public void LoadSession_EmptyJson_ReturnsNull()
+    {
+        var sessionFile = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DotElectric", "autosave", "session.json");
+
+        var dir = Path.GetDirectoryName(sessionFile);
+        if (dir != null)
+        {
+            Directory.CreateDirectory(dir);
+            File.WriteAllText(sessionFile, string.Empty);
+        }
+
+        try
+        {
+            var session = _service.LoadSession();
+            Assert.Null(session);
+        }
+        finally
+        {
+            if (File.Exists(sessionFile)) File.Delete(sessionFile);
+        }
+    }
+
+    [Fact]
+    public void LoadSession_ValidJson_ReturnsCorrectState()
+    {
+        var sessionFile = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DotElectric", "autosave", "session.json");
+
+        var dir = Path.GetDirectoryName(sessionFile);
+        if (dir != null)
+        {
+            Directory.CreateDirectory(dir);
+            var json = @"{
+                ""SessionStart"": ""2025-01-15T12:00:00Z"",
+                ""LastAutosave"": ""2025-01-15T13:00:00Z"",
+                ""Tabs"": [
+                    {
+                        ""TabId"": ""tab1"",
+                        ""DisplayName"": ""My Template"",
+                        ""OriginalFilePath"": ""C:\\templates\\test.tdel"",
+                        ""AutosaveFile"": ""autosave_tab1_20250115_120000.tdel"",
+                        ""WasDirty"": true
+                    }
+                ]
+            }";
+            File.WriteAllText(sessionFile, json);
+        }
+
+        try
+        {
+            var session = _service.LoadSession();
+            Assert.NotNull(session);
+            Assert.Equal(new DateTime(2025, 1, 15, 12, 0, 0, DateTimeKind.Utc), session.SessionStart);
+            Assert.Equal(new DateTime(2025, 1, 15, 13, 0, 0, DateTimeKind.Utc), session.LastAutosave);
+            Assert.Single(session.Tabs);
+            Assert.Equal("tab1", session.Tabs[0].TabId);
+            Assert.Equal("My Template", session.Tabs[0].DisplayName);
+            Assert.Equal(@"C:\templates\test.tdel", session.Tabs[0].OriginalFilePath);
+            Assert.Equal("autosave_tab1_20250115_120000.tdel", session.Tabs[0].AutosaveFile);
+            Assert.True(session.Tabs[0].WasDirty);
+        }
+        finally
+        {
+            if (File.Exists(sessionFile)) File.Delete(sessionFile);
+        }
+    }
+
+    [Fact]
     public void ClearAutosaveFolder_DoesNotThrow()
     {
         // Create some files to clear

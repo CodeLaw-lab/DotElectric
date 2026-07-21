@@ -612,6 +612,96 @@ public class DrawingLineToolTests
         Assert.Equal(sheetW, line.EndMicronsX);
         Assert.Equal(sheetH, line.EndMicronsY);
     }
+
+    // ============= Reset =============
+
+    [Fact]
+    public void Reset_ClearsPreview_PreviewLineBecomesNull()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewLine);
+
+        tool.Reset();
+
+        Assert.Null(vm.PreviewLine);
+    }
+
+    [Fact]
+    public void Reset_AfterMouseDown_ClearsState()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+
+        tool.Reset();
+
+        // After Reset, MouseMove should not update preview
+        tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Null(vm.PreviewLine);
+
+        // After Reset, MouseUp should not create an object
+        tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Empty(vm.Template.Objects);
+    }
+
+    [Fact]
+    public void Reset_CanBeCalledMultipleTimes_DoesNotThrow()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+
+        var ex = Record.Exception(() =>
+        {
+            tool.Reset();
+            tool.Reset();
+            tool.Reset();
+        });
+
+        Assert.Null(ex);
+    }
+
+    // ============= OnKeyDown =============
+
+    [Fact]
+    public void OnKeyDown_Escape_ReturnsTrueAndSwitchesToSelect()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewLine);
+
+        var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
+
+        Assert.True(result);
+        Assert.Null(vm.PreviewLine);
+        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+    }
+
+    [Fact]
+    public void OnKeyDown_NonEscapeKey_ReturnsFalse()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+
+        var result = tool.OnKeyDown(ToolKey.Enter, ToolModifiers.None);
+
+        Assert.False(result);
+    }
+
+    // ============= OnMouseWheel =============
+
+    [Fact]
+    public void OnMouseWheel_ReturnsFalse_DoesNotBlockZoom()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingLineTool(vm);
+
+        var result = tool.OnMouseWheel(120, new PointMicrons(0, 0));
+
+        Assert.False(result);
+    }
 }
 
 public class DrawingRectangleToolTests
@@ -796,6 +886,96 @@ public class DrawingRectangleToolTests
         Assert.True(rect.WidthMicrons > 0);
         Assert.True(rect.HeightMicrons > 0);
     }
+
+    // ============= Reset =============
+
+    [Fact]
+    public void Reset_ClearsPreview_PreviewRectangleBecomesNull()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewRectangle);
+
+        tool.Reset();
+
+        Assert.Null(vm.PreviewRectangle);
+    }
+
+    [Fact]
+    public void Reset_AfterMouseDown_ClearsState()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+
+        tool.Reset();
+
+        // After Reset, MouseMove should not update preview
+        tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Null(vm.PreviewRectangle);
+
+        // After Reset, MouseUp should not create an object
+        tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Empty(vm.Template.Objects);
+    }
+
+    [Fact]
+    public void Reset_CanBeCalledMultipleTimes_DoesNotThrow()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+
+        var ex = Record.Exception(() =>
+        {
+            tool.Reset();
+            tool.Reset();
+            tool.Reset();
+        });
+
+        Assert.Null(ex);
+    }
+
+    // ============= OnKeyDown =============
+
+    [Fact]
+    public void OnKeyDown_Escape_ClearsPreviewAndSwitchesToSelect()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewRectangle);
+
+        var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
+
+        Assert.True(result);
+        Assert.Null(vm.PreviewRectangle);
+        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+    }
+
+    [Fact]
+    public void OnKeyDown_NonEscapeKey_ReturnsFalse()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+
+        var result = tool.OnKeyDown(ToolKey.Enter, ToolModifiers.None);
+
+        Assert.False(result);
+    }
+
+    // ============= OnMouseWheel =============
+
+    [Fact]
+    public void OnMouseWheel_ReturnsFalse_DoesNotBlockZoom()
+    {
+        var vm = CreateViewModel();
+        var tool = new DrawingRectangleTool(vm);
+
+        var result = tool.OnMouseWheel(120, new PointMicrons(0, 0));
+
+        Assert.False(result);
+    }
 }
 
 public class TextToolTests
@@ -900,6 +1080,112 @@ public class TextToolTests
 
         var text = (Text)vm.Template.Objects[0];
         Assert.Equal(TextType.Dimension, text.TextType);
+    }
+
+    // ============= Reset =============
+
+    [Fact]
+    public void Reset_ClearsPreview_PreviewTextBecomesNull()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewText);
+
+        tool.Reset();
+
+        Assert.Null(vm.PreviewText);
+    }
+
+    [Fact]
+    public void Reset_AfterMouseDown_ClearsState()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+
+        tool.Reset();
+
+        // After Reset, MouseMove should not update preview
+        tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Null(vm.PreviewText);
+
+        // After Reset, MouseUp should not create an object
+        tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Empty(vm.Template.Objects);
+    }
+
+    [Fact]
+    public void Reset_CanBeCalledMultipleTimes_DoesNotThrow()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        var ex = Record.Exception(() =>
+        {
+            tool.Reset();
+            tool.Reset();
+            tool.Reset();
+        });
+
+        Assert.Null(ex);
+    }
+
+    // ============= OnKeyDown =============
+
+    [Fact]
+    public void OnKeyDown_Escape_ReturnsTrueAndSwitchesToSelect()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewText);
+
+        var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
+
+        Assert.True(result);
+        Assert.Null(vm.PreviewText);
+        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+    }
+
+    [Fact]
+    public void OnKeyDown_NonEscapeKey_ReturnsFalse()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        var result = tool.OnKeyDown(ToolKey.Enter, ToolModifiers.None);
+
+        Assert.False(result);
+    }
+
+    // ============= OnDoubleClick =============
+
+    [Fact]
+    public void OnDoubleClick_ClearsPreviewAndSwitchesToSelect()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewText);
+
+        tool.OnDoubleClick(new PointMicrons(5000, 6000));
+
+        Assert.Null(vm.PreviewText);
+        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+    }
+
+    // ============= OnMouseWheel =============
+
+    [Fact]
+    public void OnMouseWheel_ReturnsFalse_DoesNotBlockZoom()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        var result = tool.OnMouseWheel(120, new PointMicrons(0, 0));
+
+        Assert.False(result);
     }
 }
 

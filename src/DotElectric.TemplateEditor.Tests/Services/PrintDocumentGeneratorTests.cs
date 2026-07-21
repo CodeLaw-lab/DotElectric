@@ -29,6 +29,20 @@ public class PrintDocumentGeneratorTests
         });
     }
 
+    [Fact]
+    public void Generate_EmptyTemplate_ContainsOnlyBackground()
+    {
+        WpfContext.Execute(() =>
+        {
+            var template = CreateEmptyTemplate();
+            var doc = _generator.Generate(template);
+            var page = (FixedPage)GetPageContent(doc).Child;
+            Assert.Single(page.Children);
+            var bg = Assert.IsType<WpfRectangle>(page.Children[0]);
+            Assert.Equal(new SolidColorBrush(Colors.White).Color, ((SolidColorBrush)bg.Fill).Color);
+        });
+    }
+
     // ===== 7.3: Page size matches sheet dimensions =====
 
     [Fact]

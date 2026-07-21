@@ -318,4 +318,20 @@ public class GridManagerTests
         Assert.True(sut.RawNodeCount <= EditorSettings.MaxGridNodes,
             $"Nodes ({sut.RawNodeCount}) exceed budget ({EditorSettings.MaxGridNodes})");
     }
+
+    [Fact]
+    public void GridStepMm_Setter_RaisesPropertyChanged()
+    {
+        var sut = CreateSut();
+        var propertyChanged = false;
+        sut.PropertyChanged += (_, args) =>
+        {
+            if (args.PropertyName == nameof(GridManager.GridStepMm))
+                propertyChanged = true;
+        };
+
+        sut.GridStepMm = 7.5;
+
+        Assert.True(propertyChanged);
+    }
 }

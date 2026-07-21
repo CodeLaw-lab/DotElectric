@@ -18,7 +18,7 @@ namespace DotElectric.TemplateEditor.Behaviors;
 /// </summary>
 public static class PreviewLineChangedBehavior
 {
-    private sealed class CachedElements
+    internal sealed class CachedElements
     {
         public required System.Windows.Shapes.Line PreviewLineElement { get; init; }
         public required System.Windows.Shapes.Rectangle PreviewRectangleElement { get; init; }
@@ -78,7 +78,7 @@ public static class PreviewLineChangedBehavior
         _cachedElements.Remove(vm);
     }
 
-    private static void UpdatePreviewLine(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
+    internal static void UpdatePreviewLine(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
     {
         if (!_cachedElements.TryGetValue(vm, out var cached)) return;
         var line = cached.PreviewLineElement;
@@ -97,7 +97,7 @@ public static class PreviewLineChangedBehavior
         line.Y2 = (double)_convY.Convert(new object[] { preview.EndMicronsY, sheetHeightMm, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!;
     }
 
-    private static void UpdatePreviewRectangle(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
+    internal static void UpdatePreviewRectangle(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
     {
         if (!_cachedElements.TryGetValue(vm, out var cached)) return;
         var rect = cached.PreviewRectangleElement;
@@ -116,7 +116,7 @@ public static class PreviewLineChangedBehavior
         rect.Height = (double)_convPx.Convert(new object[] { preview.HeightMicrons, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!;
     }
 
-    private static void UpdatePreviewText(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
+    internal static void UpdatePreviewText(Canvas canvas, EditorViewModel vm, double zoom, double sheetHeightMm)
     {
         if (!_cachedElements.TryGetValue(vm, out var cached)) return;
         var tb = cached.PreviewTextElement;

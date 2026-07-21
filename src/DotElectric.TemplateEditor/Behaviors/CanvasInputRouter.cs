@@ -158,6 +158,9 @@ public static class CanvasInputRouter
 
     public static void RoutePreviewKeyDown(Canvas canvas, KeyEventArgs e, EditorCanvasState state)
     {
+        if (state.Editor.InlineEditManager.IsEditing)
+            return;
+
         if (FocusManager.GetFocusedElement(canvas) is UIElement focused && focused != canvas)
             return;
 
@@ -174,6 +177,9 @@ public static class CanvasInputRouter
 
     public static void RouteKeyDown(Canvas canvas, KeyEventArgs e, EditorCanvasState state)
     {
+        if (state.Editor.InlineEditManager.IsEditing)
+            return;
+
         var tool = GetCurrentTool(state.Editor);
         var toolKey = ToToolKey(e.Key);
         var modifiers = ToToolModifiers(Keyboard.Modifiers);

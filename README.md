@@ -1,4 +1,4 @@
-﻿# DotElectric Template Editor
+# DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
 **Тестов:** 2035, 0 сбоев, 1 предопределённый skip

@@ -15,6 +15,9 @@ public static class ShortcutRegistry
 
     public static bool TryHandle(Key key, ModifierKeys modifiers, EditorViewModel editor)
     {
+        if (editor.InlineEditManager.IsEditing)
+            return false;
+
         var tool = GetToolForShortcut(key);
         if (tool != null && modifiers == ModifierKeys.None)
         {
