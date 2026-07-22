@@ -79,6 +79,23 @@ description: Tech Lead code review — checks plan compliance, architecture, Com
 - [ ] `[RelayCommand]` на `void` с суффиксом `Async` — имя команды будет `MethodAsyncCommand`
 - [ ] Нет Grid/StackPanel в EditorCanvas (только Canvas)
 
+### Inline Editor Completeness
+- [ ] Inline TextBox XAML содержит ВСЕ биндинги: Text, FontFamily, FontSize (MicronsToPixelConverter), AcceptsReturn="True" (не привязан к TextWrapping!), TextWrapping (BoolToTextWrappingConverter), TextAlignment (StringToTextAlignmentConverter), LayoutTransform (RotateTransform), Visibility, Canvas.Left/Top (через конвертеры), AutoFocus behavior, LostFocus handler
+- [ ] InputBindings: Ctrl+Enter→Commit, Escape→Cancel (на TextBox, НЕ на UserControl)
+- [ ] Нет конфликтующих UserControl.InputBindings для тех же клавиш
+
+### Guard Conditions
+- [ ] Guard-свойства (`IsEditable`, `IsEnabled`, `CanExecute`) проверяются на ВСЕХ публичных entry points
+- [ ] Defense-in-depth: guard на уровне Manager/Service ДОПОЛНИТЕЛЬНО к guard на уровне Tool/View (не только один уровень защиты)
+- [ ] При guard=false: нет side effects (состояние системы не меняется)
+- [ ] При guard=false: возвращается корректное значение (null/false/early return)
+
+### StatusBar Integration
+- [ ] StatusBar обновляется при ВСЕХ типах выделения (Text, Line, Rectangle, null)
+- [ ] При переключении между типами объектов нет stale сообщений (например, "Текст: ..." когда выбран Line)
+- [ ] При пустом выделении StatusBar показывает "Готово" (или эквивалент)
+- [ ] StatusBar не содержит hardcoded строк для типов объектов
+
 ## 4. Code Quality (general)
 
 - [ ] SOLID: Single Responsibility (класс >300 строк — red flag)

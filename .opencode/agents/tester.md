@@ -42,6 +42,38 @@ steps: 45
 | Error scenarios | Исключения, таймауты, отказ внешних зависимостей |
 | Concurrency | Параллельные вызовы, race conditions (если shared state) |
 
+### 2.5. Guard Condition Testing (NEW — после PR #24)
+Для каждого публичного метода, который принимает объект с булевыми/опциональными guard-свойствами:
+- [ ] Guard condition TRUE → действие выполняется
+- [ ] Guard condition FALSE → действие НЕ выполняется, нет side effects
+- [ ] Guard condition FALSE → состояние системы не изменилось
+- [ ] Guard condition на всех public entry points (не только основном consumer)
+
+Пример guard conditions: `IsEditable`, `IsEnabled`, `CanExecute`, null checks.
+
+### 2.6. State Transition Testing (NEW — после PR #24)
+Для StatusBar/Selection визуального состояния:
+- [ ] Object type A selected → StatusBar показывает Type A info
+- [ ] Object type B selected → StatusBar показывает Type B info
+- [ ] Switch from A→B → StatusBar обновлён (не stale A info)
+- [ ] Deselect all → StatusBar показывает "Готово"
+- [ ] Null/empty selection → корректное состояние
+
+### 2.7. Inline Editor Completeness (NEW — после PR #24)
+При изменении XAML inline-редактора текста, проверь что присутствуют ВСЕ биндинги:
+- [ ] Text (двусторонний)
+- [ ] FontFamily (конвертер)
+- [ ] FontSize (через MicronsToPixelConverter + Zoom)
+- [ ] AcceptsReturn (безусловный True, не привязанный к TextWrapping!)
+- [ ] TextWrapping (конвертер)
+- [ ] TextAlignment (конвертер)
+- [ ] LayoutTransform (RotateTransform для RotationAngle)
+- [ ] Visibility (NotNullToVisibility или триггер)
+- [ ] Canvas.Left + Canvas.Top (через ModelXToCanvasLeft + ModelYToCanvasTop)
+- [ ] InputBindings: Ctrl+Enter→Commit, Escape→Cancel
+- [ ] AutoFocus (через поведение)
+- [ ] LostFocus → Commit
+
 ### 3. Fixtures (переиспользование)
 - `IClassFixture<T>` / `ICollectionFixture<T>` для тяжёлых моков
 - `EditorViewModelFixture` — реальный DI-контейнер с mock-зависимостями
@@ -58,14 +90,16 @@ steps: 45
 ### 5. Параллельность и идемпотентность
 - Все тесты независимы (не полагаются на shared state)
 - `[Collection("FontMetrics", DisableParallelization = true)]` только при flaky
+- `[Collection("AutosaveSharedState", DisableParallelization = true)]` для тестов, использующих общий `session.json`
+- Тесты, работающие с файловой системой (`%APPDATA%`) должны изолироваться через `ICollectionFixture` с временной папкой
 - Нет `Thread.Sleep` — через `IDateTimeProvider.SetupSequence`
 
-### 6. UI-тесты — только для critical path
+### 8. UI-тесты — только для critical path
 - Основная бизнес-логика (открыть → создать → сохранить → закрыть)
 - Валидация пользовательского ввода
 - Проверка доступности ключевых команд через CanExecute
 
-### 7. Если код не тестируем — предложи рефакторинг
+### 9. Если код не тестируем — предложи рефакторинг
 - Метод >50 строк без DI → вынести зависимость в параметр/интерфейс
 - `static` метод с I/O → обернуть в `IDateTimeProvider` / `IFileService`
 - `new ConcreteClass()` внутри метода → добавить `Func<T>` / интерфейс

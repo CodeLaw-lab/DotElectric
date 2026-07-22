@@ -33,6 +33,10 @@ steps: 45
 | 4 | **Code Quality (general)** | SOLID, DRY, naming, magic numbers → константы, обработка исключений, sealed классы |
 | 5 | **Performance + Memory** | UI thread blocking, async/await, event subscriptions (+=/-=), WeakReference, CaptureMouse, STA-тесты |
 | 6 | **Security (future-proof)** | Валидация входных данных, **SQL injection guards** (parameterized queries), secrets/connection strings (не в коде), конфигурация через DI |
+| 7 | **Inline Editor completeness** | Проверка что XAML inline-редактора текста содержит ВСЕ обязательные биндинги (Text, FontFamily, FontSize, AcceptsReturn=True, TextWrapping, TextAlignment, RotationAngle, Canvas.Left/Top, InputBindings Ctrl+Enter/Escape, AutoFocus, LostFocus) |
+| 8 | **StatusBar Integration** | StatusBar обновляется при всех типах выделения? Нет stale сообщений при переключении типов объектов? |
+| 9 | **Input Routing** | Нет конфликта UserControl.InputBindings с InputBindings дочерних контролов? (Особенно Enter/Escape в inline editor vs инструменты) |
+| 10 | **Guard Conditions completeness** | Guard-свойства (IsEditable, IsEnabled, CanExecute) проверяются на ВСЕХ entry points, а не только на основном consumer? Есть defense-in-depth на уровне Manager/Service? |
 
 ## Формат вывода
 
