@@ -34,13 +34,12 @@ public class AutosaveServiceTests : IDisposable
         _mockDateTimeProvider = new Mock<IDateTimeProvider>();
         _mockDateTimeProvider.Setup(p => p.UtcNow).Returns(FixedDate);
 
-        // Note: AutosaveService uses hardcoded %APPDATA% path
-        // We'll test what we can without file system
         _service = new AutosaveService(
             _mockTemplateService.Object,
             _mockSettingsService.Object,
             _mockLogger.Object,
-            dateTimeProvider: _mockDateTimeProvider.Object);
+            dateTimeProvider: _mockDateTimeProvider.Object,
+            autosaveFolder: _testAutosaveFolder);
     }
 
     public void Dispose()
@@ -116,16 +115,9 @@ public class AutosaveServiceTests : IDisposable
     [Fact]
     public void LoadSession_InvalidJson_ReturnsNull()
     {
-        var sessionFile = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DotElectric", "autosave", "session.json");
-
-        var dir = Path.GetDirectoryName(sessionFile);
-        if (dir != null)
-        {
-            Directory.CreateDirectory(dir);
-            File.WriteAllText(sessionFile, "invalid json");
-        }
+        var sessionFile = Path.Combine(_testAutosaveFolder, "session.json");
+        Directory.CreateDirectory(_testAutosaveFolder);
+        File.WriteAllText(sessionFile, "invalid json");
 
         try
         {
@@ -141,16 +133,9 @@ public class AutosaveServiceTests : IDisposable
     [Fact]
     public void LoadSession_EmptyJson_ReturnsNull()
     {
-        var sessionFile = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DotElectric", "autosave", "session.json");
-
-        var dir = Path.GetDirectoryName(sessionFile);
-        if (dir != null)
-        {
-            Directory.CreateDirectory(dir);
-            File.WriteAllText(sessionFile, string.Empty);
-        }
+        var sessionFile = Path.Combine(_testAutosaveFolder, "session.json");
+        Directory.CreateDirectory(_testAutosaveFolder);
+        File.WriteAllText(sessionFile, string.Empty);
 
         try
         {
@@ -166,15 +151,9 @@ public class AutosaveServiceTests : IDisposable
     [Fact]
     public void LoadSession_ValidJson_ReturnsCorrectState()
     {
-        var sessionFile = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DotElectric", "autosave", "session.json");
-
-        var dir = Path.GetDirectoryName(sessionFile);
-        if (dir != null)
-        {
-            Directory.CreateDirectory(dir);
-            var json = @"{
+        var sessionFile = Path.Combine(_testAutosaveFolder, "session.json");
+        Directory.CreateDirectory(_testAutosaveFolder);
+        var json = @"{
                 ""SessionStart"": ""2025-01-15T12:00:00Z"",
                 ""LastAutosave"": ""2025-01-15T13:00:00Z"",
                 ""Tabs"": [
@@ -187,8 +166,7 @@ public class AutosaveServiceTests : IDisposable
                     }
                 ]
             }";
-            File.WriteAllText(sessionFile, json);
-        }
+        File.WriteAllText(sessionFile, json);
 
         try
         {
@@ -213,12 +191,9 @@ public class AutosaveServiceTests : IDisposable
     public void ClearAutosaveFolder_DoesNotThrow()
     {
         // Create some files to clear
-        var folder = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "DotElectric", "autosave");
-        Directory.CreateDirectory(folder);
+        Directory.CreateDirectory(_testAutosaveFolder);
 
-        var testFile = Path.Combine(folder, "test_clear.txt");
+        var testFile = Path.Combine(_testAutosaveFolder, "test_clear.txt");
         File.WriteAllText(testFile, "test");
 
         try
