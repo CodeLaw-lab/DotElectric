@@ -27,7 +27,7 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed, 1 pre-existing skip
+**Tests:** 2095 passed, 1 pre-existing skip
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -45,7 +45,7 @@
 - **Text rotation fix (Sprint 59)** — ContainsPoint() исправлен на inverse WPF RotateTransform (standard CCW matrix). RotatedCorner0-3, GetBoundingBox — reverted к оригинальным (корректным) формулам. HitTestHelper/HitTestText для 90°/270°/45° — все проходят. Осознана и зафиксирована матрица WPF `x'=x*cosθ−y*sinθ`. Архитектурный инсайт: ContainsPoint() был багнут (forward вместо inverse) независимо от путаницы со знаками.
 
 ### Что не вошло / отложено
-- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — STA-тесты (требуют полного визуального дерева)~~ — в ешено в Sprint 62
+- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — STA-тесты (требуют полного визуального дерева)~~ — решено в Sprint 62
 - **Text markers — tech debt:** исправлен поворот (`RotatedCorner0–3`, `GetBoundingBox`, `HitTestHelper`), но остаются недочёты отображения маркеров: `TextSelectionMarkerBehavior` не используется, пустой `<Canvas/>` внутри DataTemplate Text, маркеры в отдельном ItemsControl вместо внутри DataTemplate
 - **Inline text editing — tech debt (вся работа с текстом):**
   - Escape не отменял редактирование — **исправлено** (focus guard в CanvasInputRouter). Остаётся:
@@ -54,10 +54,7 @@
     - Ручная верификация Escape при редактировании не проведена (таски 2.2, 2.3 в fix-escape-inline-editing)
 
 ### Next Steps
-- Этап 2 — Редактор УГО (планирование)
-- FR-021 Drag&Drop из библиотеки
-- FR-022 Preview шаблонов
-- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — integration/UI тесты с STA~~ — С ешено в Sprint 62
+- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — integration/UI тесты с STA~~ — решено в Sprint 62
 
 ## Build Commands
 
@@ -166,9 +163,9 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs завершены)
 
-- **Tests:** 2094 (0 failures, 1 pre-existing skip)
+- **Tests:** 2095 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
@@ -1530,7 +1527,31 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 - `Tests/Services/TemplateTests.cs` — добавлен regression test
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.3% line-rate ✅
+
+## Sprint — Fix Session 2 bugs (22.07.2026)
+
+### 6 исправлений по результатам ручного тестирования Session 2
+**Bug 1: StatusBar info for text selection** — При выделении текста статус-бар показывает "Текст: {FontName}, {FontSizeMm}мм". При выделении линии — "Линия", прямоугольника — "Прямоугольник". При пустом выделении — "Готово".
+**Файлы:** `EditorViewModel.cs`
+
+**Bug 2: Enter in MultiLine** — `AcceptsReturn="True"` теперь безусловно (было привязано к TextWrapping). Enter всегда создаёт новую строку, Ctrl+Enter — commit.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 3: Ctrl+Enter/Escape routing** — Удалены конфликтующие `UserControl.InputBindings` для Enter/Escape. Всё обрабатывается через `TextBox.InputBindings`.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 4: TextAlignment in inline editor** — Добавлен `TextAlignment` биндинг на TextBox inline-редактора.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 5: IsEditable=false guard** — Добавлена проверка `text.IsEditable` в `OnDoubleClick()` и `InlineEditManager.Start()` — defense-in-depth.
+**Файлы:** `SelectTool.cs`, `InlineEditManager.cs`
+
+**Bug 6: Font rendering** — Проверено: TTF-файлы с internal names `#GOST Type AU` / `#GOST Type BU` присутствуют. Конвертер корректен.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
 
 ## Sprint — Архитектурный рефакторинг P2 — ITabOperationsService (21.07.2026)
@@ -1554,5 +1575,6 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 - `Tests/Commands/CommandTests.cs`
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
+

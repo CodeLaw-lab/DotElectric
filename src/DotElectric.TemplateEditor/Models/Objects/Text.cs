@@ -288,7 +288,7 @@ public partial class Text : TemplateObjectBase
 
     public Text(long micronsX, long micronsY, string content, long fontSizeMicrons,
         string fontName = "ГОСТ А", TextType textType = TextType.Text, int rotationAngle = 0,
-        string? key = null, bool isEditable = false, string? defaultValue = null,
+        string? key = null, bool isEditable = true, string? defaultValue = null,
         string? foreground = null, bool textWrapping = false,
         string textAlignment = "Left") : this()
     {

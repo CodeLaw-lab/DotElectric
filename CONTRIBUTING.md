@@ -53,7 +53,7 @@ src/
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
 │   └── Messages/                        # WeakReferenceMessenger сообщения
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2094 tests, 1 pre-existing skip)
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2095 tests, 1 pre-existing skip)
 ```
 
 ### Coding Standards
