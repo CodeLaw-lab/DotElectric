@@ -130,7 +130,7 @@ public class SelectToolTests
     public void OnDoubleClick_OnNonEditableText_DoesNotStartInlineEditing()
     {
         var vm = CreateViewModel();
-        var text = new Text(1000, 1000, "Hello", 3500) { RotationAngle = 0 }; // isEditable: false by default
+        var text = new Text(1000, 1000, "Hello", 3500, isEditable: false) { RotationAngle = 0 };
         vm.Template.Objects.Add(text);
         vm.SelectSingle(text);
 
