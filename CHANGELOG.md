@@ -16,6 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - AGENTS.md: РѕР±РЅРѕРІР»РµРЅС‹ СЃС‡С‘С‚С‡РёРєРё С‚РµСЃС‚РѕРІ (2035) Рё РїРѕРєСЂС‹С‚РёРµ (75.15%)
+- .opencode/agents/tester.md: РґРѕР±Р°РІР»РµРЅС‹ СЂР°Р·РґРµР»С‹ Guard Condition Testing, State Transition Testing, Inline Editor Completeness
+- .opencode/agents/critic.md: РґРѕР±Р°РІР»РµРЅ СЂР°Р·РґРµР» Past Incidents Verification
+- .opencode/agents/reviewer.md: РґРѕР±Р°РІР»РµРЅС‹ 4 РЅРѕРІС‹С… РїСѓРЅРєС‚Р° РІ С‡РµРє-Р»РёСЃС‚ СЂРµРІСЊСЋ
+- .opencode/skills/code-reviewer/SKILL.md: РґРѕР±Р°РІР»РµРЅС‹ 3 РїРѕРґСЃРµРєС†РёРё (Inline Editor Completeness, Guard Conditions, StatusBar Integration)
+- AGENTS.md: РґРѕР±Р°РІР»РµРЅС‹ Common Mistakes #69, #70, #71
 
 ### Fixed
 - CI: Added missing `--configuration Release` to Build step in `opencode-pipeline.yml` — was causing test failures due to Debug/Release mismatch
@@ -34,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 61: Text rotation marker fix — `GetLayoutTransformOffset()` in Text.cs accounts for WPF `LayoutTransform` bounding box offset at non-zero angles
 - Sprint 61: `HitTestHelper.GetTextHandle()` simplified to use `Text.RotatedCorner0-3` directly
 - Sprint 61: Updated TextTests.cs (4 new tests) and HitTestHelperTests.cs (stale rotated text test points)
+- Pipeline: Р°РіРµРЅС‚С‹ tester/critic/reviewer С‚РµРїРµСЂСЊ РїСЂРѕРІРµСЂСЏСЋС‚ guard conditions, inline editor completeness Рё StatusBar РёРЅС‚РµРіСЂР°С†РёСЋ
 
 ### Added
 - Sprint 62: STA-based unit tests for TabItemMiddleClickBehavior (12 tests) — middle-click-close, button filtering, sender validation, event subscription lifecycle
@@ -149,4 +155,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/anomalyco/dotelectric/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/anomalyco/dotelectric/releases/tag/v0.1.0
+
 
