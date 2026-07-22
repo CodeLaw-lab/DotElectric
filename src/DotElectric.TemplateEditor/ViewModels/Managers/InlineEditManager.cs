@@ -46,6 +46,7 @@ public sealed partial class InlineEditManager : ObservableObject
     /// </summary>
     public void Start(Text textObj)
     {
+        if (!textObj.IsEditable) return; // defense-in-depth
         InlineEditingText = textObj;
         InlineEditText = textObj.Content;
         _onStatusChanged?.Invoke("Редактирование текста");

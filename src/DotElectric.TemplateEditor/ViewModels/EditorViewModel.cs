@@ -540,6 +540,24 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         SelectionVersion++;
         OnPropertyChanged(nameof(SelectionVersion));
         PropertiesVm.Refresh();
+
+        if (_selectionManager.SingleSelectedObject is Text text)
+        {
+            var fontSizeMm = Coordinate.ToMm(text.FontSizeMicrons);
+            _statusBarManager.StatusMessage = $"Текст: {text.FontName}, {fontSizeMm:F1}мм";
+        }
+        else if (_selectionManager.SingleSelectedObject is Line)
+        {
+            _statusBarManager.StatusMessage = "Линия";
+        }
+        else if (_selectionManager.SingleSelectedObject is Rectangle)
+        {
+            _statusBarManager.StatusMessage = "Прямоугольник";
+        }
+        else if (_selectionManager.SelectedObjects.Count == 0)
+        {
+            _statusBarManager.StatusMessage = "Готово";
+        }
     }
 
     /// <summary>

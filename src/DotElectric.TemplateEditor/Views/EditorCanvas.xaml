@@ -13,11 +13,7 @@
              d:DesignWidth="800" d:DesignHeight="600"
              Focusable="True">
 
-    <!-- Горячие клавиши (inline editing) -->
-    <UserControl.InputBindings>
-        <KeyBinding Key="Enter" Command="{Binding CommitInlineEditingCommand}"/>
-        <KeyBinding Key="Escape" Command="{Binding CancelInlineEditingCommand}"/>
-    </UserControl.InputBindings>
+
 
     <!-- Контекстное меню Canvas -->
     <UserControl.ContextMenu>
@@ -382,11 +378,12 @@
                       LostFocus="InlineTextEditor_LostFocus"
                       Text="{Binding InlineEditManager.InlineEditText, UpdateSourceTrigger=PropertyChanged}"
                      Visibility="{Binding InlineEditManager.InlineEditingText, Converter={StaticResource NotNullToVisibility}}"
-                     AcceptsReturn="{Binding InlineEditManager.InlineEditingText.TextWrapping}"
+                      AcceptsReturn="True"
                      TextWrapping="{Binding InlineEditManager.InlineEditingText.TextWrapping, Converter={StaticResource BoolToTextWrappingConverter}}"
                      Background="White" BorderBrush="#0078D4" BorderThickness="2"
                      Padding="2" MinWidth="100" MinHeight="24"
-                     FontFamily="{Binding InlineEditManager.InlineEditingText.FontName, Converter={StaticResource FontNameToFamilyConverter}}">
+                      FontFamily="{Binding InlineEditManager.InlineEditingText.FontName, Converter={StaticResource FontNameToFamilyConverter}}"
+                      TextAlignment="{Binding InlineEditManager.InlineEditingText.TextAlignment, Converter={StaticResource StringToTextAlignmentConverter}}">
                 <TextBox.LayoutTransform>
                     <RotateTransform>
                         <RotateTransform.Angle>

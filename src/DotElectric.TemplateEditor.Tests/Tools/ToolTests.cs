@@ -116,7 +116,7 @@ public class SelectToolTests
     public void OnDoubleClick_OnTextObject_StartsInlineEditing()
     {
         var vm = CreateViewModel();
-        var text = new Text(1000, 1000, "Hello", 3500);
+        var text = new Text(1000, 1000, "Hello", 3500, isEditable: true) { RotationAngle = 0 };
         vm.Template.Objects.Add(text);
         vm.SelectSingle(text);
 
@@ -124,6 +124,20 @@ public class SelectToolTests
         tool.OnDoubleClick(new PointMicrons(1000, 1000));
 
         Assert.NotNull(vm.InlineEditManager.InlineEditingText);
+    }
+
+    [Fact]
+    public void OnDoubleClick_OnNonEditableText_DoesNotStartInlineEditing()
+    {
+        var vm = CreateViewModel();
+        var text = new Text(1000, 1000, "Hello", 3500) { RotationAngle = 0 }; // isEditable: false by default
+        vm.Template.Objects.Add(text);
+        vm.SelectSingle(text);
+
+        var tool = new SelectTool(vm);
+        tool.OnDoubleClick(new PointMicrons(1000, 1000));
+
+        Assert.Null(vm.InlineEditManager.InlineEditingText);
     }
 
     [Fact]

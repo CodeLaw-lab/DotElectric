@@ -303,7 +303,7 @@ public sealed class SelectTool : ITool
     {
         // Двойной клик по текстовому объекту — начать inline-редактирование
         var hit = HitTestHelper.HitTest(modelPoint, _context.Template.Objects);
-        if (hit is Text text)
+        if (hit is Text text && text.IsEditable)
         {
             _context.SelectSingle(text);
             _context.StartInlineEditing(text);
