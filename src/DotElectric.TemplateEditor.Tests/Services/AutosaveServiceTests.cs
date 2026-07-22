@@ -8,6 +8,7 @@ using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.Services;
 
+[Collection("AutosaveSharedState")]
 public class AutosaveServiceTests : IDisposable
 {
     private readonly Mock<ITemplateService> _mockTemplateService;
@@ -101,6 +102,13 @@ public class AutosaveServiceTests : IDisposable
     [Fact]
     public void LoadSession_NoSessionFile_ReturnsNull()
     {
+        // Ensure no stale session.json from previous tests
+        var sessionFile = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+            "DotElectric", "autosave", "session.json");
+        if (File.Exists(sessionFile))
+            File.Delete(sessionFile);
+
         var session = _service.LoadSession();
         Assert.Null(session);
     }

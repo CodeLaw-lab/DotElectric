@@ -8,6 +8,7 @@ using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.ViewModels;
 
+[Collection("AutosaveSharedState")]
 public class MainViewModelTests : IDisposable
 {
     private readonly Mock<ITabOperationsService> _mockTabOperations;
