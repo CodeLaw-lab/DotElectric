@@ -231,10 +231,10 @@ public class TextTests : IDisposable
     }
 
     [Fact]
-    public void IsEditable_Default_IsFalse()
+    public void IsEditable_Default_IsTrue()
     {
         var text = new Text(0, 0, "Test", 2500);
-        Assert.False(text.IsEditable);
+        Assert.True(text.IsEditable);
     }
 
     [Fact]

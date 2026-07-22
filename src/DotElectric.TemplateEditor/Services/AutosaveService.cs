@@ -85,7 +85,8 @@ public sealed class AutosaveService : IDisposable
         ISettingsService settingsService,
         ILogger<AutosaveService>? logger = null,
         IDispatcherService? dispatcherService = null,
-        IDateTimeProvider? dateTimeProvider = null)
+        IDateTimeProvider? dateTimeProvider = null,
+        string? autosaveFolder = null)
     {
         _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
@@ -93,7 +94,7 @@ public sealed class AutosaveService : IDisposable
         _dispatcherService = dispatcherService;
         _dateTimeProvider = dateTimeProvider ?? new DateTimeProvider();
 
-        _autosaveFolder = Path.Combine(
+        _autosaveFolder = autosaveFolder ?? Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
             "DotElectric", "autosave");
 

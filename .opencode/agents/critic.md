@@ -49,6 +49,15 @@ steps: 45
 - [ ] Нет `Thread.Sleep`?
 - [ ] Нет flaky тестов?
 
+### Past Incidents Verification (NEW — после PR #24)
+Проверь, что известные баги из предыдущих спринтов/PR НЕ повторяются:
+
+- [ ] **Guard conditions**: все публичные entry points проверяют guard-свойства (IsEditable, IsEnabled, null checks) — не только основной consumer, но и defense-in-depth на уровне Manager/Service
+- [ ] **Inline Editor completeness**: XAML inline-редактора содержит ВСЕ необходимые биндинги (Text, FontFamily, FontSize, AcceptsReturn, TextWrapping, TextAlignment, RotationAngle, Visibility, Canvas.Left/Top, InputBindings, AutoFocus, LostFocus)
+- [ ] **StatusBar not stale**: при смене типа выделения (Text→Line→Rect→null) StatusBar обновляется, не показывая stale информацию предыдущего типа
+- [ ] **Input routing**: нет конфликтов UserControl.InputBindings с ContentControl.InputBindings (особенно Enter/Escape)
+- [ ] **Flaky tests**: тесты, работающие с общей файловой системой или разделяемым состоянием, должны быть в изолированной `[Collection]` с `DisableParallelization = true`
+
 ### Documentation Consistency (CRITICAL gate)
 
 **Перед проверкой кода** — сверь метрики между всеми источниками. Это **блокирующий** раздел, наследует правила из `.opencode/DOCS_MANIFEST.md`.

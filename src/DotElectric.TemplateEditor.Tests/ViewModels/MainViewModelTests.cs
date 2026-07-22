@@ -8,6 +8,7 @@ using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.ViewModels;
 
+[Collection("AutosaveSharedState")]
 public class MainViewModelTests : IDisposable
 {
     private readonly Mock<ITabOperationsService> _mockTabOperations;
@@ -19,6 +20,7 @@ public class MainViewModelTests : IDisposable
     private readonly Mock<IApplicationLifecycle> _mockApplicationLifecycle;
     private readonly Mock<ILogger<MainViewModel>> _mockLogger;
     private readonly Mock<IPrintDocumentGenerator> _mockPrintDocumentGenerator;
+    private readonly string _testAutosaveFolder;
     private readonly AutosaveService _autosaveService;
     private readonly MainViewModel _viewModel;
 
@@ -41,12 +43,16 @@ public class MainViewModelTests : IDisposable
         _mockLogger = new Mock<ILogger<MainViewModel>>();
         _mockPrintDocumentGenerator = new Mock<IPrintDocumentGenerator>();
 
+        _testAutosaveFolder = Path.Combine(Path.GetTempPath(), $"MainViewModelAutosaveTest_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(_testAutosaveFolder);
+
         _autosaveService = new AutosaveService(
             new Mock<ITemplateService>().Object,
             _mockSettingsService.Object,
             logger: null,
             dispatcherService: null,
-            dateTimeProvider: null);
+            dateTimeProvider: null,
+            autosaveFolder: _testAutosaveFolder);
 
         // Setup default TabOperations behavior
         _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
@@ -82,6 +88,8 @@ public class MainViewModelTests : IDisposable
     {
         _viewModel.Dispose();
         _autosaveService.Dispose();
+        if (Directory.Exists(_testAutosaveFolder))
+            Directory.Delete(_testAutosaveFolder, true);
     }
 
     // ===== Constructor =====
@@ -390,18 +398,23 @@ public class MainViewModelTests : IDisposable
         tab.DirtyStateManager.FilePath = "test.tdel";
 
         // Create a second autosave service that won't try to create backups etc.
+        var autosaveFolder = Path.Combine(Path.GetTempPath(), $"MainViewModelAutosaveTest2_{Guid.NewGuid():N}");
+        Directory.CreateDirectory(autosaveFolder);
         var testAutosave = new AutosaveService(
             mockTemplateService.Object,
             _mockSettingsService.Object,
             logger: null,
             dispatcherService: null,
-            dateTimeProvider: null);
+            dateTimeProvider: null,
+            autosaveFolder: autosaveFolder);
 
         var exception = await Record.ExceptionAsync(
             () => testAutosave.AutosaveAllTabsAsync(_viewModel.OpenedTabs, TestContext.Current.CancellationToken));
         Assert.Null(exception);
 
         testAutosave.Dispose();
+        if (Directory.Exists(autosaveFolder))
+            Directory.Delete(autosaveFolder, true);
     }
 
     // ===== ToggleTheme =====

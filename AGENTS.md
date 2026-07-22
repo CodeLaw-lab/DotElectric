@@ -27,7 +27,7 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed, 1 pre-existing skip
+**Tests:** 2095 passed, 1 pre-existing skip
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -45,7 +45,7 @@
 - **Text rotation fix (Sprint 59)** — ContainsPoint() исправлен на inverse WPF RotateTransform (standard CCW matrix). RotatedCorner0-3, GetBoundingBox — reverted к оригинальным (корректным) формулам. HitTestHelper/HitTestText для 90°/270°/45° — все проходят. Осознана и зафиксирована матрица WPF `x'=x*cosθ−y*sinθ`. Архитектурный инсайт: ContainsPoint() был багнут (forward вместо inverse) независимо от путаницы со знаками.
 
 ### Что не вошло / отложено
-- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — STA-тесты (требуют полного визуального дерева)~~ — в ешено в Sprint 62
+- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — STA-тесты (требуют полного визуального дерева)~~ — решено в Sprint 62
 - **Text markers — tech debt:** исправлен поворот (`RotatedCorner0–3`, `GetBoundingBox`, `HitTestHelper`), но остаются недочёты отображения маркеров: `TextSelectionMarkerBehavior` не используется, пустой `<Canvas/>` внутри DataTemplate Text, маркеры в отдельном ItemsControl вместо внутри DataTemplate
 - **Inline text editing — tech debt (вся работа с текстом):**
   - Escape не отменял редактирование — **исправлено** (focus guard в CanvasInputRouter). Остаётся:
@@ -54,10 +54,7 @@
     - Ручная верификация Escape при редактировании не проведена (таски 2.2, 2.3 в fix-escape-inline-editing)
 
 ### Next Steps
-- Этап 2 — Редактор УГО (планирование)
-- FR-021 Drag&Drop из библиотеки
-- FR-022 Preview шаблонов
-- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — integration/UI тесты с STA~~ — С ешено в Sprint 62
+- ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — integration/UI тесты с STA~~ — решено в Sprint 62
 
 ## Build Commands
 
@@ -166,9 +163,9 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs завершены)
 
-- **Tests:** 2094 (0 failures, 1 pre-existing skip)
+- **Tests:** 2095 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
@@ -1394,6 +1391,10 @@ Tests:  1780 passed, 1 skip
 66. `RouteKeyDown` must have the same `IsEditing` guard as `RoutePreviewKeyDown`. Without it, key events during inline editing reach the active tool and can clear selection, switch tools, or delete objects.
 67. `ShortcutRegistry.TryHandle` must check `editor.InlineEditManager.IsEditing` before processing shortcuts. Without the guard, V/L/R/T/E hotkeys during inline editing switch tools or rotate objects instead of being handled by the TextBox.
 68. WPF `LayoutTransform` offset on rotated elements ( WPF positions a `LayoutTransform`-ed element so the **top-left of the transformed bounding box** (not the local origin `(0,0)`) lands at the layout position. For `Text` with `RotateTransform(angle, 0, 0)`, this creates an offset `(-minX, +minY)` where `minX = min(0, W·cosθ, −H·sinθ, W·cosθ−H·sinθ)` and `minY = min(0, W·sinθ, H·cosθ, W·sinθ+H·cosθ)`. Model formulas (`RotatedCorner0-3`, `ContainsPoint`, `GetBoundingBox`) MUST apply this offset to match the visual position. At 0° the offset is (0,0) — no change. `HitTestHelper.GetTextHandle` must use `Text.RotatedCorner0-3` directly (not recompute corners) to stay consistent.
+69. Inline editor TextBox must have ALL properties bound — проверь весь комплект: `Text`, `FontFamily` (конвертер), `FontSize` (`MicronsToPixelConverter + Zoom`), `AcceptsReturn="True"` (безусловно, НЕ привязан к `TextWrapping`!), `TextWrapping` (`BoolToTextWrappingConverter`), `TextAlignment` (`StringToTextAlignmentConverter`), `LayoutTransform` (`RotateTransform` для `RotationAngle`), `Visibility`, `Canvas.Left`/`Canvas.Top` (конвертеры), `AutoFocus` behavior, `LostFocus` → commit, `InputBindings` (`Ctrl+Enter`→commit, `Escape`→cancel на TextBox, НЕ на UserControl).
+70. Guard conditions at ALL public entry points — defense-in-depth: guard-свойство (`IsEditable`, `IsEnabled`, `CanExecute`) проверяется не только на уровне Tool/View (первый consumer), но и на уровне Manager/Service. Один пропущенный entry point = баг. При `guard=false` не должно быть side effects.
+71. InputBindings routing — Enter/Escape для inline editor должны быть на `TextBox.InputBindings`, НЕ на `UserControl.InputBindings`. UserControl.InputBindings перехватывают события ДО TextBox, даже если AcceptsReturn=True. Это вызывает конфликт: Enter (новая строка) не доходит до TextBox.
+
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2035 passed, 1 pre-existing skip
@@ -1526,7 +1527,31 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 - `Tests/Services/TemplateTests.cs` — добавлен regression test
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 75.3% line-rate ✅
+
+## Sprint — Fix Session 2 bugs (22.07.2026)
+
+### 6 исправлений по результатам ручного тестирования Session 2
+**Bug 1: StatusBar info for text selection** — При выделении текста статус-бар показывает "Текст: {FontName}, {FontSizeMm}мм". При выделении линии — "Линия", прямоугольника — "Прямоугольник". При пустом выделении — "Готово".
+**Файлы:** `EditorViewModel.cs`
+
+**Bug 2: Enter in MultiLine** — `AcceptsReturn="True"` теперь безусловно (было привязано к TextWrapping). Enter всегда создаёт новую строку, Ctrl+Enter — commit.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 3: Ctrl+Enter/Escape routing** — Удалены конфликтующие `UserControl.InputBindings` для Enter/Escape. Всё обрабатывается через `TextBox.InputBindings`.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 4: TextAlignment in inline editor** — Добавлен `TextAlignment` биндинг на TextBox inline-редактора.
+**Файлы:** `EditorCanvas.xaml`
+
+**Bug 5: IsEditable=false guard** — Добавлена проверка `text.IsEditable` в `OnDoubleClick()` и `InlineEditManager.Start()` — defense-in-depth.
+**Файлы:** `SelectTool.cs`, `InlineEditManager.cs`
+
+**Bug 6: Font rendering** — Проверено: TTF-файлы с internal names `#GOST Type AU` / `#GOST Type BU` присутствуют. Конвертер корректен.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
 
 ## Sprint — Архитектурный рефакторинг P2 — ITabOperationsService (21.07.2026)
@@ -1550,5 +1575,6 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 - `Tests/Commands/CommandTests.cs`
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2094 passed (0 failures, 1 pre-existing skip)
+**Tests:** 2095 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
+

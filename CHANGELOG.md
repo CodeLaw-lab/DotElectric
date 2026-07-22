@@ -9,28 +9,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Sprint 63: Regression test `Clone_CopiesAllPublicProperties_ExceptId` for `Template.Clone()` — reflection-based check against future property drift
-- Pipeline: СѓРІРµР»РёС‡РµРЅРёРµ РїРѕРєСЂС‹С‚РёСЏ С‚РµСЃС‚Р°РјРё РґРѕ 75.15% (Р±С‹Р»Рѕ ~59-67%)
-- ~195 РЅРѕРІС‹С… С‚РµСЃС‚РѕРІ: Commands null guards, Tools Reset(), Grid edge cases, Services, Models, MainViewModel, FontMetrics, TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogViewModel, ShortcutRegistry
-- Template.Clone() вЂ” deep copy СЃ Metadata, Sheet Рё Objects
-- PointMicrons operator+ Рё operator- (РєРѕРјРїРѕРЅРµРЅС‚РЅРѕРµ СЃР»РѕР¶РµРЅРёРµ/РІС‹С‡РёС‚Р°РЅРёРµ)
+- Pipeline: увеличение покрытия тестами до 75.15% (было ~59-67%)
+- ~195 новых тестов: Commands null guards, Tools Reset(), Grid edge cases, Services, Models, MainViewModel, FontMetrics, TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogViewModel, ShortcutRegistry
+- Template.Clone() вЂ” deep copy с Metadata, Sheet и Objects
+- PointMicrons operator+ и operator- (компонентное сложение/вычитание)
 
 ### Changed
-- AGENTS.md: РѕР±РЅРѕРІР»РµРЅС‹ СЃС‡С‘С‚С‡РёРєРё С‚РµСЃС‚РѕРІ (2035) Рё РїРѕРєСЂС‹С‚РёРµ (75.15%)
+- AGENTS.md: обновлены счС‘тчики тестов (2035) и покрытие (75.15%)
 
 ### Fixed
 - CI: Added missing `--configuration Release` to Build step in `opencode-pipeline.yml` — was causing test failures due to Debug/Release mismatch
-- README.md: РїРѕРІС‚РѕСЂРЅРѕРµ РёСЃРїСЂР°РІР»РµРЅРёРµ РєРѕРґРёСЂРѕРІРєРё (UTF-8 double-encoding / mojibake)
-- README.md: РёСЃРїСЂР°РІР»РµРЅР° РєРѕРґРёСЂРѕРІРєР° (UTF-8 double-encoding / mojibake) вЂ” РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅС‹ СЂСѓСЃСЃРєРёР№ С‚РµРєСЃС‚ Рё СЌРјРѕРґР·Рё
+- README.md: повторное исправление кодировки (UTF-8 double-encoding / mojibake)
+- README.md: исправлена кодировка (UTF-8 double-encoding / mojibake) вЂ” восстановлены русский текст и эмодзи
 - H1: `AutosaveService` event `Action?` в†’ `Func<Task>?` + `InvokeAsync` in `IDispatcherService` (eliminates async-void in `MainViewModel`)
 - H2: `IValidationService` interface added; `TemplateValidator` uses injectable `IValidationService` instead of static `ValidationService.ValidateHexColor()`
 - H3: `DialogServiceFactory` dead code removed from `IDialogService.cs`
 - H4: `PrintVisualProvider` nulled in `EditorViewModel.Dispose()` (dangling reference cleanup)
-- H5: No-op `РЎРІРѕР№СЃС‚РІР° (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
-- TemplateTests.cs: РёСЃРїСЂР°РІР»РµРЅ СЃРёРЅС‚Р°РєСЃРёСЃ (Р»РёС€РЅСЏСЏ Р·Р°РєСЂС‹РІР°СЋС‰Р°СЏ СЃРєРѕР±РєР°)
-- Documentation: РёСЃРїСЂР°РІР»РµРЅС‹ 27 РѕС€РёР±РѕРє РІ 9 md-С„Р°Р№Р»Р°С… вЂ” Р±РёС‚С‹Рµ СЃСЃС‹Р»РєРё РЅР° archive, EditorConstants в†’ PhysicalConstants/EditorSettings, СѓСЃС‚Р°СЂРµРІС€РёРµ РјРµС‚СЂРёРєРё, XAML-Р±РёРЅРґРёРЅРіРё РІ docs/09, placeholder URL, С„Р°РєС‚РёС‡РµСЃРєРёРµ РѕС€РёР±РєРё РІ README, docs/19 РґРёРЅР°РјРёРєР° РїРѕРєСЂС‹С‚РёСЏ
+- H5: No-op `Свойства (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
+- TemplateTests.cs: исправлен синтаксис (лишняя закрывающая скобка)
+- Documentation: исправлены 27 ошибок в 9 md-файлах вЂ” битые ссылки на archive, EditorConstants в†’ PhysicalConstants/EditorSettings, устаревшие метрики, XAML-биндинги в docs/09, placeholder URL, фактические ошибки в README, docs/19 динамика покрытия
 - Sprint 60: Inline text editing — AutoFocusOnVisibleBehavior, CanvasInputRouter guards (Escape/Enter during edit), ShortcutRegistry guard (V/L/R/T/E blocked during edit)
 - Sprint 60: `RouteKeyDown` guard for `IsEditing` (matching existing `RoutePreviewKeyDown` guard)
 - Sprint 60: LostFocus → Commit for inline text editor
+- Sprint "Fix Session 2 bugs": StatusBar info for text selection — shows font name and size
+- Sprint "Fix Session 2 bugs": MultiLine — `AcceptsReturn="True"` unconditional (always Enter=newline)
+- Sprint "Fix Session 2 bugs": Ctrl+Enter/Escape routing — conflicting UserControl.InputBindings removed, routing via TextBox.InputBindings
+- Sprint "Fix Session 2 bugs": TextAlignment binding in inline editor TextBox
+- Sprint "Fix Session 2 bugs": IsEditable=false guard in `OnDoubleClick()` and `InlineEditManager.Start()` (defense-in-depth)
 - Sprint 61: Text rotation marker fix — `GetLayoutTransformOffset()` in Text.cs accounts for WPF `LayoutTransform` bounding box offset at non-zero angles
 - Sprint 61: `HitTestHelper.GetTextHandle()` simplified to use `Text.RotatedCorner0-3` directly
 - Sprint 61: Updated TextTests.cs (4 new tests) and HitTestHelperTests.cs (stale rotated text test points)
@@ -38,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Sprint 62: STA-based unit tests for TabItemMiddleClickBehavior (12 tests) — middle-click-close, button filtering, sender validation, event subscription lifecycle
 - Sprint 62: STA-based unit tests for PreviewLineChangedBehavior (11 tests) — register/unregister, update preview shapes, null preview handling, PropertyChanged flow
-- CI workflow: GitHub Actions (build, test, coverage gate 75%) РЅР° `windows-latest`
+- CI workflow: GitHub Actions (build, test, coverage gate 75%) на `windows-latest`
 - Sprint STA: `WpfContext` helper вЂ” STA-thread dispatcher for WPF unit tests
 - Sprint STA: `TextBoxLostFocusCommandBehaviorTests` вЂ” 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)
 - Sprint STA: `ComboBoxSelectionChangedCommandBehaviorTests` вЂ” 10 tests (DP get/set, OnSelectionChanged via STA)
@@ -93,7 +98,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 28: Split `CommonConverters.cs` into 16 individual converter files
 - Sprint 28: Renamed `ITemplateObject` в†’ `TemplateObjectBase` across 50+ files
 - Sprint 27: `EditorViewModel` reduced from ~1037 to ~700 lines (-32%)
-- Documentation: XAML-Р±РёРЅРґРёРЅРіРё РІ docs/09_UI_СЂРµС€РµРЅРёСЏ.md РѕР±РЅРѕРІР»РµРЅС‹ РґРѕ manager-СЃРІРѕР№СЃС‚РІ (РїРѕСЃР»Рµ R3.1/A.2)
+- Documentation: XAML-биндинги в docs/09_UI_решения.md обновлены до manager-свойств (после R3.1/A.2)
 
 ### Fixed
 - Sprint 41: Drag delta accumulation (was `obj.MicronsX + delta`, now `initialPos + delta`)
@@ -118,7 +123,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint "Архитектурный рефакторинг P2": `EditorViewModelFactory` marked `sealed`
 
 ### Metrics
-- **Tests:** 2094 (0 failures, 1 pre-existing skip)
+- **Tests:** 2095 (0 failures, 1 pre-existing skip)
 - **Coverage:** 75.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
