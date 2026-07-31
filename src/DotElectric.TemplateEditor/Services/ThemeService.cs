@@ -26,6 +26,9 @@ public sealed class ThemeService : IThemeService
 
     public string CurrentTheme { get; private set; }
 
+    /// <inheritdoc/>
+    public event Action<string>? ThemeChanged;
+
     public void SetTheme(string theme)
     {
         if (string.IsNullOrEmpty(theme))
@@ -42,6 +45,8 @@ public sealed class ThemeService : IThemeService
 
             CurrentTheme = theme;
             _settingsService.Set("Theme", theme);
+
+            ThemeChanged?.Invoke(theme);
 
             _logger?.LogDebug("Тема изменена на: {Theme}", theme);
         }

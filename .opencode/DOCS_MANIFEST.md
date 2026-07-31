@@ -24,7 +24,7 @@
 | 12 | `docs/48_Архитектурный_анализ_и_план_рефакторинга.md` | arch | 25 замечаний, file:line, метрики | 2026-07-20 |
 | 13 | `docs/49_План_рефакторинга_R1-R4.md` | arch | 30 задач, file:line, XAML-маппинги | 2026-07-20 |
 | 14 | `docs/План_ручного_тестирования.md` | test | Manual test scenarios, FR-XXX | 2026-07-20 |
-| 15 | `docs/1.md` | orphan | ⚠️ Не зарегистрирован в 00_Индекс — orphan file (1.3 KB) | ⚠️ unverified |
+| 15 | `docs/plan_next_steps.md` | roadmap | Следующие шаги, backlog, follow-ups; scope: test_count, coverage | 2026-08-01 |
 
 **Исключения** (не требуют консистентности):
 - `docs/archive/` — исторические материалы, заморожены
@@ -225,3 +225,4 @@ PASS | FAIL
 | Date | Change | Reason |
 |------|--------|--------|
 | 2026-07-20 | Initial creation (15 files, 6 metrics, 8 rules) | Phase 5 docs consistency fix |
+| 2026-08-01 | Removed `docs/1.md` (orphan deleted), registered `docs/plan_next_steps.md` | Docs hygiene |

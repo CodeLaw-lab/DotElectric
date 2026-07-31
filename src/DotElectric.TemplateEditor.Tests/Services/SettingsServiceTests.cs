@@ -333,6 +333,70 @@ public class SettingsServiceTests : IDisposable
         Assert.Same(first, second);
     }
 
+    // === Round-trip новых полей сетки (GridMaxNodes / GridNodeColor / GridNodeSize) ===
+
+    [Fact]
+    public void Load_FirstTime_GridNodeDefaults()
+    {
+        // Arrange
+        var service = CreateService();
+
+        // Act
+        var settings = service.Load();
+
+        // Assert
+        Assert.Equal(250000, settings.GridMaxNodes);
+        Assert.Null(settings.GridNodeColor);
+        Assert.Equal(2.0, settings.GridNodeSize);
+    }
+
+    [Fact]
+    public void SetGet_GridNodeSettings_RoundTripThroughFile()
+    {
+        // Arrange
+        var writer = CreateService();
+        writer.Set("GridMaxNodes", 100000);
+        writer.Set("GridNodeColor", "#FF8800");
+        writer.Set("GridNodeSize", 3.5);
+
+        // Act — новый инстанс на том же файле: чтение идёт из JSON, а не из кэша
+        var reader = new SettingsService(settingsFilePath: _testSettingsFile);
+        var loaded = reader.Load();
+
+        // Assert — AppSettings десериализован корректно
+        Assert.Equal(100000, loaded.GridMaxNodes);
+        Assert.Equal("#FF8800", loaded.GridNodeColor);
+        Assert.Equal(3.5, loaded.GridNodeSize);
+
+        // Assert — Get<T> по ключам возвращает те же значения
+        Assert.Equal(100000, reader.Get("GridMaxNodes", 0));
+        Assert.Equal("#FF8800", reader.Get("GridNodeColor", "fallback"));
+        Assert.Equal(3.5, reader.Get("GridNodeSize", 0.0));
+
+        // Assert — ключи реально сериализованы в JSON-файл
+        var json = File.ReadAllText(_testSettingsFile);
+        Assert.Contains("GridMaxNodes", json);
+        Assert.Contains("GridNodeColor", json);
+        Assert.Contains("GridNodeSize", json);
+    }
+
+    [Fact]
+    public void SetGet_GridNodeColor_Null_RoundTripThroughFile()
+    {
+        // Arrange — сначала явный цвет, затем сброс в null (null = авто по теме)
+        var writer = CreateService();
+        writer.Set("GridNodeColor", "#FF0000");
+        writer.Set<string?>("GridNodeColor", null);
+
+        // Act — новый инстанс: десериализация из JSON
+        var reader = new SettingsService(settingsFilePath: _testSettingsFile);
+        var loaded = reader.Load();
+
+        // Assert
+        Assert.Null(loaded.GridNodeColor);
+        Assert.Null(reader.Get<string?>("GridNodeColor", null));
+    }
+
     [Fact]
     public void Save_ThenLoad_ReturnsSameValues()
     {

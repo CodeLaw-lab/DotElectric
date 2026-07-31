@@ -66,7 +66,7 @@ public partial class EditorCanvas : UserControl
             // Dispatcher.InvokeAsync не нужен — вызываем InvalidateVisual напрямую.
             newVm.GridManager.GridInvalidated = () =>
             {
-                GridNodesLayer.SetNodes(newVm.GridManager.RawNodeData, newVm.GridManager.RawNodeCount);
+                GridNodesLayer.SetNodes(newVm.GridManager.Nodes);
             };
 
             RefreshGridNodesLayer();
@@ -100,7 +100,7 @@ public partial class EditorCanvas : UserControl
     {
         if (DataContext is EditorViewModel vm)
         {
-            GridNodesLayer.SetNodes(vm.GridManager.RawNodeData, vm.GridManager.RawNodeCount);
+            GridNodesLayer.SetNodes(vm.GridManager.Nodes);
             GridNodesLayer.InvalidateVisual();
         }
     }

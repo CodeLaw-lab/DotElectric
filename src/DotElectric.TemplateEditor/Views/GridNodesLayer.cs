@@ -1,83 +1,119 @@
 using System.Windows;
 using System.Windows.Media;
+using DotElectric.TemplateEditor.Helpers;
 
 namespace DotElectric.TemplateEditor.Views;
 
 /// <summary>
 /// Слой отрисовки узлов сетки через DrawingContext.
-/// Хранит координаты в микронах (model space), преобразует в пиксели в OnRender.
+/// Узлы хранятся в абсолютных координатах листа (микроны) и НЕ регенерируются при пане —
+/// RenderTransform (TranslateTransform) двигает их синхронно с DrawingCanvas.
 /// </summary>
-public class GridNodesLayer : FrameworkElement
+public sealed class GridNodesLayer : FrameworkElement
 {
-    private readonly Brush _nodeBrush;
-    private long[] _nodeData = [];
-    private int _nodeCount;
-
     public static readonly DependencyProperty ZoomProperty =
-        DependencyProperty.Register(
-            nameof(Zoom), typeof(double), typeof(GridNodesLayer),
-            new PropertyMetadata(1.0, OnTransformChanged));
+        DependencyProperty.Register(nameof(Zoom), typeof(double), typeof(GridNodesLayer),
+            new PropertyMetadata(1.0, OnRenderPropertyChanged));
 
     public static readonly DependencyProperty SheetHeightMmProperty =
-        DependencyProperty.Register(
-            nameof(SheetHeightMm), typeof(double), typeof(GridNodesLayer),
-            new PropertyMetadata(0.0, OnTransformChanged));
+        DependencyProperty.Register(nameof(SheetHeightMm), typeof(double), typeof(GridNodesLayer),
+            new PropertyMetadata(0.0, OnRenderPropertyChanged));
 
-    public double Zoom
+    public static readonly DependencyProperty NodeColorProperty =
+        DependencyProperty.Register(nameof(NodeColor), typeof(Brush), typeof(GridNodesLayer),
+            new PropertyMetadata(null, OnRenderPropertyChanged));
+
+    public static readonly DependencyProperty NodeSizeProperty =
+        DependencyProperty.Register(nameof(NodeSize), typeof(double), typeof(GridNodesLayer),
+            new PropertyMetadata(2.0, OnRenderPropertyChanged));
+
+    public static readonly DependencyProperty IsDarkThemeProperty =
+        DependencyProperty.Register(nameof(IsDarkTheme), typeof(bool), typeof(GridNodesLayer),
+            new PropertyMetadata(false, OnIsDarkThemeChanged));
+
+    public double Zoom { get => (double)GetValue(ZoomProperty); set => SetValue(ZoomProperty, value); }
+    public double SheetHeightMm { get => (double)GetValue(SheetHeightMmProperty); set => SetValue(SheetHeightMmProperty, value); }
+
+    /// <summary>
+    /// Цвет узлов. null = авто (тема): Light → #C0C0C0, Dark → #808080.
+    /// </summary>
+    public Brush? NodeColor { get => (Brush?)GetValue(NodeColorProperty); set => SetValue(NodeColorProperty, value); }
+
+    /// <summary>
+    /// Диаметр узла в пикселях.
+    /// </summary>
+    public double NodeSize { get => (double)GetValue(NodeSizeProperty); set => SetValue(NodeSizeProperty, value); }
+
+    /// <summary>
+    /// Тёмная тема активна — переключает темо-зависимый цвет узлов по умолчанию.
+    /// </summary>
+    public bool IsDarkTheme { get => (bool)GetValue(IsDarkThemeProperty); set => SetValue(IsDarkThemeProperty, value); }
+
+    private IReadOnlyList<GridNode> _nodes = [];
+    private Brush _themeBrush;
+
+    public GridNodesLayer()
     {
-        get => (double)GetValue(ZoomProperty);
-        set => SetValue(ZoomProperty, value);
+        _themeBrush = CreateThemeBrush(isDark: false);
+        IsHitTestVisible = false;
     }
 
-    public double SheetHeightMm
+    private static Brush CreateThemeBrush(bool isDark)
     {
-        get => (double)GetValue(SheetHeightMmProperty);
-        set => SetValue(SheetHeightMmProperty, value);
+        var brush = new SolidColorBrush(isDark ? Color.FromRgb(128, 128, 128) : Color.FromRgb(192, 192, 192));
+        brush.Freeze();
+        return brush;
     }
 
-    private static void OnTransformChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+    /// <summary>
+    /// Обновляет темо-зависимый цвет по умолчанию (когда NodeColor == null).
+    /// </summary>
+    public void UpdateThemeBrush(bool isDark)
+    {
+        _themeBrush = CreateThemeBrush(isDark);
+        InvalidateVisual();
+    }
+
+    private static void OnRenderPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
         if (d is GridNodesLayer layer)
             layer.InvalidateVisual();
     }
 
-    public GridNodesLayer()
+    private static void OnIsDarkThemeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
     {
-        var brush = new SolidColorBrush(Color.FromRgb(192, 192, 192));
-        brush.Freeze();
-        _nodeBrush = brush;
-
-        IsHitTestVisible = false;
+        if (d is GridNodesLayer layer)
+            layer.UpdateThemeBrush((bool)e.NewValue);
     }
 
     /// <summary>
-    /// Updates node data from a flat long[] buffer with alternating X,Y micron coordinates.
-    /// The caller must not modify the array after passing it here.
+    /// Устанавливает узлы сетки (абсолютные координаты листа в микронах).
     /// </summary>
-    public void SetNodes(long[] data, int count)
+    public void SetNodes(IReadOnlyList<GridNode>? nodes)
     {
-        _nodeData = data;
-        _nodeCount = count;
+        _nodes = nodes ?? [];
         InvalidateVisual();
     }
 
     protected override void OnRender(DrawingContext dc)
     {
-        if (_nodeCount <= 0)
+        if (_nodes.Count <= 0)
             return;
 
         var zoom = Zoom;
         if (zoom <= 0)
             return;
 
+        var brush = NodeColor ?? _themeBrush;
+        var radius = Math.Max(0.5, NodeSize / 2.0);
         var invMicronsPerMm = 1.0 / 1000.0;
         var heightMm = SheetHeightMm;
 
-        for (int i = 0; i < _nodeCount; i++)
+        foreach (var node in _nodes)
         {
-            var xPx = _nodeData[i * 2] * invMicronsPerMm * zoom;
-            var yPx = (heightMm - _nodeData[i * 2 + 1] * invMicronsPerMm) * zoom;
-            dc.DrawEllipse(_nodeBrush, null, new Point(xPx, yPx), 1.0, 1.0);
+            var xPx = node.XMicrons * invMicronsPerMm * zoom;
+            var yPx = (heightMm - node.YMicrons * invMicronsPerMm) * zoom;
+            dc.DrawEllipse(brush, null, new Point(xPx, yPx), radius, radius);
         }
     }
 }

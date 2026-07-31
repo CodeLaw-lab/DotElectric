@@ -32,6 +32,21 @@ public sealed class AppSettings
     public double GridStepMm { get; set; } = 5.0;
 
     /// <summary>
+    /// Максимальное количество узлов сетки (бюджет).
+    /// </summary>
+    public int GridMaxNodes { get; set; } = 250000;
+
+    /// <summary>
+    /// Цвет узлов сетки (HEX). null = авто (по теме).
+    /// </summary>
+    public string? GridNodeColor { get; set; } = null;
+
+    /// <summary>
+    /// Размер узлов сетки в пикселях.
+    /// </summary>
+    public double GridNodeSize { get; set; } = 2.0;
+
+    /// <summary>
     /// Масштаб по умолчанию (1.0 = 100%).
     /// </summary>
     public double DefaultZoom { get; set; } = 1.0;

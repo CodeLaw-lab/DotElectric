@@ -13,7 +13,7 @@ public static class EditorSettings
     // Grid
     public const long DefaultGridStepMicrons = 5000;
     public const int MaxGridNodes = 250000;
-    public const double MinPixelSpacing = 0.5;
+    public const double MinPixelSpacing = 5.0;
 
     // Nudge
     public const long NudgeStepMicrons = 1000;

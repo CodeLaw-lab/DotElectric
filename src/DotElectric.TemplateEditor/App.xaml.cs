@@ -2,6 +2,7 @@
 using System.IO;
 using System.Windows;
 using System.Windows.Threading;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tools;
@@ -84,6 +85,7 @@ public partial class App : Application
                     services.AddSingleton<IDialogHostService, WpfDialogHostService>();
                     services.AddSingleton<IApplicationLifecycle, WpfApplicationLifecycle>();
                     services.AddSingleton<IFontMetrics>(FontMetrics.Default);
+                    services.AddSingleton<IGridNodeGenerator, GridNodeGenerator>();
                     services.AddSingleton<IEditorViewModelFactory, EditorViewModelFactory>();
                     services.AddSingleton<ITabOperationsService, TabOperationsService>();
 

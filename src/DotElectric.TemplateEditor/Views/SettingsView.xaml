@@ -2,14 +2,16 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:DotElectric.TemplateEditor.Converters"
         Title="{Binding Title}"
-        Width="420" Height="440"
+        Width="420" Height="560"
         ResizeMode="NoResize"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource WindowBackgroundBrush}"
         TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
 
     <Window.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="FontSize" Value="11"/>
@@ -78,6 +80,43 @@
                     <TextBox Grid.Column="1" Text="{Binding GridStepMm, UpdateSourceTrigger=PropertyChanged}"
                              Padding="4,2" VerticalContentAlignment="Center"/>
                     <TextBlock Grid.Column="2" Text="мм" VerticalAlignment="Center" Margin="4,0,0,0"
+                               Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Макс. узлов:" Style="{StaticResource FieldLabelStyle}"/>
+                    <TextBox Grid.Column="1" Text="{Binding GridMaxNodes, UpdateSourceTrigger=PropertyChanged}"
+                             Width="100" HorizontalAlignment="Left"
+                             Padding="4,2" VerticalContentAlignment="Center"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Цвет узлов:" Style="{StaticResource FieldLabelStyle}"/>
+                    <CheckBox Grid.Column="1" Content="Авто (по теме)" IsChecked="{Binding GridNodeColorAuto}"
+                              VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Grid.Column="2" Text="{Binding GridNodeColor, UpdateSourceTrigger=PropertyChanged}"
+                             Width="80" HorizontalAlignment="Left"
+                             Padding="4,2" VerticalContentAlignment="Center"
+                             IsEnabled="{Binding GridNodeColorAuto, Converter={StaticResource InverseBooleanConverter}}"/>
+                </Grid>
+                <Grid Margin="0,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="140"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="Размер узлов (px):" Style="{StaticResource FieldLabelStyle}"/>
+                    <Slider Grid.Column="1" Minimum="1" Maximum="6" Value="{Binding GridNodeSize}"
+                            Width="120" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <TextBlock Grid.Column="2" Text="{Binding GridNodeSize, StringFormat=F1}"
+                               VerticalAlignment="Center" Margin="8,0,0,0" MinWidth="24"
                                Foreground="{DynamicResource TextSecondaryBrush}"/>
                 </Grid>
 

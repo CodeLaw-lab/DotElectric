@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 
@@ -12,10 +13,10 @@ public interface IEditorViewModelFactory
     /// <summary>
     /// Creates an EditorViewModel for a new template (no file path).
     /// </summary>
-    EditorViewModel Create(Template template, GridSettings? gridSettings = null, IPrintService? printService = null);
+    EditorViewModel Create(Template template, GridSettings? gridSettings = null, IPrintService? printService = null, IGridNodeGenerator? gridNodeGenerator = null, IThemeService? themeService = null);
 
     /// <summary>
     /// Creates an EditorViewModel for a template loaded from a file.
     /// </summary>
-    EditorViewModel CreateWithFilePath(Template template, string filePath, GridSettings? gridSettings = null, IPrintService? printService = null);
+    EditorViewModel CreateWithFilePath(Template template, string filePath, GridSettings? gridSettings = null, IPrintService? printService = null, IGridNodeGenerator? gridNodeGenerator = null, IThemeService? themeService = null);
 }
