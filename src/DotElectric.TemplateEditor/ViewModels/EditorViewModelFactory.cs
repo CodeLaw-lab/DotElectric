@@ -10,12 +10,14 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
     private readonly IServiceProvider _serviceProvider;
     private readonly IGridNodeGenerator? _gridNodeGenerator;
     private readonly IThemeService? _themeService;
+    private readonly ISettingsService? _settingsService;
 
-    public EditorViewModelFactory(IServiceProvider serviceProvider, IGridNodeGenerator? gridNodeGenerator = null, IThemeService? themeService = null)
+    public EditorViewModelFactory(IServiceProvider serviceProvider, IGridNodeGenerator? gridNodeGenerator = null, IThemeService? themeService = null, ISettingsService? settingsService = null)
     {
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
         _gridNodeGenerator = gridNodeGenerator;
         _themeService = themeService;
+        _settingsService = settingsService;
     }
 
     public EditorViewModel Create(
@@ -37,7 +39,7 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
         return new EditorViewModel(
             template,
             templateService,
-            gridSettings,
+            ResolveGridSettings(gridSettings),
             resolvedPrintService,
             resolvedGridNodeGenerator,
             resolvedThemeService);
@@ -65,9 +67,21 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
             template,
             filePath,
             templateService,
-            gridSettings,
+            ResolveGridSettings(gridSettings),
             resolvedPrintService,
             resolvedGridNodeGenerator,
             resolvedThemeService);
+    }
+
+    private GridSettings ResolveGridSettings(GridSettings? gridSettings)
+    {
+        if (gridSettings != null) return gridSettings;
+        if (_settingsService != null)
+        {
+            var app = _settingsService.Load();
+            if (app != null)
+                return GridSettings.FromAppSettings(app);
+        }
+        return GridSettings.FromDefaultGrid();
     }
 }
