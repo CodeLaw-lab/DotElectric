@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Архитектурный рефакторинг P2 завершён.** Создан `ITabOperationsService` — фасад для операций с вкладками (NewTab, OpenFile, Save, SaveAs), сокративший конструктор `MainViewModel` с 13 до 10 зависимостей. Интерфейс размещён в `ViewModels.Abstractions` во избежание циклических зависимостей. Переименованы 14 тестов команд для единообразия (`MoveObjectCommand_*` → `ChangePropertyCommand_Move_*`).
+**Grid Refactoring завершён.** Статический `GridHelper` полностью заменён на `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton). Узлы сетки генерируются в **абсолютных координатах листа** (0,0 = нижний левый угол) для всей площади листа — панорамирование не вызывает регенерацию (RenderTransform двигает сетку бесплатно). Defense-in-depth coarsen: сетка никогда не исчезает молча из-за бюджета `MaxGridNodes`. `Template` переведён на `ObservableObject` (INPC на `Sheet` → регенерация сетки при смене формата). Добавлены настройки сетки `MaxGridNodes`/`NodeColor`/`NodeSize` + 3 поля в Settings UI. Темо-зависимый цвет узлов (Light #C0C0C0 / Dark #808080) через `IThemeService.ThemeChanged`. Ранее: архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -25,9 +25,11 @@
 | **Sealed classes** | **0** | **66 классов (Converters, Services, Tools, Managers, Commands)** |
 | **Shortcut dispatch** | **code-behind 30 строк** | **ShortcutRegistry.TryHandle()** |
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
+| **GridHelper** | **static class** | **IGridNodeGenerator/GridNodeGenerator (DI Singleton)** |
+| **Grid nodes** | **viewport-координаты + регенерация на pan** | **абсолютные координаты листа, pan = RenderTransform** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2095 passed, 1 pre-existing skip
+**Tests:** 2140 total (2139 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -163,24 +165,25 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring завершены)
 
-- **Tests:** 2095 (0 failures, 1 pre-existing skip)
-- **Coverage:** 75.3% line-rate ✅
+- **Tests:** 2140 (2139 passed, 1 pre-existing skip)
+- **Coverage:** 76.3% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
 - **Managers:** ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState
 - **Tools:** ITool + IEditorContext + ResizeMath (чистые функции) + ShortcutRegistry
-- **Converters:** 27 файлов (все sealed)
+- **Converters:** 29 файлов (все sealed; +GridNodeColorConverter, +InverseBooleanConverter)
 - **Naming:** `TemplateObjectBase` (не `ITemplateObject`)
 - **Commands:** `IUndoCommand` + `CustomResizeCommand` (полиморфный ApplyResize)
-- **Model INPC:** `[ObservableProperty]` sourcegen на Line, Rectangle, Text
+- **Model INPC:** `[ObservableProperty]` sourcegen на Line, Rectangle, Text; `Template` → ObservableObject (INPC на `Sheet`)
 - **Constants:** `PhysicalConstants` + `EditorSettings` (вместо `EditorConstants.cs`-прокладки)
 - **Validation:** `ITemplateValidator`/`TemplateValidator` (domain) + `ValidationService` (UI)
 - **EditorCanvasBehavior:** 78 строк (AttachedProperty + stubs), 3 файла: State, Transform, Router
 - **FontMetrics:** `IFontMetrics` + `FontMetrics.Default` static Singleton (DI-registered)
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
+- **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`
 
 ## Sprint — Coverage Improvement (19.07.2026)
 
@@ -1577,4 +1580,53 @@ Conductor (primary) → делегирует subagent'ам через Task tool
 **Build:** 0 errors, 0 warnings
 **Tests:** 2095 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 75.3% line-rate ✅
+
+## Sprint — Grid Refactoring (22.07.2026)
+
+### Feature GR-1: GridHelper → IGridNodeGenerator (DI Singleton)
+**Проблема:** `GridHelper` — статический класс с логикой `ComputeDisplayStep`/`GenerateGridNodes`. Нетестируем через DI, viewport-математика (`ViewportMargin = 1.5`) вызывала регенерацию узлов при каждом панорамировании.
+**Решение:** Создан `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton). `GridNode` вынесен в top-level struct `Helpers/GridNode.cs`. `GridHelper.cs` и `GridHelperTests.cs` удалены (−21 viewport-тест, устарели). Создан `GridNodeGeneratorTests.cs` (+36 тестов).
+
+### Feature GR-2: Абсолютная генерация узлов
+**Проблема:** Узлы генерировались в viewport-координатах — каждый pan вызывал регенерацию + требовал `ViewportMargin = 1.5` для покрытия краёв. `_nodeBuffer` (shared mutable) и `RawNodeData`/`RawNodeCount` — небезопасное переиспользование буфера.
+**Решение:** Узлы генерируются для всей площади листа в **абсолютных координатах** (0,0 = нижний левый угол). Панорамирование НЕ вызывает регенерацию — `RenderTransform` двигает сетку бесплатно (GPU). Удалены `ViewportMargin`, `_nodeBuffer`, `RawNodeData`/`RawNodeCount`. `GridManager.Nodes` — `IReadOnlyList<GridNode>`, каждый refresh аллоцирует новый список (нет shared mutable state).
+
+### Feature GR-3: Defense-in-depth coarsen
+**Проблема:** При превышении бюджета `MaxGridNodes` (A3+ с мелким шагом) сетка молча исчезала — `GenerateGridNodes` возвращал пустой список.
+**Решение:** Двухуровневая защита: (1) `ComputeDisplayStep` уважает пользовательский шаг если он укладывается в бюджет и pixel-spacing; (2) генератор удваивает шаг (coarsen) пока не влезет в `MaxGridNodes` — никогда не возвращает пустой список из-за бюджета. Сетка не исчезает молча.
+
+### Feature GR-4: Template → ObservableObject + GridManager IDisposable
+**Проблема:** При смене формата листа (`Template.Sheet`) сетка не регенерировалась — `Template` не имел INPC.
+**Решение:** `Template` переведён на `ObservableObject` (INPC на `Sheet`). `GridManager` подписывается на `Template.PropertyChanged` → регенерация при смене формата. `GridManager` реализует `IDisposable` (отписка).
+
+### Feature GR-5: Настройки сетки (GridSettings + AppSettings + Settings UI)
+**Решение:** Добавлены 3 новых поля:
+- `MaxGridNodes` (int, default 250000) — бюджет узлов
+- `NodeColor` (string?, null = авто по теме) — цвет узлов
+- `NodeSize` (double, default 2.0) — размер узлов в px
+SettingsView: 3 новых поля в секции СЕТКА (Макс. узлов TextBox, Цвет узлов с чекбоксом «Авто (по теме)», Размер узлов Slider 1-6).
+
+### Feature GR-6: Темо-зависимый цвет узлов
+**Решение:** `IThemeService.ThemeChanged` — новое событие. `EditorViewModel.IsDarkTheme` — проброс темы (подписка/отписка в Dispose). `GridNodesLayer.IsDarkTheme` DP → `UpdateThemeBrush`: Light #C0C0C0 / Dark #808080. `GridNodeColorConverter` — HEX → Brush, null/invalid → null (темо-зависимый fallback). `InverseBooleanConverter` — новый конвертер для Settings UI.
+
+### Follow-up (не сделано)
+- **Цепочка AppSettings → GridSettings** при создании редактора отсутствует (`GridSettings.FromDefaultGrid` не читает AppSettings). Новые настройки сохраняются, но пока не применяются к открытым/новым вкладкам. Требуется применение в TabOperationsService/factory при создании EditorViewModel.
+
+### Тесты
+- Удалён `GridHelperTests.cs` (−21 тест, viewport-кейсы устарели)
+- Создан `GridNodeGeneratorTests.cs` (+36 тестов)
+- Переписан `GridManagerTests.cs` (32 теста)
+- Новые: конвертеры (+12), SettingsViewModel (+4), ThemeService ThemeChanged (+3), SettingsService round-trip (+3)
+- Coverage: GridManager/GridNodeGenerator/GridNode/SettingsViewModel/ThemeService/GridNodeColorConverter/InverseBooleanConverter — 100%
+- Release ×3 стабильно (flaky нет)
+
+### Common Mistakes (new)
+72. Grid nodes generation — always generate in ABSOLUTE sheet coordinates (0,0 = bottom-left), not viewport coordinates. RenderTransform handles pan offset for free (GPU). Viewport-based generation causes unnecessary regeneration on every pan + ViewportMargin complexity.
+73. GridHelper — fully replaced by IGridNodeGenerator (DI Singleton). All grid logic (ComputeDisplayStep, GenerateGridNodes) is injectable. Never use static helper classes for testable domain logic.
+74. Defense-in-depth for budget constraints — GenerateGridNodes never returns empty due to MaxGridNodes budget: coarsen (double step) until fits. First gate (ComputeDisplayStep) respects user intent; second gate (generator) guarantees grid never silently disappears.
+75. Theme-aware resources — use "auto" (null) as default that follows theme (Light/Dark), and explicit user choice as permanent override. GridNodesLayer: NodeColor null → theme brush (#C0C0C0 Light / #808080 Dark); explicit HEX → always user color.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2140 total, 2139 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 76.3% line-rate ✅
 

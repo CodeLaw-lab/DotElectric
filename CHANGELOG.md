@@ -116,19 +116,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint "Архитектурный рефакторинг P2": `ITabOperationsService` facade for tab operations (NewTab, OpenFile, Save, SaveAs)
 - `ViewModels/Abstractions/ITabOperationsService.cs` (new interface)
 - `Services/TabOperationsService.cs` (new implementation)
+- Sprint "Grid Refactoring": `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton) — вся логика сетки инъектируема; `GridNode` — top-level struct в `Helpers/GridNode.cs`
+- Sprint "Grid Refactoring": `GridSettings` новые поля — `MaxGridNodes` (default 250000), `NodeColor` (null = авто по теме), `NodeSize` (default 2.0)
+- Sprint "Grid Refactoring": Settings UI — 3 новых поля в секции СЕТКА (Макс. узлов, Цвет узлов с чекбоксом «Авто (по теме)», Размер узлов Slider 1-6)
+- Sprint "Grid Refactoring": `IThemeService.ThemeChanged` event; `EditorViewModel.IsDarkTheme` проброс; `GridNodesLayer.IsDarkTheme` DP → `UpdateThemeBrush` (Light #C0C0C0 / Dark #808080)
+- Sprint "Grid Refactoring": `GridNodeColorConverter` (HEX → Brush, null/invalid → темо-зависимый fallback) и `InverseBooleanConverter`
+- Sprint "Grid Refactoring": `GridNodeGeneratorTests` (+36), `GridManagerTests` переписан (32), конвертеры (+12), SettingsViewModel (+4), ThemeService ThemeChanged (+3), SettingsService round-trip (+3)
 
 ### Changed
 - Sprint "Архитектурный рефакторинг P2": MainViewModel constructor reduced from 13 to 10 dependencies (removed `_templateService`, `_fileService`, `_printService`, `_printDocumentGenerator`, `_editorViewModelFactory`; added `_tabOperations`)
 - Sprint "Архитектурный рефакторинг P2": 14 test methods renamed in `CommandTests.cs` — `MoveObjectCommand_*` → `ChangePropertyCommand_Move_*`, etc.
 - Sprint "Архитектурный рефакторинг P2": `EditorViewModelFactory` marked `sealed`
+- Sprint "Grid Refactoring": `GridHelper` (static) → `IGridNodeGenerator` (DI Singleton); `GridManager` принимает генератор через DI, реализует `IDisposable`
+- Sprint "Grid Refactoring": узлы сетки генерируются в абсолютных координатах листа (0,0 = нижний левый угол) для всей площади — панорамирование не вызывает регенерацию (RenderTransform)
+- Sprint "Grid Refactoring": `GridManager.Nodes` — `IReadOnlyList<GridNode>`, новый список на каждый refresh (нет shared mutable state); удалены `ViewportMargin`, `_nodeBuffer`, `RawNodeData`/`RawNodeCount`
+- Sprint "Grid Refactoring": `Template` переведён на `ObservableObject` (INPC на `Sheet` → регенерация сетки при смене формата листа)
+- Sprint "Grid Refactoring": `ComputeDisplayStep` уважает пользовательский шаг если укладывается в бюджет и pixel-spacing
+
+### Removed
+- Sprint "Grid Refactoring": `GridHelper.cs` и `GridHelperTests.cs` удалены (−21 viewport-тест, устарели)
+
+### Fixed
+- Sprint "Grid Refactoring": сетка больше не исчезает молча из-за бюджета `MaxGridNodes` — defense-in-depth coarsen (удвоение шага до вписывания в бюджет), `GenerateGridNodes` никогда не возвращает пустой список из-за бюджета
 
 ### Metrics
-- **Tests:** 2095 (0 failures, 1 pre-existing skip)
-- **Coverage:** 75.3% line-rate ✅
+- **Tests:** 2140 (2139 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 76.3% line-rate ✅ (GridManager/GridNodeGenerator/GridNode/SettingsViewModel/ThemeService/GridNodeColorConverter/InverseBooleanConverter — 100%)
 - **Build:** 0 errors, 0 warnings
 - **P0/P1 bugs:** 0
 - **EditorViewModel:** ~784 lines (9 managers, post R3.1 de-bloat)
-- **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext, ITabOperationsService
+- **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext, ITabOperationsService, IGridNodeGenerator
 
 ---
 

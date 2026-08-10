@@ -47,6 +47,7 @@
         <converters:IsObjectSelectedConverter x:Key="IsObjectSelectedConverter"/>
         <converters:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter"/>
         <converters:HexToBrushConverter x:Key="HexToBrushConverter"/>
+        <converters:GridNodeColorConverter x:Key="GridNodeColorConverter"/>
         <converters:BoolToTextWrappingConverter x:Key="BoolToTextWrappingConverter"/>
         <converters:StringToTextAlignmentConverter x:Key="StringToTextAlignmentConverter"/>
 
@@ -534,7 +535,10 @@
                 <!-- Узлы сетки поверх Canvas — синхронный pan через RenderTransform -->
                 <local:GridNodesLayer x:Name="GridNodesLayer"
                                       Zoom="{Binding ZoomPanManager.Zoom}"
-                                      SheetHeightMm="{Binding Template.Sheet.HeightMm}">
+                                      SheetHeightMm="{Binding Template.Sheet.HeightMm}"
+                                      IsDarkTheme="{Binding IsDarkTheme}"
+                                      NodeSize="{Binding GridSettings.NodeSize}"
+                                      NodeColor="{Binding GridSettings.NodeColor, Converter={StaticResource GridNodeColorConverter}}">
                     <local:GridNodesLayer.RenderTransform>
                         <TranslateTransform X="{Binding ZoomPanManager.CanvasOffsetX}" Y="{Binding ZoomPanManager.CanvasOffsetY}"/>
                     </local:GridNodesLayer.RenderTransform>

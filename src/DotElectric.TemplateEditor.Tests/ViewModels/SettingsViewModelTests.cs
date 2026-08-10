@@ -28,6 +28,9 @@ public class SettingsViewModelTests
         _settingsMock.Setup(s => s.Get("ShowGrid", true)).Returns(true);
         _settingsMock.Setup(s => s.Get("SnapToGrid", true)).Returns(true);
         _settingsMock.Setup(s => s.Get("GridStepMm", 5.0)).Returns(5.0);
+        _settingsMock.Setup(s => s.Get("GridMaxNodes", 250000)).Returns(250000);
+        _settingsMock.Setup(s => s.Get<string?>("GridNodeColor", null)).Returns((string?)null);
+        _settingsMock.Setup(s => s.Get("GridNodeSize", 2.0)).Returns(2.0);
         _settingsMock.Setup(s => s.Get("AutosaveIntervalMinutes", 5)).Returns(5);
         _settingsMock.Setup(s => s.Get("DefaultSheetFormat", "A3")).Returns("A3");
         _settingsMock.Setup(s => s.Get("DefaultZoom", 1.0)).Returns(1.0);
@@ -103,5 +106,56 @@ public class SettingsViewModelTests
     public void Constructor_NullSettings_Throws()
     {
         Assert.Throws<ArgumentNullException>(() => new SettingsViewModel(null!));
+    }
+
+    [Fact]
+    public void Constructor_LoadsGridNodeDefaults()
+    {
+        var vm = new SettingsViewModel(_settingsMock.Object);
+
+        Assert.Equal(250000, vm.GridMaxNodes);
+        Assert.True(vm.GridNodeColorAuto);
+        Assert.Equal("#C0C0C0", vm.GridNodeColor);
+        Assert.Equal(2.0, vm.GridNodeSize);
+    }
+
+    [Fact]
+    public void Constructor_ExplicitNodeColor_SetsAutoFalse()
+    {
+        _settingsMock.Setup(s => s.Get<string?>("GridNodeColor", null)).Returns("#FF0000");
+
+        var vm = new SettingsViewModel(_settingsMock.Object);
+
+        Assert.False(vm.GridNodeColorAuto);
+        Assert.Equal("#FF0000", vm.GridNodeColor);
+    }
+
+    [Fact]
+    public void Confirm_AutoNodeColor_SavesNull()
+    {
+        var vm = new SettingsViewModel(_settingsMock.Object);
+        vm.GridNodeColorAuto = true;
+        vm.GridNodeColor = "#FF0000";
+
+        vm.ConfirmCommand.Execute(null);
+
+        _settingsMock.Verify(s => s.Save(It.Is<AppSettings>(a => a.GridNodeColor == null)), Times.Once);
+    }
+
+    [Fact]
+    public void Confirm_ExplicitNodeColor_SavesValue()
+    {
+        var vm = new SettingsViewModel(_settingsMock.Object);
+        vm.GridNodeColorAuto = false;
+        vm.GridNodeColor = "#FF0000";
+        vm.GridMaxNodes = 100000;
+        vm.GridNodeSize = 4.0;
+
+        vm.ConfirmCommand.Execute(null);
+
+        _settingsMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.GridNodeColor == "#FF0000" &&
+            a.GridMaxNodes == 100000 &&
+            a.GridNodeSize == 4.0)), Times.Once);
     }
 }

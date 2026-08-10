@@ -21,6 +21,18 @@ public partial class SettingsViewModel : ObservableObject
     private double _gridStepMm;
 
     [ObservableProperty]
+    private int _gridMaxNodes;
+
+    [ObservableProperty]
+    private bool _gridNodeColorAuto;
+
+    [ObservableProperty]
+    private string _gridNodeColor = "#C0C0C0";
+
+    [ObservableProperty]
+    private double _gridNodeSize;
+
+    [ObservableProperty]
     private int _autosaveIntervalMinutes;
 
     [ObservableProperty]
@@ -49,6 +61,11 @@ public partial class SettingsViewModel : ObservableObject
         ShowGrid = _settingsService.Get("ShowGrid", true);
         SnapToGrid = _settingsService.Get("SnapToGrid", true);
         GridStepMm = _settingsService.Get("GridStepMm", 5.0);
+        GridMaxNodes = _settingsService.Get("GridMaxNodes", 250000);
+        var nodeColor = _settingsService.Get<string?>("GridNodeColor", null);
+        GridNodeColorAuto = nodeColor == null;
+        GridNodeColor = nodeColor ?? "#C0C0C0";
+        GridNodeSize = _settingsService.Get("GridNodeSize", 2.0);
         AutosaveIntervalMinutes = _settingsService.Get("AutosaveIntervalMinutes", 5);
         DefaultSheetFormat = _settingsService.Get("DefaultSheetFormat", "A3");
         DefaultZoom = _settingsService.Get("DefaultZoom", 1.0);
@@ -65,6 +82,9 @@ public partial class SettingsViewModel : ObservableObject
         settings.ShowGrid = ShowGrid;
         settings.SnapToGrid = SnapToGrid;
         settings.GridStepMm = GridStepMm;
+        settings.GridMaxNodes = GridMaxNodes;
+        settings.GridNodeColor = GridNodeColorAuto ? null : GridNodeColor;
+        settings.GridNodeSize = GridNodeSize;
         settings.AutosaveIntervalMinutes = AutosaveIntervalMinutes;
         settings.DefaultSheetFormat = DefaultSheetFormat;
         settings.DefaultZoom = DefaultZoom;

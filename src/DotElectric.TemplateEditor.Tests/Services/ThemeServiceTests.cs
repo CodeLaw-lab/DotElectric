@@ -282,4 +282,43 @@ public class ThemeServiceTests : IDisposable
         _service.SetTheme("Dark");
         Assert.Equal("Dark", _service.CurrentTheme);
     }
+
+    // ==================== ThemeChanged Event Tests ====================
+
+    [Fact]
+    public void SetTheme_Success_RaisesThemeChanged()
+    {
+        string? raised = null;
+        _service.ThemeChanged += t => raised = t;
+
+        _service.SetTheme("Dark");
+
+        Assert.Equal("Dark", raised);
+    }
+
+    [Fact]
+    public void SetTheme_DictionaryManagerThrows_DoesNotRaiseThemeChanged()
+    {
+        _mockDictionaryManager
+            .Setup(m => m.SetThemeDictionary(DarkThemePath))
+            .Throws(new InvalidOperationException("Dictionary error"));
+
+        var fired = false;
+        _service.ThemeChanged += _ => fired = true;
+
+        _service.SetTheme("Dark");
+
+        Assert.False(fired);
+    }
+
+    [Fact]
+    public void ToggleTheme_RaisesThemeChangedWithNewTheme()
+    {
+        string? raised = null;
+        _service.ThemeChanged += t => raised = t;
+
+        _service.ToggleTheme();
+
+        Assert.Equal("Dark", raised);
+    }
 }

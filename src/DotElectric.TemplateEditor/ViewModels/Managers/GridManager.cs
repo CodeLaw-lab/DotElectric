@@ -5,44 +5,40 @@ using DotElectric.TemplateEditor.Models;
 
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
 
-public sealed partial class GridManager : ObservableObject
+public sealed partial class GridManager : ObservableObject, IDisposable
 {
     private readonly Template _template;
     private readonly GridSettings _gridSettings;
     private readonly ZoomPanManager _zoomPanManager;
+    private readonly IGridNodeGenerator _gridNodeGenerator;
 
-    private long[] _nodeData = [];
-    private int _nodeCount;
-
-    private readonly List<GridHelper.GridNode> _nodeBuffer = new();
-
-    private const double ViewportMargin = 1.5;
+    private IReadOnlyList<GridNode> _nodes = [];
 
     public GridManager(
         Template template,
         GridSettings gridSettings,
-        ZoomPanManager zoomPanManager)
+        ZoomPanManager zoomPanManager,
+        IGridNodeGenerator gridNodeGenerator)
     {
         _template = template ?? throw new ArgumentNullException(nameof(template));
         _gridSettings = gridSettings ?? throw new ArgumentNullException(nameof(gridSettings));
         _zoomPanManager = zoomPanManager ?? throw new ArgumentNullException(nameof(zoomPanManager));
+        _gridNodeGenerator = gridNodeGenerator ?? throw new ArgumentNullException(nameof(gridNodeGenerator));
+
+        _template.PropertyChanged += OnTemplatePropertyChanged;
     }
 
-    public long[] RawNodeData => _nodeData;
-
-    public int RawNodeCount => _nodeCount;
+    /// <summary>
+    /// Узлы сетки в абсолютных координатах листа (микроны).
+    /// Регенерируются при zoom/смене шага/смене формата. НЕ регенерируются при пане —
+    /// RenderTransform в GridNodesLayer двигает их бесплатно.
+    /// </summary>
+    public IReadOnlyList<GridNode> Nodes => _nodes;
 
     public Action? GridInvalidated { get; set; }
 
-    public void ToggleGrid()
-    {
-        IsGridEnabled = !IsGridEnabled;
-    }
-
-    public void ToggleSnap()
-    {
-        _gridSettings.SnapEnabled = !_gridSettings.SnapEnabled;
-    }
+    public void ToggleGrid() => IsGridEnabled = !IsGridEnabled;
+    public void ToggleSnap() => IsSnapEnabled = !IsSnapEnabled;
 
     public bool IsGridEnabled
     {
@@ -83,60 +79,38 @@ public sealed partial class GridManager : ObservableObject
     {
         if (!_gridSettings.Enabled || !_gridSettings.Visible)
         {
-            _nodeData = [];
-            _nodeCount = 0;
+            _nodes = [];
             InvalidateGrid();
             return;
         }
 
-        var (vpLeft, vpBottom, vpWidth, vpHeight) = _zoomPanManager.GetViewportMicrons(ViewportMargin);
-
-        // If viewport is zero (tab not visible yet), fall back to full-sheet
-        if (vpWidth <= 0 || vpHeight <= 0)
-        {
-            vpLeft = 0;
-            vpBottom = 0;
-            vpWidth = _template.Sheet.WidthMicrons;
-            vpHeight = _template.Sheet.HeightMicrons;
-        }
-
-        var sheetWidth = _template.Sheet.WidthMicrons;
-        var sheetHeight = _template.Sheet.HeightMicrons;
-
-        var displayStep = GridHelper.ComputeDisplayStep(
+        var displayStep = _gridNodeGenerator.ComputeDisplayStep(
             _zoomPanManager.Zoom,
-            EditorSettings.MaxGridNodes,
-            sheetWidth,
-            sheetHeight,
-            vpWidth,
-            vpHeight,
+            _gridSettings.MaxGridNodes,
+            _template.Sheet.WidthMicrons,
+            _template.Sheet.HeightMicrons,
             _gridSettings.StepMicrons);
 
-        var nodes = GridHelper.GenerateGridNodes(
-            _template.Sheet,
+        _nodes = _gridNodeGenerator.GenerateGridNodes(
             displayStep,
             _zoomPanManager.Zoom,
-            vpLeft,
-            vpBottom,
-            vpWidth,
-            vpHeight,
-            _nodeBuffer);
-
-        // Allocate new array each refresh — no shared mutable state with GridNodesLayer
-        _nodeCount = nodes.Count;
-        var data = new long[_nodeCount * 2];
-        for (int i = 0; i < _nodeCount; i++)
-        {
-            data[i * 2] = nodes[i].XMicrons;
-            data[i * 2 + 1] = nodes[i].YMicrons;
-        }
-        _nodeData = data;
+            _template.Sheet.WidthMicrons,
+            _template.Sheet.HeightMicrons,
+            _gridSettings.MaxGridNodes);
 
         InvalidateGrid();
     }
 
-    private void InvalidateGrid()
+    private void OnTemplatePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        GridInvalidated?.Invoke();
+        if (e.PropertyName is nameof(Template.Sheet))
+            RefreshGridNodes();
+    }
+
+    private void InvalidateGrid() => GridInvalidated?.Invoke();
+
+    public void Dispose()
+    {
+        _template.PropertyChanged -= OnTemplatePropertyChanged;
     }
 }

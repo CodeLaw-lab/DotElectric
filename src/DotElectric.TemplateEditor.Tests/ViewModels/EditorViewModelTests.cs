@@ -43,7 +43,7 @@ public class EditorViewModelTests
         Assert.NotNull(vm.CommandHistory);
         Assert.NotNull(vm.GridSettings);
         Assert.NotNull(vm.PropertiesVm);
-        Assert.NotNull(vm.GridManager.RawNodeData);
+        Assert.NotNull(vm.GridManager.Nodes);
         Assert.NotNull(vm.SelectedObjects);
         Assert.Empty(vm.SelectedObjects);
 
@@ -647,34 +647,42 @@ public class EditorViewModelTests
     public void GridNodes_PopulatedOnConstruction()
     {
         var vm = CreateViewModel();
-        // A3: 420x297mm, default grid 5mm step, zoom=1.0 → 5px >= 3px threshold → видимы
-        Assert.True(vm.GridManager.RawNodeCount > 0);
+        // A3: 420x297mm, default grid 5mm step, zoom=1.0 → 5px >= 5.0px MinPixelSpacing → видимы
+        Assert.NotEmpty(vm.GridManager.Nodes);
     }
 
     [Fact]
     public void GridNodes_ClearsWhenGridDisabled()
     {
         var vm = CreateViewModel();
-        Assert.True(vm.GridManager.RawNodeCount > 0);
+        Assert.NotEmpty(vm.GridManager.Nodes);
 
         vm.GridSettings.Enabled = false;
         vm.GridSettings.Visible = false;
         vm.SetZoom(1.0001); // trigger OnZoomChanged → RefreshGridNodes
 
-        Assert.Equal(0, vm.GridManager.RawNodeCount);
+        Assert.Empty(vm.GridManager.Nodes);
     }
 
     [Fact]
     public void GridNodes_UpdatesOnZoomChange()
     {
-        var vm = CreateViewModel();
-        var countAt1x = vm.GridManager.RawNodeCount;
+        var vm = CreateViewModel(); // A3 landscape 420x297мм, шаг 5мм, zoom=1.0
 
-        vm.SetZoom(0.5); // меньше зум → меньше узлов (могут скрыться)
-        var countAt05x = vm.GridManager.RawNodeCount;
+        Assert.NotEmpty(vm.GridManager.Nodes);
 
-        Assert.True(countAt1x >= 0);
-        Assert.True(countAt05x >= 0);
+        // zoom 0.5: 5мм × 0.5 = 2.5px < 5.0 MinPixelSpacing → user step отклонён,
+        // fallback шаг = 5.0/0.5 = 10мм → узлы не исчезают, регенерированы с шагом 10000
+        vm.SetZoom(0.5);
+
+        Assert.NotEmpty(vm.GridManager.Nodes);
+        foreach (var node in vm.GridManager.Nodes)
+        {
+            Assert.Equal(0, node.XMicrons % 10000);
+            Assert.Equal(0, node.YMicrons % 10000);
+            Assert.InRange(node.XMicrons, 0, 420000);
+            Assert.InRange(node.YMicrons, 0, 297000);
+        }
     }
 
     // === Canvas dimensions ===
@@ -898,15 +906,15 @@ public class EditorViewModelTests
         vm.ZoomPanManager.SetViewportSize(sheet.WidthMm, sheet.HeightMm);
         vm.GridManager.GridStepMm = 10.0;
 
-        Assert.True(vm.GridManager.RawNodeCount > 0);
+        Assert.NotEmpty(vm.GridManager.Nodes);
 
-        // Verify micron coordinates are non-negative and within sheet bounds
+        // Узлы в абсолютных микронных координатах листа (не пиксели)
         var maxXMicrons = sheet.WidthMicrons;
         var maxYMicrons = sheet.HeightMicrons;
-        for (int i = 0; i < vm.GridManager.RawNodeCount && i < 10; i++)
+        foreach (var node in vm.GridManager.Nodes.Take(10))
         {
-            Assert.InRange(vm.GridManager.RawNodeData[i * 2], 0, maxXMicrons);
-            Assert.InRange(vm.GridManager.RawNodeData[i * 2 + 1], 0, maxYMicrons);
+            Assert.InRange(node.XMicrons, 0, maxXMicrons);
+            Assert.InRange(node.YMicrons, 0, maxYMicrons);
         }
     }
 
@@ -922,15 +930,15 @@ public class EditorViewModelTests
         vm.ZoomPanManager.SetViewportSize(sheet.WidthMm, sheet.HeightMm);
         vm.GridManager.GridStepMm = 10.0;
 
-        Assert.True(vm.GridManager.RawNodeCount > 0);
+        Assert.NotEmpty(vm.GridManager.Nodes);
 
-        // Verify micron coordinates are non-negative and within sheet bounds
+        // Узлы в абсолютных микронных координатах листа (не пиксели)
         var maxXMicrons = sheet.WidthMicrons;
         var maxYMicrons = sheet.HeightMicrons;
-        for (int i = 0; i < vm.GridManager.RawNodeCount && i < 10; i++)
+        foreach (var node in vm.GridManager.Nodes.Take(10))
         {
-            Assert.InRange(vm.GridManager.RawNodeData[i * 2], 0, maxXMicrons);
-            Assert.InRange(vm.GridManager.RawNodeData[i * 2 + 1], 0, maxYMicrons);
+            Assert.InRange(node.XMicrons, 0, maxXMicrons);
+            Assert.InRange(node.YMicrons, 0, maxYMicrons);
         }
     }
 

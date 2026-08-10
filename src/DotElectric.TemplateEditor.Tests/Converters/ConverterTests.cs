@@ -1240,3 +1240,75 @@ public class LeftEdgeMicronsMultiConverterExtendedTests
             _converter.ConvertBack(0.0, new[] { typeof(long) }, null, CultureInfo.InvariantCulture));
     }
 }
+
+public class GridNodeColorConverterTests
+{
+    private readonly GridNodeColorConverter _converter = new();
+
+    [Theory]
+    [InlineData("#000000")]
+    [InlineData("#FF0000")]
+    [InlineData("#80FF0000")]
+    public void Convert_ValidHex_ReturnsMatchingBrush(string hex)
+    {
+        var result = _converter.Convert(hex, typeof(System.Windows.Media.Brush), null, CultureInfo.InvariantCulture);
+        var brush = Assert.IsType<System.Windows.Media.SolidColorBrush>(result);
+        var expected = (System.Windows.Media.Color)System.Windows.Media.ColorConverter.ConvertFromString(hex);
+        Assert.Equal(expected, brush.Color);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("not a color")]
+    public void Convert_NullEmptyOrInvalid_ReturnsNull(string? value)
+    {
+        var result = _converter.Convert(value, typeof(System.Windows.Media.Brush), null, CultureInfo.InvariantCulture);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Convert_NonString_ReturnsNull()
+    {
+        var result = _converter.Convert(42, typeof(System.Windows.Media.Brush), null, CultureInfo.InvariantCulture);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(System.Windows.Media.Brushes.Black, typeof(string), null, CultureInfo.InvariantCulture));
+    }
+}
+
+public class InverseBooleanConverterTests
+{
+    private readonly InverseBooleanConverter _converter = new();
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void Convert_InvertsBool(bool input, bool expected)
+    {
+        var result = _converter.Convert(input, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    public void ConvertBack_InvertsBool(bool input, bool expected)
+    {
+        var result = _converter.ConvertBack(input, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void Convert_NonBool_ReturnsFalse()
+    {
+        var result = _converter.Convert("not a bool", typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(false, result);
+    }
+}
