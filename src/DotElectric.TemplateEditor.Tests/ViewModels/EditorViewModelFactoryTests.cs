@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels;
@@ -117,5 +118,124 @@ public class EditorViewModelFactoryTests
         var factory = new EditorViewModelFactory(_serviceProvider);
         var template = new Template();
         Assert.Throws<ArgumentException>(() => factory.CreateWithFilePath(template, null!));
+    }
+
+    [Fact]
+    public void Create_NoGridSettings_UsesAppSettings()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings
+        {
+            ShowGrid = false,
+            GridStepMm = 1.0,
+            GridMaxNodes = 50000,
+            GridNodeSize = 3.5,
+        });
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        var vm = factory.Create(template);
+
+        Assert.NotNull(vm);
+        Assert.False(vm.GridSettings.Enabled);
+        Assert.Equal(1000, vm.GridSettings.StepMicrons);
+        Assert.Equal(50000, vm.GridSettings.MaxGridNodes);
+        Assert.Equal(3.5, vm.GridSettings.NodeSize);
+    }
+
+    [Fact]
+    public void Create_WithExplicitGridSettings_ExplicitWins()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { GridStepMm = 1.0 });
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        var vm = factory.Create(template, new GridSettings { StepMicrons = 10000 });
+
+        Assert.NotNull(vm);
+        Assert.Equal(10000, vm.GridSettings.StepMicrons);
+        mockSettingsService.Verify(s => s.Load(), Times.Never);
+    }
+
+    [Fact]
+    public void CreateWithFilePath_WithExplicitGridSettings_ExplicitWinsAndLoadNotCalled()
+    {
+        // Arrange — settings service вернул бы шаг 1 мм, но явный GridSettings должен победить
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { GridStepMm = 1.0 });
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        // Act
+        var vm = factory.CreateWithFilePath(template, @"C:\test\t.tdel", new GridSettings { StepMicrons = 10000 });
+
+        // Assert — explicit настройки применены, Load() не вызывался
+        Assert.NotNull(vm);
+        Assert.Equal(10000, vm.GridSettings.StepMicrons);
+        mockSettingsService.Verify(s => s.Load(), Times.Never);
+    }
+
+    [Fact]
+    public void Create_NoSettingsService_FallsBackToDefaults()
+    {
+        var factory = new EditorViewModelFactory(_serviceProvider);
+        var template = new Template();
+
+        var vm = factory.Create(template);
+
+        Assert.NotNull(vm);
+        Assert.True(vm.GridSettings.Enabled);
+        Assert.Equal(Grid.Default.StepMicrons, vm.GridSettings.StepMicrons);
+        Assert.Equal(EditorSettings.MaxGridNodes, vm.GridSettings.MaxGridNodes);
+        Assert.Null(vm.GridSettings.NodeColor);
+        Assert.Equal(2.0, vm.GridSettings.NodeSize);
+    }
+
+    [Fact]
+    public void CreateWithFilePath_NoGridSettings_UsesAppSettings()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { ShowGrid = false });
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        var vm = factory.CreateWithFilePath(template, @"C:\test\template.tdel");
+
+        Assert.NotNull(vm);
+        Assert.False(vm.GridSettings.Enabled);
+        mockSettingsService.Verify(s => s.Load(), Times.Once);
+    }
+
+    [Fact]
+    public void Create_WithAppSettings_NodeColorAndSnapApplied()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings
+        {
+            SnapToGrid = false,
+            GridNodeColor = "#00FF00",
+        });
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        var vm = factory.Create(template);
+
+        Assert.NotNull(vm);
+        Assert.False(vm.GridSettings.SnapEnabled);
+        Assert.Equal("#00FF00", vm.GridSettings.NodeColor);
+    }
+
+    [Fact]
+    public void Create_SettingsServiceLoadCalledOnce()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings());
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        factory.Create(template);
+
+        mockSettingsService.Verify(s => s.Load(), Times.Once);
     }
 }

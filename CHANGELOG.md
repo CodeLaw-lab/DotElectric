@@ -147,6 +147,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **EditorViewModel:** ~784 lines (9 managers, post R3.1 de-bloat)
 - **DI services:** IDateTimeProvider, IDialogFileService, IPrintVisualProvider, ITemplateValidator, IEditorContext, ITabOperationsService, IGridNodeGenerator
 
+### Added
+- Sprint "AppSettings → GridSettings chain": `GridSettings.FromAppSettings(AppSettings)` static factory (6 полей: ShowGrid→Enabled, SnapToGrid→SnapEnabled, GridStepMm→StepMicrons, GridMaxNodes→MaxGridNodes, GridNodeColor→NodeColor, GridNodeSize→NodeSize; clamping: StepMicrons ≥ 1 мкм, MaxGridNodes ≥ 1, NodeSize не NaN/∞/≤0); `GridSettings` → sealed; `EditorSettings.DefaultGridNodeSize = 2.0`
+- Sprint "AppSettings → GridSettings chain": `EditorViewModelFactory.ResolveGridSettings()` (explicit gridSettings → AppSettings → FromDefaultGrid), опциональный `ISettingsService?` в ctor — настройки сетки из Settings UI применяются к новым/открытым вкладкам (Create, CreateWithFilePath; TabOperationsService: CreateNewTab, OpenFileAsync, OpenFromFilePath, CreateNewCustomTab)
+- Sprint "AppSettings → GridSettings chain": +18 тестов (9 FromAppSettings + 6 factory + 3 по ревью)
+
+### Metrics
+- **Tests:** 2160 (2159 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 76.4% line-rate ✅
+- **Build:** 0 errors, 0 warnings
+
 ---
 
 ## [0.1.0] вЂ” 2026-04-01

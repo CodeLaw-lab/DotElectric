@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Grid Refactoring завершён.** Статический `GridHelper` полностью заменён на `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton). Узлы сетки генерируются в **абсолютных координатах листа** (0,0 = нижний левый угол) для всей площади листа — панорамирование не вызывает регенерацию (RenderTransform двигает сетку бесплатно). Defense-in-depth coarsen: сетка никогда не исчезает молча из-за бюджета `MaxGridNodes`. `Template` переведён на `ObservableObject` (INPC на `Sheet` → регенерация сетки при смене формата). Добавлены настройки сетки `MaxGridNodes`/`NodeColor`/`NodeSize` + 3 поля в Settings UI. Темо-зависимый цвет узлов (Light #C0C0C0 / Dark #808080) через `IThemeService.ThemeChanged`. Ранее: архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
+**Grid Refactoring завершён; follow-up AppSettings → GridSettings chain реализован (10.08.2026).** Статический `GridHelper` полностью заменён на `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton). Узлы сетки генерируются в **абсолютных координатах листа** (0,0 = нижний левый угол) для всей площади листа — панорамирование не вызывает регенерацию (RenderTransform двигает сетку бесплатно). Defense-in-depth coarsen: сетка никогда не исчезает молча из-за бюджета `MaxGridNodes`. `Template` переведён на `ObservableObject` (INPC на `Sheet` → регенерация сетки при смене формата). Добавлены настройки сетки `MaxGridNodes`/`NodeColor`/`NodeSize` + 3 поля в Settings UI. Темо-зависимый цвет узлов (Light #C0C0C0 / Dark #808080) через `IThemeService.ThemeChanged`. **Цепочка настройки → вкладки замкнута:** `GridSettings.FromAppSettings(AppSettings)` (static factory, 6 полей + clamping) + `EditorViewModelFactory.ResolveGridSettings()` (explicit gridSettings → AppSettings → FromDefaultGrid, опциональный `ISettingsService?` в ctor) — настройки сетки из Settings UI (ShowGrid/SnapToGrid/GridStepMm/GridMaxNodes/GridNodeColor/GridNodeSize) применяются ко всем новым и открытым вкладкам (Create, CreateWithFilePath; TabOperationsService: CreateNewTab, OpenFileAsync, OpenFromFilePath, CreateNewCustomTab). Ранее: архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -27,9 +27,10 @@
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 | **GridHelper** | **static class** | **IGridNodeGenerator/GridNodeGenerator (DI Singleton)** |
 | **Grid nodes** | **viewport-координаты + регенерация на pan** | **абсолютные координаты листа, pan = RenderTransform** |
+| **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2140 total (2139 passed, 1 pre-existing skip)
+**Tests:** 2160 total (2159 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -165,10 +166,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain завершены)
 
-- **Tests:** 2140 (2139 passed, 1 pre-existing skip)
-- **Coverage:** 76.3% line-rate ✅
+- **Tests:** 2160 (2159 passed, 1 pre-existing skip)
+- **Coverage:** 76.4% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
@@ -183,7 +184,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **EditorCanvasBehavior:** 78 строк (AttachedProperty + stubs), 3 файла: State, Transform, Router
 - **FontMetrics:** `IFontMetrics` + `FontMetrics.Default` static Singleton (DI-registered)
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
-- **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`
+- **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`; `GridSettings.FromAppSettings` + `EditorViewModelFactory.ResolveGridSettings` — настройки применяются к вкладкам
 
 ## Sprint — Coverage Improvement (19.07.2026)
 
@@ -1609,8 +1610,8 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 ### Feature GR-6: Темо-зависимый цвет узлов
 **Решение:** `IThemeService.ThemeChanged` — новое событие. `EditorViewModel.IsDarkTheme` — проброс темы (подписка/отписка в Dispose). `GridNodesLayer.IsDarkTheme` DP → `UpdateThemeBrush`: Light #C0C0C0 / Dark #808080. `GridNodeColorConverter` — HEX → Brush, null/invalid → null (темо-зависимый fallback). `InverseBooleanConverter` — новый конвертер для Settings UI.
 
-### Follow-up (не сделано)
-- **Цепочка AppSettings → GridSettings** при создании редактора отсутствует (`GridSettings.FromDefaultGrid` не читает AppSettings). Новые настройки сохраняются, но пока не применяются к открытым/новым вкладкам. Требуется применение в TabOperationsService/factory при создании EditorViewModel.
+### Follow-up (РЕШЁН — Sprint "AppSettings → GridSettings chain", 10.08.2026)
+- **Цепочка AppSettings → GridSettings** при создании редактора отсутствовала (`GridSettings.FromDefaultGrid` не читал AppSettings) — настройки сохранялись, но не применялись к открытым/новым вкладкам. **Решение:** см. секцию «Sprint — AppSettings → GridSettings chain (10.08.2026)» ниже: `GridSettings.FromAppSettings` + `EditorViewModelFactory.ResolveGridSettings()` применяют настройки сетки из Settings UI во всех путях создания вкладок.
 
 ### Тесты
 - Удалён `GridHelperTests.cs` (−21 тест, viewport-кейсы устарели)
@@ -1629,4 +1630,37 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2140 total, 2139 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 76.3% line-rate ✅
+
+## Sprint — AppSettings → GridSettings chain (10.08.2026)
+
+### Feature AGS-1: GridSettings.FromAppSettings static factory
+**Проблема:** Настройки сетки из Settings UI (ShowGrid/SnapToGrid/GridStepMm/GridMaxNodes/GridNodeColor/GridNodeSize) сохранялись в `AppSettings`, но при создании EditorViewModel использовался только `GridSettings.FromDefaultGrid` — цепочка «настройки → вкладки» была разорвана (follow-up из Grid Refactoring).
+**Решение:** Добавлена static factory `GridSettings.FromAppSettings(AppSettings)` — маппинг 6 полей:
+- `ShowGrid` → `Enabled`
+- `SnapToGrid` → `SnapEnabled`
+- `GridStepMm` → `StepMicrons`
+- `GridMaxNodes` → `MaxGridNodes`
+- `GridNodeColor` → `NodeColor`
+- `GridNodeSize` → `NodeSize`
+Плюс clamping: `StepMicrons` ≥ 1 мкм, `MaxGridNodes` ≥ 1, `NodeSize` не NaN/∞/≤0. `GridSettings` помечен `sealed`. Добавлена константа `EditorSettings.DefaultGridNodeSize = 2.0`.
+
+### Feature AGS-2: EditorViewModelFactory.ResolveGridSettings()
+**Проблема:** Фабрика редактора не имела доступа к настройкам приложения — каждый путь создания вкладки создавал GridSettings из дефолтов.
+**Решение:** `EditorViewModelFactory` получил опциональный `ISettingsService?` в ctor. Новый метод `ResolveGridSettings()` — каскад разрешения:
+1. explicit `gridSettings` (переданный параметр) — приоритет
+2. `AppSettings` через `ISettingsService` (если доступен) → `GridSettings.FromAppSettings`
+3. fallback `GridSettings.FromDefaultGrid()`
+Применяется во всех путях создания вкладок: `Create`, `CreateWithFilePath` (EditorViewModelFactory), `TabOperationsService`: `CreateNewTab`, `OpenFileAsync`, `OpenFromFilePath`, `CreateNewCustomTab`.
+
+### Тесты
+- `GridSettingsTests`: 9 тестов `FromAppSettings` (маппинг всех 6 полей + clamping: StepMicrons ≥ 1 мкм, MaxGridNodes ≥ 1, NodeSize NaN/∞/≤0 → default)
+- `EditorViewModelFactoryTests`: 6 тестов `ResolveGridSettings` (explicit > AppSettings > FromDefaultGrid, null ISettingsService)
+- 3 теста по ревью
+- Итого: +18 тестов
+
+**Файлы:** `Models/GridSettings.cs`, `ViewModels/EditorViewModelFactory.cs`, `ViewModels/IEditorViewModelFactory.cs`, `Constants/EditorSettings.cs`, `Services/TabOperationsService.cs`, `ViewModels/MainViewModel.cs` (производственные); `Tests/Models/GridSettingsTests.cs`, `Tests/ViewModels/EditorViewModelFactoryTests.cs` (тесты)
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2160 total, 2159 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 76.4% line-rate ✅
 

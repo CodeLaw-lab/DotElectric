@@ -1,4 +1,5 @@
 using DotElectric.TemplateEditor.Constants;
+using DotElectric.TemplateEditor.Services;
 
 namespace DotElectric.TemplateEditor.Models;
 
@@ -7,8 +8,9 @@ namespace DotElectric.TemplateEditor.Models;
 /// Хранятся в EditorViewModel, НЕ сериализуются в .tdel.
 /// Пользователь может менять шаг, привязку и видимость.
 /// </summary>
-public class GridSettings
+public sealed class GridSettings
 {
+    private const long MinStepMicrons = 1;
     /// <summary>
     /// Сетка включена (отображается на холсте).
     /// </summary>
@@ -43,7 +45,7 @@ public class GridSettings
     /// <summary>
     /// Размер узла сетки в пикселях (диаметр).
     /// </summary>
-    public double NodeSize { get; set; } = 2.0;
+    public double NodeSize { get; set; } = EditorSettings.DefaultGridNodeSize;
 
     /// <summary>
     /// Создать настройки с параметрами по умолчанию.
@@ -62,6 +64,35 @@ public class GridSettings
             Visible = true,
             MaxGridNodes = EditorSettings.MaxGridNodes,
             NodeColor = null,
-            NodeSize = 2.0,
+            NodeSize = EditorSettings.DefaultGridNodeSize,
         };
+
+    /// <summary>
+    /// Создать настройки из AppSettings (цепочка настроек приложения → настройки сетки).
+    /// </summary>
+    public static GridSettings FromAppSettings(AppSettings settings)
+    {
+        if (settings == null) throw new ArgumentNullException(nameof(settings));
+
+        var stepMicrons = (long)(settings.GridStepMm * PhysicalConstants.MicronsPerMm);
+        if (stepMicrons < MinStepMicrons) // < 1 мкм
+            stepMicrons = Grid.Default.StepMicrons; // fallback 5 мм
+
+        var maxNodes = settings.GridMaxNodes < 1 ? EditorSettings.MaxGridNodes : settings.GridMaxNodes;
+
+        double nodeSize = settings.GridNodeSize;
+        if (double.IsNaN(nodeSize) || double.IsInfinity(nodeSize) || nodeSize <= 0)
+            nodeSize = EditorSettings.DefaultGridNodeSize;
+
+        return new GridSettings
+        {
+            Enabled = settings.ShowGrid,
+            SnapEnabled = settings.SnapToGrid,
+            StepMicrons = stepMicrons,
+            Visible = true,
+            MaxGridNodes = maxNodes,
+            NodeColor = settings.GridNodeColor,
+            NodeSize = nodeSize,
+        };
+    }
 }
