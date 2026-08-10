@@ -2,19 +2,12 @@
 
 ## Git Operations
 - Repo: D:\dotElectricTest (CodeLaw-lab/DotElectric)
-- Main: 477a46c (Merge PR #28, grid-settings-appchain) — fast-forwarded from 93d8c8a
-- Develop: c094125 (Merge PR #29 from main, includes PR #28) — fast-forwarded from f2d5bc7
-- Status: PR #28 MERGED, develop synced, feature branch deleted, current branch: main
+- Main: 8928a8d (Merge PR #30, docs: fix CHANGELOG.md mojibake) — fast-forward from da0d6cb
+- Current branch: feature/default-zoom-10082026 (HEAD = 8928a8d, pushed to origin)
+- Status: PR #30 MERGED, feature branch deleted, next-task branch created
 
-## GitHub (gh-ops, 10.08.2026)
-- PR #28: state=MERGED (mergedBy CodeLaw-lab @ 2026-08-10T20:35:46Z, merge commit 477a46c)
-  - CI: build-and-test SUCCESS (actions/runs/31429078082) + Build & Test SUCCESS (actions/runs/31429078164)
-  - mergeStateStatus: UNKNOWN (post-merge, no actionable status)
-- Remote branch feature/grid-settings-appchain: deleted manually via `git push origin --delete` (gh pr merge --delete-branch reported "already merged" without deleting)
-- Develop sync: `git merge origin/main` → "Already up to date" (main fully merged into develop via PR #29)
-- Push to develop: not required (local fast-forward to origin/develop)
-
-## Implementation (implementor) — completed, merged via PR #28
-- [x] `GridSettings.FromAppSettings(AppSettings)` — static factory with clamping
-- [x] `EditorViewModelFactory.ResolveGridSettings()` — gridSettings → AppSettings → FromDefaultGrid
-- [x] Tests: 2159 passed, 0 failed, 1 pre-existing skip (total 2160); coverage 76.4%
+## GitHub (gh-ops, 11.08.2026)
+- PR #30: state=MERGED (mergedBy CodeLaw-lab @ 2026-08-10T20:59:40Z, merge commit 8928a8d)
+  - CI: Build & Test pass (1m10s, runs/31431542349) + build-and-test pass (1m46s, runs/31431542338)
+  - Merge: gh pr merge 30 --merge --delete-branch (fast-forward, 2 files: CHANGELOG.md, DOCS_MANIFEST.md)
+- New branch: feature/default-zoom-10082026 (origin, tracking set)
