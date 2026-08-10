@@ -11,23 +11,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 63: Regression test `Clone_CopiesAllPublicProperties_ExceptId` for `Template.Clone()` — reflection-based check against future property drift
 - Pipeline: увеличение покрытия тестами до 75.15% (было ~59-67%)
 - ~195 новых тестов: Commands null guards, Tools Reset(), Grid edge cases, Services, Models, MainViewModel, FontMetrics, TemplateObjectBase, NonZeroToVisibilityConverter, CustomSheetDialogViewModel, ShortcutRegistry
-- Template.Clone() вЂ” deep copy с Metadata, Sheet и Objects
+- Template.Clone() — deep copy с Metadata, Sheet и Objects
 - PointMicrons operator+ и operator- (компонентное сложение/вычитание)
 
 ### Changed
-- AGENTS.md: обновлены счС‘тчики тестов (2035) и покрытие (75.15%)
+- AGENTS.md: обновлены счётчики тестов (2035) и покрытие (75.15%)
 
 ### Fixed
 - CI: Added missing `--configuration Release` to Build step in `opencode-pipeline.yml` — was causing test failures due to Debug/Release mismatch
 - README.md: повторное исправление кодировки (UTF-8 double-encoding / mojibake)
-- README.md: исправлена кодировка (UTF-8 double-encoding / mojibake) вЂ” восстановлены русский текст и эмодзи
-- H1: `AutosaveService` event `Action?` в†’ `Func<Task>?` + `InvokeAsync` in `IDispatcherService` (eliminates async-void in `MainViewModel`)
+- README.md: исправлена кодировка (UTF-8 double-encoding / mojibake) — восстановлены русский текст и эмодзи
+- H1: `AutosaveService` event `Action?` → `Func<Task>?` + `InvokeAsync` in `IDispatcherService` (eliminates async-void in `MainViewModel`)
 - H2: `IValidationService` interface added; `TemplateValidator` uses injectable `IValidationService` instead of static `ValidationService.ValidateHexColor()`
 - H3: `DialogServiceFactory` dead code removed from `IDialogService.cs`
 - H4: `PrintVisualProvider` nulled in `EditorViewModel.Dispose()` (dangling reference cleanup)
 - H5: No-op `Свойства (F4)` MenuItem removed from `EditorCanvas.xaml` context menu
 - TemplateTests.cs: исправлен синтаксис (лишняя закрывающая скобка)
-- Documentation: исправлены 27 ошибок в 9 md-файлах вЂ” битые ссылки на archive, EditorConstants в†’ PhysicalConstants/EditorSettings, устаревшие метрики, XAML-биндинги в docs/09, placeholder URL, фактические ошибки в README, docs/19 динамика покрытия
+- Documentation: исправлены 27 ошибок в 9 md-файлах — битые ссылки на archive, EditorConstants → PhysicalConstants/EditorSettings, устаревшие метрики, XAML-биндинги в docs/09, placeholder URL, фактические ошибки в README, docs/19 динамика покрытия
 - Sprint 60: Inline text editing — AutoFocusOnVisibleBehavior, CanvasInputRouter guards (Escape/Enter during edit), ShortcutRegistry guard (V/L/R/T/E blocked during edit)
 - Sprint 60: `RouteKeyDown` guard for `IsEditing` (matching existing `RoutePreviewKeyDown` guard)
 - Sprint 60: LostFocus → Commit for inline text editor
@@ -44,21 +44,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 62: STA-based unit tests for TabItemMiddleClickBehavior (12 tests) — middle-click-close, button filtering, sender validation, event subscription lifecycle
 - Sprint 62: STA-based unit tests for PreviewLineChangedBehavior (11 tests) — register/unregister, update preview shapes, null preview handling, PropertyChanged flow
 - CI workflow: GitHub Actions (build, test, coverage gate 75%) на `windows-latest`
-- Sprint STA: `WpfContext` helper вЂ” STA-thread dispatcher for WPF unit tests
-- Sprint STA: `TextBoxLostFocusCommandBehaviorTests` вЂ” 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)
-- Sprint STA: `ComboBoxSelectionChangedCommandBehaviorTests` вЂ” 10 tests (DP get/set, OnSelectionChanged via STA)
-- Sprint STA: `ZoomComboBoxBehaviorTests` вЂ” 11 tests (DP get/set, ApplyZoom parsing, events via real EditorViewModel)
-- Sprint STA: `MarkerPositionTests` вЂ” 10 tests (DP get/set for XPropertyPath/YPropertyPath)
+- Sprint STA: `WpfContext` helper — STA-thread dispatcher for WPF unit tests
+- Sprint STA: `TextBoxLostFocusCommandBehaviorTests` — 14 tests (DP get/set, OnLostFocus, OnKeyDown Enter via STA)
+- Sprint STA: `ComboBoxSelectionChangedCommandBehaviorTests` — 10 tests (DP get/set, OnSelectionChanged via STA)
+- Sprint STA: `ZoomComboBoxBehaviorTests` — 11 tests (DP get/set, ApplyZoom parsing, events via real EditorViewModel)
+- Sprint STA: `MarkerPositionTests` — 10 tests (DP get/set for XPropertyPath/YPropertyPath)
 - Sprint STA: 4 behavior files made handlers `internal static` for testability (matching existing CanvasInputRouter pattern)
-- Sprint 54: `IDialogFileService`/`WpfDialogFileService` вЂ” WPF dialog isolation from FileService for CI/testability
+- Sprint 54: `IDialogFileService`/`WpfDialogFileService` — WPF dialog isolation from FileService for CI/testability
 - Sprint 54: FileService now delegates `OpenFileDialog()`/`SaveFileDialog()` to `IDialogFileService` (optional DI)
 - Sprint 54: 5 dialog tests rewritten with `Mock<IDialogFileService>` (zero UI calls in headless)
-- Sprint 53: `IDateTimeProvider`/`DateTimeProvider` вЂ” abstraction over `DateTime.UtcNow`, injected into 3 services
-- Sprint 53: `MarkerPosition` attached behavior вЂ” `XPropertyPath`/`YPropertyPath` auto-create Canvas.Left/Top MultiBindings (XAML markers reduced from 250в†’40 lines)
-- Sprint 53: `EditorCanvasBehaviorTests` вЂ” 18 unit tests for `ToToolMouseButton`, `ToToolModifiers`, `ToToolKey`
-- Sprint 53: `[InternalsVisibleTo]` вЂ” methods changed from `private` to `internal static` for testability
+- Sprint 53: `IDateTimeProvider`/`DateTimeProvider` — abstraction over `DateTime.UtcNow`, injected into 3 services
+- Sprint 53: `MarkerPosition` attached behavior — `XPropertyPath`/`YPropertyPath` auto-create Canvas.Left/Top MultiBindings (XAML markers reduced from 250→40 lines)
+- Sprint 53: `EditorCanvasBehaviorTests` — 18 unit tests for `ToToolMouseButton`, `ToToolModifiers`, `ToToolKey`
+- Sprint 53: `[InternalsVisibleTo]` — methods changed from `private` to `internal static` for testability
 - Sprint 53: All `Thread.Sleep` removed from test code (5 files, ~2310ms total), replaced with `Mock<IDateTimeProvider>`
-- Sprint 52: Free rotation for text (0-359В°, `cos`/`sin` math in `ContainsPoint`/`GetBoundingBox`)
+- Sprint 52: Free rotation for text (0-359°, `cos`/`sin` math in `ContainsPoint`/`GetBoundingBox`)
 - Sprint 52: GOST font names fixed (`#GOST Type AU`/`BU`) with FontNameToFamilyConverter
 - Sprint 52: Double-click inline text editing with rotation-aligned TextBox
 - Sprint 51: Panning `CaptureMouse()`/`ReleaseMouseCapture()` for stable drag outside canvas
@@ -73,7 +73,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 44: `PropertiesViewModel` subscribes to `INotifyPropertyChanged` on selected object
 - Sprint 44: Text INPC for all properties (FontSizeMicrons, Content, FontName, TextType, RotationAngle)
 - Sprint 43: `GetCurrentTool()` `case "Resize"` dispatch fix
-- Sprint 42: `StrokeThicknessMicrons` end-to-end (default 500Вµ = 0.5mm, converter + INPC)
+- Sprint 42: `StrokeThicknessMicrons` end-to-end (default 500µ = 0.5mm, converter + INPC)
 - Sprint 41: Drag delta from saved initial position (`_initialPositions[obj]`), fixes drift
 - Sprint 41: Text INPC implementations (MicronsX/Y backing fields + Right/Bottom/Center notifications)
 - Sprint 40: Layout-independent keyboard shortcuts via `PreviewKeyDown` (V/L/R/T, E/Shift+E)
@@ -88,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 37: Preview shape re-assign pattern (create once, update in MouseMove, re-assign reference)
 - Sprint 37: `SelectionVersion` (int) for binding re-evaluation
 - Sprint 37: `OnPropertyChanged(nameof(Zoom))` in `OnZoomChangedInternal`
-- Sprint 37: Escape в†’ `ActiveTool = "Select"` in all tools
+- Sprint 37: Escape → `ActiveTool = "Select"` in all tools
 - Sprint 31: Decomposed EditorViewModel into 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 - Sprint 31: 21 new manager unit tests
 
@@ -96,13 +96,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sprint 38: DrawingRectangleTool `CalculateRectangle()` accepts lineType parameter
 - Sprint 37: `ToModelPoint()` no longer subtracts PanOffset (e.GetPosition already accounts for RenderTransform)
 - Sprint 28: Split `CommonConverters.cs` into 16 individual converter files
-- Sprint 28: Renamed `ITemplateObject` в†’ `TemplateObjectBase` across 50+ files
+- Sprint 28: Renamed `ITemplateObject` → `TemplateObjectBase` across 50+ files
 - Sprint 27: `EditorViewModel` reduced from ~1037 to ~700 lines (-32%)
 - Documentation: XAML-биндинги в docs/09_UI_решения.md обновлены до manager-свойств (после R3.1/A.2)
 
 ### Fixed
 - Sprint 41: Drag delta accumulation (was `obj.MicronsX + delta`, now `initialPos + delta`)
-- Sprint 40: Tool switching not working with Russian keyboard layout (InputBindings в†’ PreviewKeyDown)
+- Sprint 40: Tool switching not working with Russian keyboard layout (InputBindings → PreviewKeyDown)
 - Sprint 40: `SetActiveTool()` bypassing `ActiveTool` setter (no `OnPropertyChanged`)
 - Sprint 39: Rectangle interior area selectable (now border-band only)
 - Sprint 38: ComboBox not showing current LineType value (missing SelectedIndex binding)
@@ -159,7 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.1.0] вЂ” 2026-04-01
+## [0.1.0] — 2026-04-01
 
 ### Added
 - Initial release of DotElectric Template Editor

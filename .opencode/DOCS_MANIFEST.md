@@ -227,3 +227,4 @@ PASS | FAIL
 | 2026-07-20 | Initial creation (15 files, 6 metrics, 8 rules) | Phase 5 docs consistency fix |
 | 2026-08-01 | Removed `docs/1.md` (orphan deleted), registered `docs/plan_next_steps.md` | Docs hygiene |
 | 2026-08-10 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "AppSettings → GridSettings chain": test_count 2160, coverage 76.4%) | Sprint docs sync |
+| 2026-08-10 | CHANGELOG.md: исправлен UTF-8 double-encoding (mojibake) в старых строках (21 строка: в†’→→, вЂ”→—, В°→°, Вµ→µ, С‘→ё); BOM/CRLF сохранены, метрики не менялись | Encoding fix (backlog docs/plan_next_steps.md Задача 2) |
