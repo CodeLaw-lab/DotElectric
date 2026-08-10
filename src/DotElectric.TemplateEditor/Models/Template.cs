@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Models;
@@ -7,9 +8,13 @@ namespace DotElectric.TemplateEditor.Models;
 /// Корневая модель шаблона листов.
 /// Содержит метаданные, параметры листа, сетку по умолчанию и коллекцию объектов.
 /// Модель создаётся один раз и не заменяется после создания (иммутабельна после инициализации).
+/// INPC реализован для <see cref="Sheet"/>, чтобы подписчики (GridManager) могли
+/// реагировать на смену формата листа.
 /// </summary>
-public class Template
+public class Template : ObservableObject
 {
+    private Sheet _sheet;
+
     /// <summary>
     /// Версия формата файла.
     /// </summary>
@@ -23,7 +28,11 @@ public class Template
     /// <summary>
     /// Параметры листа.
     /// </summary>
-    public Sheet Sheet { get; set; }
+    public Sheet Sheet
+    {
+        get => _sheet;
+        set => SetProperty(ref _sheet, value);
+    }
 
     /// <summary>
     /// Сетка по умолчанию (фиксированная, 5 мм, readonly).
@@ -42,7 +51,7 @@ public class Template
     public Template()
     {
         Metadata = new Metadata();
-        Sheet = Sheet.FromFormat("A3");
+        _sheet = Sheet.FromFormat("A3");
         Objects = new ObservableCollection<TemplateObjectBase>();
     }
 
@@ -89,7 +98,7 @@ public class Template
     public Template(Metadata metadata, Sheet sheet)
     {
         Metadata = metadata;
-        Sheet = sheet;
+        _sheet = sheet;
         Objects = new ObservableCollection<TemplateObjectBase>();
     }
 }

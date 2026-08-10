@@ -126,6 +126,18 @@ public sealed class SettingsService : ISettingsService
                 if (typeof(T) == typeof(double))
                     return (T)(object)settings.GridStepMm;
                 break;
+            case "GridMaxNodes":
+                if (typeof(T) == typeof(int))
+                    return (T)(object)settings.GridMaxNodes;
+                break;
+            case "GridNodeColor":
+                if (typeof(T) == typeof(string))
+                    return (T)(object)settings.GridNodeColor!;
+                break;
+            case "GridNodeSize":
+                if (typeof(T) == typeof(double))
+                    return (T)(object)settings.GridNodeSize;
+                break;
             case "DefaultZoom":
                 if (typeof(T) == typeof(double))
                     return (T)(object)settings.DefaultZoom;
@@ -185,6 +197,15 @@ public sealed class SettingsService : ISettingsService
                 break;
             case "GridStepMm":
                 if (value is double doubleVal) settings.GridStepMm = doubleVal;
+                break;
+            case "GridMaxNodes":
+                if (value is int intVal2) settings.GridMaxNodes = intVal2;
+                break;
+            case "GridNodeColor":
+                settings.GridNodeColor = value as string;
+                break;
+            case "GridNodeSize":
+                if (value is double doubleVal3) settings.GridNodeSize = doubleVal3;
                 break;
             case "DefaultZoom":
                 if (value is double doubleVal2) settings.DefaultZoom = doubleVal2;

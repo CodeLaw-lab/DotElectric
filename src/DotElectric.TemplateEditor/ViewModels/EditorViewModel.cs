@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Behaviors;
 using DotElectric.TemplateEditor.Commands;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
@@ -38,6 +39,8 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     private readonly StatusBarManager _statusBarManager;
     private readonly GridManager _gridManager;
     private readonly DirtyStateManager _dirtyStateManager;
+    private readonly IGridNodeGenerator _gridNodeGenerator;
+    private readonly IThemeService? _themeService;
 
     // All PropertyChanged handlers are now managed by individual managers.
     // No forwarding from Manager → EditorViewModel is needed since XAML binds directly.
@@ -124,6 +127,13 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// Настройки сетки (НЕ сериализуются — состояние редактора).
     /// </summary>
     public GridSettings GridSettings { get; }
+
+    /// <summary>
+    /// Текущая тема — тёмная. Используется для темо-зависимого цвета узлов сетки.
+    /// </summary>
+    public bool IsDarkTheme => _themeService?.CurrentTheme == "Dark";
+
+    private void OnThemeChanged(string _) => OnPropertyChanged(nameof(IsDarkTheme));
 
     // === Свойства состояния ===
 
@@ -495,7 +505,9 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         Template template,
         ITemplateService templateService,
         GridSettings? gridSettings = null,
-        IPrintService? printService = null)
+        IPrintService? printService = null,
+        IGridNodeGenerator? gridNodeGenerator = null,
+        IThemeService? themeService = null)
     {
         _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
         _printService = printService ?? throw new ArgumentNullException(nameof(printService));
@@ -503,11 +515,16 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         _commandHistory = new CommandHistory(maxLevels: EditorSettings.CommandHistoryMaxLevels, markDirty: MarkDirty);
         TabId = Guid.NewGuid().ToString("N")[..12];
         GridSettings = gridSettings ?? GridSettings.FromDefaultGrid();
+        _gridNodeGenerator = gridNodeGenerator ?? new GridNodeGenerator();
+        _themeService = themeService;
+
+        if (_themeService != null)
+            _themeService.ThemeChanged += OnThemeChanged;
 
         // Инициализация менеджеров
         _selectionManager = new SelectionManager(OnSelectionChangedInternal);
         _zoomPanManager = new ZoomPanManager(Template, () => { }, () => { });
-        _gridManager = new GridManager(Template, GridSettings, _zoomPanManager);
+        _gridManager = new GridManager(Template, GridSettings, _zoomPanManager, _gridNodeGenerator);
         _zoomPanManager.SetGridRefreshCallback(_gridManager.RefreshGridNodes);
         _clipboardManager = new ClipboardManager();
         _toolManager = new ToolManager(this);
@@ -568,8 +585,10 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         string filePath,
         ITemplateService templateService,
         GridSettings? gridSettings = null,
-        IPrintService? printService = null)
-        : this(template, templateService, gridSettings, printService)
+        IPrintService? printService = null,
+        IGridNodeGenerator? gridNodeGenerator = null,
+        IThemeService? themeService = null)
+        : this(template, templateService, gridSettings, printService, gridNodeGenerator, themeService)
     {
         _dirtyStateManager.FilePath = filePath;
         _dirtyStateManager.DisplayName = System.IO.Path.GetFileName(filePath);
@@ -802,8 +821,12 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         // PropertyChanged подписки на менеджеры не требуют отписки — все они живут в том же
         // EditorViewModel и умирают вместе с ним. PreviewLineChangedBehavior — отдельная отписка.
 
+        if (_themeService != null)
+            _themeService.ThemeChanged -= OnThemeChanged;
+
         PreviewLineChangedBehavior.Unregister(this);
         _selectionManager.Dispose();
+        _gridManager.Dispose();
         PropertiesVm.Dispose();
         _clipboardManager.Clear();
         PrintVisualProvider = null;

@@ -12,6 +12,11 @@ public interface IThemeService
     string CurrentTheme { get; }
 
     /// <summary>
+    /// Вызывается после успешной смены темы. Аргумент — новая тема ("Light"/"Dark").
+    /// </summary>
+    event Action<string>? ThemeChanged;
+
+    /// <summary>
     /// Применить тему.
     /// </summary>
     /// <param name="theme">"Light" или "Dark".</param>
