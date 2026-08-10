@@ -2,21 +2,19 @@
 
 ## Git Operations
 - Repo: D:\dotElectricTest (CodeLaw-lab/DotElectric)
-- Base: main @ 93d8c8a (Merge PR #27, grid refactoring)
-- Branch: feature/grid-settings-appchain (created from main, pushed, upstream set)
-- Status: branch ready for work
+- Main: 477a46c (Merge PR #28, grid-settings-appchain) — fast-forwarded from 93d8c8a
+- Develop: c094125 (Merge PR #29 from main, includes PR #28) — fast-forwarded from f2d5bc7
+- Status: PR #28 MERGED, develop synced, feature branch deleted, current branch: main
 
-## Implementation (implementor)
-- [x] `GridSettings.FromAppSettings(AppSettings)` — static factory с clamping (StepMicrons ≥ 1 мкм, MaxGridNodes ≥ 1, NodeSize > 0 и не NaN)
-- [x] `EditorViewModelFactory` — опциональный `ISettingsService`, `ResolveGridSettings()` (gridSettings → AppSettings → FromDefaultGrid), применён в `Create` и `CreateWithFilePath`
-- Build: 0 errors, 0 warnings (основной проект + slnx + тестовый проект)
-- Tests: 18/18 (EditorViewModelFactoryTests + GridSettings) — пройдены
-- НЕ закоммичено (gh-ops позже)
+## GitHub (gh-ops, 10.08.2026)
+- PR #28: state=MERGED (mergedBy CodeLaw-lab @ 2026-08-10T20:35:46Z, merge commit 477a46c)
+  - CI: build-and-test SUCCESS (actions/runs/31429078082) + Build & Test SUCCESS (actions/runs/31429078164)
+  - mergeStateStatus: UNKNOWN (post-merge, no actionable status)
+- Remote branch feature/grid-settings-appchain: deleted manually via `git push origin --delete` (gh pr merge --delete-branch reported "already merged" without deleting)
+- Develop sync: `git merge origin/main` → "Already up to date" (main fully merged into develop via PR #29)
+- Push to develop: not required (local fast-forward to origin/develop)
 
-## Testing (tester) — 3 недостающих теста по ревью
-- [x] `FromAppSettings_MaxGridNodesOne_IsPreserved` (TemplateTests.cs → GridSettingsTests) — мин. бюджет 1 сохраняется
-- [x] `FromAppSettings_NodeSizePositiveInfinity_FallsBackToDefault` (TemplateTests.cs → GridSettingsTests) — ветка Infinity покрыта
-- [x] `CreateWithFilePath_WithExplicitGridSettings_ExplicitWinsAndLoadNotCalled` (EditorViewModelFactoryTests.cs) — explicit wins, Load() не вызывается
-- Filtered run `GridSettings|EditorViewModelFactoryTests`: 38/38 passed
-- Full run: 2159 passed, 0 failed, 1 pre-existing skip (Validate_DuplicateIds_ReturnsError), total 2160
-- Production-код НЕ менялся. НЕ закоммичено.
+## Implementation (implementor) — completed, merged via PR #28
+- [x] `GridSettings.FromAppSettings(AppSettings)` — static factory with clamping
+- [x] `EditorViewModelFactory.ResolveGridSettings()` — gridSettings → AppSettings → FromDefaultGrid
+- [x] Tests: 2159 passed, 0 failed, 1 pre-existing skip (total 2160); coverage 76.4%
