@@ -1201,6 +1201,91 @@ public class TextToolTests
 
         Assert.False(result);
     }
+
+    // ============= Snap =============
+
+    [Fact]
+    public void LeftClick_WithSnapEnabled_SnapsPositionToGrid()
+    {
+        var vm = CreateViewModel();
+        vm.GridSettings.SnapEnabled = true;
+        vm.GridSettings.StepMicrons = 5000;
+        var tool = new TextTool(vm);
+
+        tool.OnMouseDown(new PointMicrons(12000, 13000), ToolMouseButton.Left, ToolModifiers.None);
+        tool.OnMouseUp(new PointMicrons(12000, 13000), ToolMouseButton.Left, ToolModifiers.None);
+
+        var text = (Text)vm.Template.Objects[0];
+        Assert.Equal(10000, text.MicronsX);
+        Assert.Equal(15000, text.MicronsY);
+    }
+
+    // ============= SetFontSize / SetDefaultContent no-op =============
+
+    [Fact]
+    public void SetFontSize_NonPositive_DoesNotChangeFontSize()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.SetFontSize(0);
+
+        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+
+        var text = (Text)vm.Template.Objects[0];
+        Assert.Equal(DotElectric.TemplateEditor.Constants.EditorSettings.DefaultFontSizeMicrons, text.FontSizeMicrons);
+    }
+
+    [Fact]
+    public void SetDefaultContent_Whitespace_DoesNotChangeContent()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+        tool.SetDefaultContent("   ");
+
+        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+
+        var text = (Text)vm.Template.Objects[0];
+        Assert.Equal("Текст", text.Content);
+    }
+
+    // ============= MouseUp / Escape guards =============
+
+    [Fact]
+    public void OnMouseUp_WithoutMouseDown_DoesNotCreateObject()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        tool.OnMouseUp(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Empty(vm.Template.Objects);
+    }
+
+    [Fact]
+    public void OnKeyDown_Escape_WhenNotDrawing_SwitchesToSelect()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
+
+        Assert.True(result);
+        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Null(vm.PreviewText);
+    }
+
+    [Fact]
+    public void OnMouseUp_RightButton_DoesNotCreateObject()
+    {
+        var vm = CreateViewModel();
+        var tool = new TextTool(vm);
+
+        tool.OnMouseUp(new PointMicrons(1000, 2000), ToolMouseButton.Right, ToolModifiers.None);
+
+        Assert.Empty(vm.Template.Objects);
+    }
 }
 
 public class SelectToolDragTests

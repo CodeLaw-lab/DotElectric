@@ -1,4 +1,5 @@
 using DotElectric.TemplateEditor.Constants;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels;
@@ -237,5 +238,47 @@ public class EditorViewModelFactoryTests
         factory.Create(template);
 
         mockSettingsService.Verify(s => s.Load(), Times.Once);
+    }
+
+    [Fact]
+    public void Create_SettingsServiceLoadReturnsNull_FallsBackToDefaults()
+    {
+        var mockSettingsService = new Mock<ISettingsService>();
+        mockSettingsService.Setup(s => s.Load()).Returns((AppSettings)null!);
+        var factory = new EditorViewModelFactory(_serviceProvider, settingsService: mockSettingsService.Object);
+        var template = new Template();
+
+        var vm = factory.Create(template);
+
+        Assert.NotNull(vm);
+        Assert.True(vm.GridSettings.Enabled);
+        Assert.Equal(Grid.Default.StepMicrons, vm.GridSettings.StepMicrons);
+    }
+
+    [Fact]
+    public void Create_WithConstructorThemeService_AppliesTheme()
+    {
+        var mockThemeService = new Mock<IThemeService>();
+        mockThemeService.Setup(t => t.CurrentTheme).Returns("Dark");
+        var factory = new EditorViewModelFactory(_serviceProvider, themeService: mockThemeService.Object);
+        var template = new Template();
+
+        var vm = factory.Create(template);
+
+        Assert.NotNull(vm);
+        Assert.True(vm.IsDarkTheme);
+    }
+
+    [Fact]
+    public void CreateWithFilePath_WithConstructorGridNodeGenerator_Works()
+    {
+        var mockGridNodeGenerator = new Mock<IGridNodeGenerator>();
+        var factory = new EditorViewModelFactory(_serviceProvider, gridNodeGenerator: mockGridNodeGenerator.Object);
+        var template = new Template();
+
+        var vm = factory.CreateWithFilePath(template, @"C:\test\template.tdel");
+
+        Assert.NotNull(vm);
+        Assert.Equal(@"C:\test\template.tdel", vm.DirtyStateManager.FilePath);
     }
 }

@@ -591,6 +591,69 @@ public class InlineEditManagerTests
         _commandHistory.Undo();
         Assert.Equal("Original", text.Content);
     }
+
+    [Fact]
+    public void Start_NonEditable_NoOp()
+    {
+        var text = new Text(0, 0, "Original", 2500, isEditable: false);
+
+        _manager.Start(text);
+
+        Assert.Null(_manager.InlineEditingText);
+        Assert.False(_manager.IsEditing);
+    }
+
+    [Fact]
+    public void Commit_UnchangedText_NoCommand()
+    {
+        var text = new Text(0, 0, "Original", 2500);
+        _manager.Start(text);
+        _manager.InlineEditText = "Original";
+
+        _manager.Commit();
+
+        Assert.False(_commandHistory.CanUndo);
+        Assert.False(_manager.IsEditing);
+    }
+
+    [Fact]
+    public void Commit_Twice_PushesSingleCommand()
+    {
+        var text = new Text(0, 0, "Original", 2500);
+        _manager.Start(text);
+        _manager.InlineEditText = "Modified";
+
+        _manager.Commit();
+        _manager.Commit();
+
+        Assert.False(_commandHistory.CanRedo);
+        _commandHistory.Undo();
+        Assert.Equal("Original", text.Content);
+        Assert.False(_commandHistory.CanUndo);
+    }
+
+    [Fact]
+    public void Cancel_WhenNotEditing_NoThrow()
+    {
+        var ex = Record.Exception(() => _manager.Cancel());
+
+        Assert.Null(ex);
+        Assert.False(_manager.IsEditing);
+    }
+
+    [Fact]
+    public void Start_WhileEditing_SwitchesObject()
+    {
+        var first = new Text(0, 0, "First", 2500);
+        var second = new Text(0, 0, "Second", 2500);
+        _manager.Start(first);
+
+        _manager.Start(second);
+
+        Assert.Same(second, _manager.InlineEditingText);
+        Assert.Equal("Second", _manager.InlineEditText);
+        Assert.True(_manager.IsEditing);
+    }
 }
 
 // ==================== StatusBarManager ====================

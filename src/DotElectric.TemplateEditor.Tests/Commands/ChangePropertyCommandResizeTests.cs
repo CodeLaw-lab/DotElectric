@@ -3,7 +3,7 @@ using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Tests.Commands;
 
-public class CustomResizeCommandTests
+public class ChangePropertyCommandResizeTests
 {
     // ===== Rectangle Tests =====
 
@@ -312,5 +312,103 @@ public class CustomResizeCommandTests
         Assert.Equal(500_000, rect.MicronsY);
         Assert.Equal(200_000, rect.WidthMicrons);
         Assert.Equal(100_000, rect.HeightMicrons);
+    }
+
+    // ===== Undo + markDirty callback =====
+
+    [Fact]
+    public void Undo_Line_CallsMarkDirty()
+    {
+        var dirtyCalled = false;
+        var line = new Line(0, 0, 1000, 1000);
+        var cmd = new ChangePropertyCommand<ResizeState>(
+            new ResizeState(0, 0, 1000, 1000),
+            s => line.ApplyResize(s),
+            new ResizeState(5000, 3000, 4000, 2000),
+            "размер",
+            () => dirtyCalled = true);
+        cmd.Execute();
+        dirtyCalled = false;
+
+        cmd.Undo();
+
+        Assert.True(dirtyCalled);
+        Assert.Equal(0, line.StartMicronsX);
+    }
+
+    [Fact]
+    public void Undo_Rectangle_CallsMarkDirty()
+    {
+        var dirtyCalled = false;
+        var rect = new Rectangle(0, 0, 1000, 1000);
+        var cmd = new ChangePropertyCommand<ResizeState>(
+            new ResizeState(0, 0, 1000, 1000),
+            s => rect.ApplyResize(s),
+            new ResizeState(5000, 3000, 4000, 2000),
+            "размер",
+            () => dirtyCalled = true);
+        cmd.Execute();
+        dirtyCalled = false;
+
+        cmd.Undo();
+
+        Assert.True(dirtyCalled);
+        Assert.Equal(0, rect.MicronsX);
+    }
+
+    [Fact]
+    public void Undo_Text_CallsMarkDirty()
+    {
+        var dirtyCalled = false;
+        var text = new Text(0, 0, "Test", 2500);
+        var cmd = new ChangePropertyCommand<ResizeState>(
+            new ResizeState(0, 0, 0, 2500),
+            s => text.ApplyResize(s),
+            new ResizeState(5000, 3000, 0, 3500),
+            "размер",
+            () => dirtyCalled = true);
+        cmd.Execute();
+        dirtyCalled = false;
+
+        cmd.Undo();
+
+        Assert.True(dirtyCalled);
+        Assert.Equal(2500, text.FontSizeMicrons);
+    }
+
+    // ===== Getter-constructor =====
+
+    [Fact]
+    public void GetterConstructor_CapturesCurrentValueOnCreate()
+    {
+        var rect = new Rectangle(0, 0, 1000, 1000);
+        var cmd = new ChangePropertyCommand<ResizeState>(
+            () => new ResizeState(rect.MicronsX, rect.MicronsY, rect.WidthMicrons, rect.HeightMicrons),
+            s => rect.ApplyResize(s),
+            new ResizeState(5000, 3000, 4000, 2000),
+            "размер");
+        rect.ApplyResize(new ResizeState(1111, 2222, 3333, 4444));
+
+        cmd.Execute();
+        cmd.Undo();
+
+        // Undo возвращает значение, захваченное в момент создания команды (0,0,1000,1000)
+        Assert.Equal(0, rect.MicronsX);
+        Assert.Equal(0, rect.MicronsY);
+        Assert.Equal(1000, rect.WidthMicrons);
+        Assert.Equal(1000, rect.HeightMicrons);
+    }
+
+    [Fact]
+    public void Name_ForCustomProperty_IsCorrect()
+    {
+        var rect = new Rectangle(0, 0, 1000, 1000);
+        var cmd = new ChangePropertyCommand<ResizeState>(
+            new ResizeState(0, 0, 1000, 1000),
+            s => rect.ApplyResize(s),
+            new ResizeState(5000, 3000, 4000, 2000),
+            "позиция");
+
+        Assert.Equal("Изменить позиция", cmd.Name);
     }
 }

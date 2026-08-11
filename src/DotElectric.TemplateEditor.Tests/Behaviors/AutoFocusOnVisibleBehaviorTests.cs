@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using DotElectric.TemplateEditor.Behaviors;
 using DotElectric.TemplateEditor.Tests.Helpers;
 
@@ -43,20 +44,61 @@ public class AutoFocusOnVisibleBehaviorTests
     }
 
     [Fact]
-    public void IsEnabledTrue_RegistersIsVisibleChanged()
+    public void VisibleTextBox_BecomesFocused()
     {
         WpfContext.Execute(() =>
         {
+            var window = new Window { Width = 200, Height = 100 };
             var textBox = new TextBox();
+            window.Content = textBox;
             AutoFocusOnVisibleBehavior.SetIsEnabled(textBox, true);
 
-            // Toggle visibility to trigger the handler
-            textBox.Visibility = Visibility.Visible;
-            textBox.Visibility = Visibility.Collapsed;
-            textBox.Visibility = Visibility.Visible;
+            try
+            {
+                window.Show();
+                window.Activate();
+                window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-            // If we got here without exception, the handler was registered and fired
-            Assert.True(AutoFocusOnVisibleBehavior.GetIsEnabled(textBox));
+                // Headless CI: focus может не успеть установиться за один pump —
+                // повторяем Activate + pump один раз, затем проверяем.
+                if (!textBox.IsFocused)
+                {
+                    window.Activate();
+                    window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+                }
+
+                Assert.True(textBox.IsFocused);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public void VisibleTextBox_SelectsAllText()
+    {
+        WpfContext.Execute(() =>
+        {
+            var window = new Window { Width = 200, Height = 100 };
+            var textBox = new TextBox { Text = "Some text" };
+            window.Content = textBox;
+            AutoFocusOnVisibleBehavior.SetIsEnabled(textBox, true);
+
+            try
+            {
+                window.Show();
+                window.Activate();
+                window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
+
+                Assert.Equal(9, textBox.SelectionLength);
+                Assert.Equal("Some text", textBox.SelectedText);
+            }
+            finally
+            {
+                window.Close();
+            }
         });
     }
 }

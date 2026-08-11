@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Grid Refactoring завершён; follow-up AppSettings → GridSettings chain реализован (10.08.2026).** Статический `GridHelper` полностью заменён на `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton). Узлы сетки генерируются в **абсолютных координатах листа** (0,0 = нижний левый угол) для всей площади листа — панорамирование не вызывает регенерацию (RenderTransform двигает сетку бесплатно). Defense-in-depth coarsen: сетка никогда не исчезает молча из-за бюджета `MaxGridNodes`. `Template` переведён на `ObservableObject` (INPC на `Sheet` → регенерация сетки при смене формата). Добавлены настройки сетки `MaxGridNodes`/`NodeColor`/`NodeSize` + 3 поля в Settings UI. Темо-зависимый цвет узлов (Light #C0C0C0 / Dark #808080) через `IThemeService.ThemeChanged`. **Цепочка настройки → вкладки замкнута:** `GridSettings.FromAppSettings(AppSettings)` (static factory, 6 полей + clamping) + `EditorViewModelFactory.ResolveGridSettings()` (explicit gridSettings → AppSettings → FromDefaultGrid, опциональный `ISettingsService?` в ctor) — настройки сетки из Settings UI (ShowGrid/SnapToGrid/GridStepMm/GridMaxNodes/GridNodeColor/GridNodeSize) применяются ко всем новым и открытым вкладкам (Create, CreateWithFilePath; TabOperationsService: CreateNewTab, OpenFileAsync, OpenFromFilePath, CreateNewCustomTab). Ранее: архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
+**Sprint "Tech debt + coverage" завершён (11.08.2026): line-rate 80.22% (было 76.4%).** Text markers tech debt закрыт — regression-тест `RotatedCorners_AllLieOnBoundingBoxEdges` (6 углов: 0/45/90/135/180/270°) подтверждает, что маркеры выделения (RotatedCorner0-3) лежат на границе `GetBoundingBox()`; `TextSelectionMarkerBehavior` не существует, пустой `<Canvas/>` внутри DataTemplate Text удалён, маркеры Text рендерятся в ItemsControl через `MarkerPosition` (RotatedCorner0-3X/Y). Inline edit защищён guards: +5 тестов InlineEditManager (Start_NonEditable_NoOp, Commit_UnchangedText_NoCommand, Commit_Twice_PushesSingleCommand, Cancel_WhenNotEditing_NoThrow, Start_WhileEditing_SwitchesObject) + 2 STA-теста AutoFocusOnVisibleBehavior (реальный фокус + SelectAll). Тестируемая логика изолирована в `internal static` в 5 WPF-обёртках (`WpfMessageBoxProvider`: ToWpfButtons/ToWpfIcon/ToMsgrResult; `WpfDispatcherService`: ctor с `Dispatcher?`; `WpfDialogFileService`: CreateOpenDialog/CreateSaveDialog; `WpfDialogHostService`: ResolveWindowDescriptor; `ThemeDictionaryManager`: FindThemeDictionary) + 27 новых тестов (WpfMessageBoxProviderTests 11, WpfDispatcherServiceTests 3 STA, WpfDialogFileServiceTests 6 STA, WpfDialogHostServiceTests 2, ThemeDictionaryManagerTests 4 STA, PrintDialogFactoryTests 1 STA). Закрыты 6 MINOR-замечаний ревью (удалены misleading-тесты: AutoFocus fake, WpfApplicationLifecycle placeholder, 4 FitToPageScale тавтологии; CustomResizeCommandTests → ChangePropertyCommandResizeTests; ThemeDictionaryManagerTestCollection DisableParallelization; AutoFocus retry-Activate). Ранее: цепочка настройки → вкладки замкнута — `GridSettings.FromAppSettings(AppSettings)` + `EditorViewModelFactory.ResolveGridSettings()` (explicit → AppSettings → FromDefaultGrid) применяют настройки сетки ко всем новым/открытым вкладкам; архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -28,9 +28,12 @@
 | **GridHelper** | **static class** | **IGridNodeGenerator/GridNodeGenerator (DI Singleton)** |
 | **Grid nodes** | **viewport-координаты + регенерация на pan** | **абсолютные координаты листа, pan = RenderTransform** |
 | **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
+| **Text markers tech debt** | **открыт (Sprint 61: маркеры смещены при повороте)** | **закрыт: regression-тест RotatedCorners_AllLieOnBoundingBoxEdges (6 углов), маркеры на границе GetBoundingBox()** |
+| **WPF-обёртки** | **private логика (нетестируема)** | **internal static handlers + 27 тестов (unit + STA)** |
+| **Coverage** | **76.4% line-rate** | **80.22% line-rate (≥80% достигнут)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2160 total (2159 passed, 1 pre-existing skip)
+**Tests:** 2295 total (2294 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -49,10 +52,9 @@
 
 ### Что не вошло / отложено
 - ~~TabItemMiddleClickBehavior / PreviewLineChangedBehavior — STA-тесты (требуют полного визуального дерева)~~ — решено в Sprint 62
-- **Text markers — tech debt:** исправлен поворот (`RotatedCorner0–3`, `GetBoundingBox`, `HitTestHelper`), но остаются недочёты отображения маркеров: `TextSelectionMarkerBehavior` не используется, пустой `<Canvas/>` внутри DataTemplate Text, маркеры в отдельном ItemsControl вместо внутри DataTemplate
+- ~~**Text markers — tech debt:** исправлен поворот (`RotatedCorner0–3`, `GetBoundingBox`, `HitTestHelper`), но остаются недочёты отображения маркеров: `TextSelectionMarkerBehavior` не используется, пустой `<Canvas/>` внутри DataTemplate Text, маркеры в отдельном ItemsControl вместо внутри DataTemplate~~ — **закрыт в Sprint "Tech debt + coverage" (11.08.2026):** `TextSelectionMarkerBehavior` не существует, пустой `<Canvas/>` удалён, маркеры Text рендерятся в ItemsControl через `MarkerPosition` (RotatedCorner0-3X/Y); regression-тест `RotatedCorners_AllLieOnBoundingBoxEdges` (6 углов: 0/45/90/135/180/270°) подтверждает, что маркеры лежат на границе `GetBoundingBox()`
 - **Inline text editing — tech debt (вся работа с текстом):**
-  - Escape не отменял редактирование — **исправлено** (focus guard в CanvasInputRouter). Остаётся:
-    - TextBox не получает авто-фокус после double-click — если не кликнуть в TextBox, Escape уходит в SelectTool (очищает выделение, редактор остаётся)
+  - Escape не отменял редактирование — **исправлено** (focus guard в CanvasInputRouter). **Guards защищены тестами (Sprint "Tech debt + coverage", 11.08.2026):** +5 тестов InlineEditManager (Start_NonEditable_NoOp, Commit_UnchangedText_NoCommand, Commit_Twice_PushesSingleCommand, Cancel_WhenNotEditing_NoThrow, Start_WhileEditing_SwitchesObject) + 2 STA-теста AutoFocusOnVisibleBehavior (реальный фокус + SelectAll). Остаётся:
     - Enter/Ctrl+Enter/Escape routing relies on fragile WPF event ordering (PreviewKeyDown vs KeyDown) — при изменении CanvasInputRouter или появлении новых child control'ов может сломаться
     - Ручная верификация Escape при редактировании не проведена (таски 2.2, 2.3 в fix-escape-inline-editing)
 
@@ -166,10 +168,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage завершены)
 
-- **Tests:** 2160 (2159 passed, 1 pre-existing skip)
-- **Coverage:** 76.4% line-rate ✅
+- **Tests:** 2295 total (2294 passed, 1 pre-existing skip)
+- **Coverage:** 80.22% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
@@ -1663,4 +1665,42 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2160 total, 2159 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 76.4% line-rate ✅
+
+## Sprint — Tech debt + coverage (11.08.2026)
+
+### Feature TD-1: Text markers tech debt закрыт (regression-тест)
+**Проблема:** После Sprint 61 (LayoutTransform offset) маркеры выделения Text могли смещаться от реальных углов повёрнутого текста — отсутствовал regression-тест, подтверждающий, что RotatedCorner0-3 лежат на границе `GetBoundingBox()`.
+**Решение:** Добавлен theory-тест `RotatedCorners_AllLieOnBoundingBoxEdges` (6 углов: 0/45/90/135/180/270°) в `TextTests.cs` — для каждого угла все 4 маркера (RotatedCorner0X/Y–3X/Y) лежат на границе `GetBoundingBox()`. Подтверждено в коде: `TextSelectionMarkerBehavior` не существует, пустой `<Canvas/>` внутри DataTemplate Text отсутствует, маркеры Text рендерятся в ItemsControl через `MarkerPosition.XPropertyPath/YPropertyPath="RotatedCornerNX/Y"` (EditorCanvas.xaml).
+**Файлы:** `Tests/Models/Objects/TextTests.cs`
+
+### Feature TD-2: Inline edit guards + тесты
+**Решение:** Guards InlineEditManager защищены тестами:
+- +5 тестов: `Start_NonEditable_NoOp`, `Commit_UnchangedText_NoCommand`, `Commit_Twice_PushesSingleCommand`, `Cancel_WhenNotEditing_NoThrow`, `Start_WhileEditing_SwitchesObject` (ManagerTests.cs:596–645)
+- +2 STA-теста AutoFocusOnVisibleBehavior: `VisibleTextBox_BecomesFocused` (реальный фокус через WPF window + retry-Activate при flaky IsFocused в headless CI), `VisibleTextBox_SelectsAllText`
+**Файлы:** `Tests/ViewModels/Managers/ManagerTests.cs`, `Tests/Behaviors/AutoFocusOnVisibleBehaviorTests.cs`
+
+### Feature TD-3: WPF-обёртки — internal static handlers + 27 тестов
+**Проблема:** Тестируемая логика WPF-обёрток была `private` — покрытие обёрток (WpfMessageBoxProvider, WpfDispatcherService, WpfDialogFileService, WpfDialogHostService, ThemeDictionaryManager, PrintDialogFactory) оставалось пробелом (docs/19 «Следующие шаги»).
+**Решение:** Логика изолирована в `internal static` в 5 production-файлах:
+- `WpfMessageBoxProvider`: `ToWpfButtons`, `ToWpfIcon`, `ToMsgrResult`
+- `WpfDispatcherService`: ctor с `Dispatcher? dispatcher = null`
+- `WpfDialogFileService`: `CreateOpenDialog`, `CreateSaveDialog`
+- `WpfDialogHostService`: `ResolveWindowDescriptor`
+- `ThemeDictionaryManager`: `FindThemeDictionary`
++27 новых тестов: WpfMessageBoxProviderTests (11), WpfDispatcherServiceTests (3 STA), WpfDialogFileServiceTests (6 STA), WpfDialogHostServiceTests (2), ThemeDictionaryManagerTests (4 STA), PrintDialogFactoryTests (1 STA).
+**Файлы:** production: `Services/WpfMessageBoxProvider.cs`, `Services/WpfDispatcherService.cs`, `Services/WpfDialogFileService.cs`, `Services/WpfDialogHostService.cs`, `Services/ThemeDictionaryManager.cs`; tests: `Tests/Services/Wpf*Tests.cs`, `ThemeDictionaryManagerTests.cs`, `PrintDialogFactoryTests.cs`
+
+### Feature TD-4: Coverage 76.4% → 80.22%
+**Решение:** Покрытие повышено с 76.4% до **80.22% line-rate** (5473/6822, +3.82 п.п., ≥80% gate достигнут). Journey: 76.4% (baseline) → 77.88% (implementor, ~76 тестов) → 80.22% (tester, +65 тестов). Зоны tester: ConverterTests (+13: IsObjectSelectedConverter, FontNameToFamilyConverter, LineLocalConverter/RelativeMicronsToPixelConverter ConvertBack), AutosaveServiceTests (+5), SettingsServiceTests (+6), PropertiesViewModelTests (+41: Text 18 / Rectangle 12 / Line 11, команды через CommandHistory + INPC-forwarding + Dispose). Исправлены 2 неверных теста implementor (порядок чтения PrintableAreaWidth, SetupSequence SettingsViewModel).
+**Файлы:** `Tests/Converters/ConverterTests.cs`, `Tests/Services/AutosaveServiceTests.cs`, `Tests/Services/SettingsServiceTests.cs`, `Tests/ViewModels/PropertiesViewModelTests.cs`, `Tests/Services/PrintServiceTests.cs`, `Tests/ViewModels/SettingsViewModelTests.cs`
+
+### Feature TD-5: 6 MINOR-замечаний ревью закрыты (11.08.2026)
+- Удалены misleading-тесты: AutoFocus fake (`IsEnabledTrue_RegistersIsVisibleChanged`), `WpfApplicationLifecycleTests.cs` (placeholder, git rm), 4 тавтологичных `FitToPageScale_*` + пустой регион Scaling Math (реальное поведение покрыто `PrintServiceStaTests.PrintWithVisual_FitToPage_FrameworkElement_AppliesScale`)
+- `CustomResizeCommandTests.cs` → `ChangePropertyCommandResizeTests.cs` (git mv + rename класса, stale имя)
+- `ThemeDictionaryManagerTests` — `[Collection("ThemeDictionaryManager")]` + `ThemeDictionaryManagerTestCollection.cs` (DisableParallelization, паттерн AutosaveTestCollection)
+- AutoFocus retry-Activate — смягчение flaky `IsFocused` в headless CI (повторный `window.Activate()` + pump один раз)
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2295 total, 2294 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 80.22% line-rate ✅
 

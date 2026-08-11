@@ -1312,3 +1312,126 @@ public class InverseBooleanConverterTests
         Assert.Equal(false, result);
     }
 }
+
+public class IsObjectSelectedConverterTests
+{
+    private readonly IsObjectSelectedConverter _converter = new();
+
+    [Fact]
+    public void Convert_ObjectInList_ReturnsTrue()
+    {
+        var obj = new object();
+        var list = new System.Collections.ObjectModel.ObservableCollection<object> { obj };
+        var result = _converter.Convert(new object[] { obj, list }, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(true, result);
+    }
+
+    [Fact]
+    public void Convert_ObjectNotInList_ReturnsFalse()
+    {
+        var obj = new object();
+        var list = new System.Collections.ObjectModel.ObservableCollection<object>();
+        var result = _converter.Convert(new object[] { obj, list }, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(false, result);
+    }
+
+    [Theory]
+    [InlineData(1)]  // меньше двух значений
+    [InlineData(2)]  // второй элемент не IList
+    public void Convert_InvalidValues_ReturnsFalse(int variant)
+    {
+        var obj = new object();
+        object[] values = variant == 1
+            ? new object[] { obj }
+            : new object[] { obj, "not a list" };
+        var result = _converter.Convert(values, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(false, result);
+    }
+
+    [Fact]
+    public void Convert_NullFirstValue_ReturnsFalse()
+    {
+        var list = new System.Collections.ObjectModel.ObservableCollection<object>();
+        var result = _converter.Convert(new object[] { null!, list }, typeof(bool), null, CultureInfo.InvariantCulture);
+        Assert.Equal(false, result);
+    }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(true, new[] { typeof(bool) }, null, CultureInfo.InvariantCulture));
+    }
+}
+
+public class LineLocalConverterConvertBackTests
+{
+    private readonly LineLocalConverter _converter = new();
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(1.0, new[] { typeof(double) }, "X1", CultureInfo.InvariantCulture));
+    }
+}
+
+public class RelativeMicronsToPixelConverterConvertBackTests
+{
+    private readonly RelativeMicronsToPixelConverter _converter = new();
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(1.0, new[] { typeof(double) }, null, CultureInfo.InvariantCulture));
+    }
+}
+
+public class FontNameToFamilyConverterTests
+{
+    private readonly FontNameToFamilyConverter _converter = new();
+
+    // В MTA-окружении pack URI не резолвится (fallback на системный шрифт),
+    // поэтому проверяем Source — строку URI, которую возвращает конвертер.
+    [Theory]
+    [InlineData("ГОСТ А", "pack://application:,,,/Resources/Fonts/#GOST Type AU")]
+    [InlineData("ГОСТ Б", "pack://application:,,,/Resources/Fonts/#GOST Type BU")]
+    public void Convert_KnownFont_ReturnsGostFamily(string fontName, string expectedSource)
+    {
+        var result = _converter.Convert(fontName, typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
+        var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
+        Assert.Equal(expectedSource, family.Source);
+    }
+
+    [Fact]
+    public void Convert_UnknownFont_ReturnsSegoeUi()
+    {
+        var result = _converter.Convert("Arial", typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
+        var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
+        Assert.Equal("Segoe UI", family.Source);
+    }
+
+    [Fact]
+    public void Convert_NonStringValue_ReturnsSegoeUi()
+    {
+        var result = _converter.Convert(42, typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
+        var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
+        Assert.Equal("Segoe UI", family.Source);
+    }
+
+    [Fact]
+    public void Convert_NullValue_ReturnsSegoeUi()
+    {
+        var result = _converter.Convert(null, typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
+        var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
+        Assert.Equal("Segoe UI", family.Source);
+    }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(new System.Windows.Media.FontFamily("Segoe UI"), typeof(string), null, CultureInfo.InvariantCulture));
+    }
+}

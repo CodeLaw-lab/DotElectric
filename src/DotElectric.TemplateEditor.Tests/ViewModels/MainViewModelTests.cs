@@ -301,6 +301,35 @@ public class MainViewModelTests : IDisposable
         Assert.Empty(_viewModel.OpenedTabs);
     }
 
+    [Fact]
+    public async Task CloseAllTabsCommand_DirtyTabCancel_KeepsOpenTabs()
+    {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(false);
+
+        _viewModel.NewTabCommand.Execute("A4");
+        _viewModel.NewTabCommand.Execute("A3");
+
+        await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
+
+        Assert.Equal(2, _viewModel.OpenedTabs.Count);
+    }
+
+    [Fact]
+    public async Task CloseAllTabsCommand_CallsPromptForEachTab()
+    {
+        _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
+            .ReturnsAsync(true);
+
+        _viewModel.NewTabCommand.Execute("A4");
+        _viewModel.NewTabCommand.Execute("A3");
+        _viewModel.NewTabCommand.Execute("A2");
+
+        await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
+
+        _mockTabOperations.Verify(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()), Times.Exactly(3));
+    }
+
     // ===== CloseOtherTabs =====
 
     [Fact]
@@ -354,6 +383,17 @@ public class MainViewModelTests : IDisposable
     {
         await _viewModel.SaveAllCommand.ExecuteAsync(null);
         _mockTabOperations.Verify(t => t.SaveTabAsync(It.IsAny<EditorViewModel>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SaveAllCommand_WithTabs_SavesAllTabs()
+    {
+        _viewModel.NewTabCommand.Execute("A4");
+        _viewModel.NewTabCommand.Execute("A3");
+
+        await _viewModel.SaveAllCommand.ExecuteAsync(null);
+
+        _mockTabOperations.Verify(t => t.SaveTabAsync(It.IsAny<EditorViewModel>()), Times.Exactly(2));
     }
 
     // ===== SaveAsAsync =====
@@ -426,6 +466,31 @@ public class MainViewModelTests : IDisposable
 
         Assert.Equal("Dark", _viewModel.Theme);
         _mockThemeService.Verify(t => t.ToggleTheme(), Times.Once);
+    }
+
+    [Fact]
+    public void ToggleThemeCommand_RaisesPropertyChanged()
+    {
+        var changed = false;
+        _viewModel.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(MainViewModel.Theme)) changed = true;
+        };
+
+        _viewModel.ToggleThemeCommand.Execute(null);
+
+        Assert.True(changed);
+    }
+
+    // ===== NewTab с суффиксом ориентации =====
+
+    [Fact]
+    public void NewTabCommand_WithOrientationSuffix_PassesThrough()
+    {
+        _viewModel.NewTabCommand.Execute("A4L");
+
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4L", null, "Landscape"), Times.Once);
+        Assert.Single(_viewModel.OpenedTabs);
     }
 
     // ===== Print =====
