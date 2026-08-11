@@ -157,6 +157,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Coverage:** 76.4% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 
+### Added
+- Sprint "Tech debt + coverage": Text markers tech debt закрыт — regression-тест `RotatedCorners_AllLieOnBoundingBoxEdges` (6 углов: 0/45/90/135/180/270°) подтверждает, что маркеры выделения (RotatedCorner0-3) лежат на границе `GetBoundingBox()`; подтверждено: `TextSelectionMarkerBehavior` не существует, пустой `<Canvas/>` внутри DataTemplate Text удалён, маркеры Text рендерятся в ItemsControl через `MarkerPosition` (RotatedCorner0-3X/Y)
+- Sprint "Tech debt + coverage": Inline edit guards защищены тестами — +5 тестов InlineEditManager (Start_NonEditable_NoOp, Commit_UnchangedText_NoCommand, Commit_Twice_PushesSingleCommand, Cancel_WhenNotEditing_NoThrow, Start_WhileEditing_SwitchesObject) + 2 STA-теста AutoFocusOnVisibleBehavior (реальный фокус + SelectAll)
+- Sprint "Tech debt + coverage": WPF-обёртки изолированы — `internal static` handlers в 5 production-файлах (WpfMessageBoxProvider: ToWpfButtons/ToWpfIcon/ToMsgrResult; WpfDispatcherService: ctor с `Dispatcher?`; WpfDialogFileService: CreateOpenDialog/CreateSaveDialog; WpfDialogHostService: ResolveWindowDescriptor; ThemeDictionaryManager: FindThemeDictionary) + 27 тестов (WpfMessageBoxProviderTests 11, WpfDispatcherServiceTests 3 STA, WpfDialogFileServiceTests 6 STA, WpfDialogHostServiceTests 2, ThemeDictionaryManagerTests 4 STA, PrintDialogFactoryTests 1 STA)
+- Sprint "Tech debt + coverage": покрытие повышено до 80.22% (было 76.4%, +3.82 п.п., ≥80% gate) — ConverterTests (+13), AutosaveServiceTests (+5), SettingsServiceTests (+6), PropertiesViewModelTests (+41)
+
+### Changed
+- Sprint "Tech debt + coverage": закрыты 6 MINOR-замечаний ревью — удалены misleading-тесты (AutoFocus fake, WpfApplicationLifecycle placeholder, 4 FitToPageScale тавтологии), `CustomResizeCommandTests.cs` → `ChangePropertyCommandResizeTests.cs`, `ThemeDictionaryManagerTests` + `ThemeDictionaryManagerTestCollection` (DisableParallelization), AutoFocus retry-Activate
+
+### Metrics
+- **Tests:** 2295 total (2294 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 80.22% line-rate ✅
+- **Build:** 0 errors, 0 warnings
+
 ---
 
 ## [0.1.0] — 2026-04-01

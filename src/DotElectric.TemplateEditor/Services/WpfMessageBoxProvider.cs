@@ -11,16 +11,25 @@ public sealed class WpfMessageBoxProvider : IMessageBoxProvider
     public MsgrResult Show(string message, string caption, MsgrButtons buttons, MsgrIcon icon)
     {
         // Этот метод уже вызывается через Dispatcher.Invoke из DialogService
-        var wpfButtons = buttons switch
-        {
-            MsgrButtons.OK => System.Windows.MessageBoxButton.OK,
-            MsgrButtons.OKCancel => System.Windows.MessageBoxButton.OKCancel,
-            MsgrButtons.YesNoCancel => System.Windows.MessageBoxButton.YesNoCancel,
-            MsgrButtons.YesNo => System.Windows.MessageBoxButton.YesNo,
-            _ => System.Windows.MessageBoxButton.OK
-        };
+        var wpfResult = MessageBox.Show(message, caption, ToWpfButtons(buttons), ToWpfIcon(icon));
+        return ToMsgrResult(wpfResult);
+    }
 
-        var wpfIcon = icon switch
+    internal static MessageBoxButton ToWpfButtons(MsgrButtons buttons)
+    {
+        return buttons switch
+        {
+            MsgrButtons.OK => MessageBoxButton.OK,
+            MsgrButtons.OKCancel => MessageBoxButton.OKCancel,
+            MsgrButtons.YesNoCancel => MessageBoxButton.YesNoCancel,
+            MsgrButtons.YesNo => MessageBoxButton.YesNo,
+            _ => MessageBoxButton.OK
+        };
+    }
+
+    internal static MessageBoxImage ToWpfIcon(MsgrIcon icon)
+    {
+        return icon switch
         {
             MsgrIcon.Information => MessageBoxImage.Information,
             MsgrIcon.Warning => MessageBoxImage.Warning,
@@ -28,15 +37,16 @@ public sealed class WpfMessageBoxProvider : IMessageBoxProvider
             MsgrIcon.Question => MessageBoxImage.Question,
             _ => MessageBoxImage.None
         };
+    }
 
-        var wpfResult = MessageBox.Show(message, caption, wpfButtons, wpfIcon);
-
-        return wpfResult switch
+    internal static MsgrResult ToMsgrResult(MessageBoxResult result)
+    {
+        return result switch
         {
-            System.Windows.MessageBoxResult.OK => MsgrResult.OK,
-            System.Windows.MessageBoxResult.Cancel => MsgrResult.Cancel,
-            System.Windows.MessageBoxResult.Yes => MsgrResult.Yes,
-            System.Windows.MessageBoxResult.No => MsgrResult.No,
+            MessageBoxResult.OK => MsgrResult.OK,
+            MessageBoxResult.Cancel => MsgrResult.Cancel,
+            MessageBoxResult.Yes => MsgrResult.Yes,
+            MessageBoxResult.No => MsgrResult.No,
             _ => MsgrResult.None
         };
     }

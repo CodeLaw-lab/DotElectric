@@ -158,4 +158,46 @@ public class SettingsViewModelTests
             a.GridMaxNodes == 100000 &&
             a.GridNodeSize == 4.0)), Times.Once);
     }
+
+    [Fact]
+    public void Confirm_SavesRemainingSettingsFields()
+    {
+        var vm = new SettingsViewModel(_settingsMock.Object);
+        vm.ShowGrid = false;
+        vm.SnapToGrid = false;
+        vm.AutosaveIntervalMinutes = 10;
+        vm.DefaultSheetFormat = "A4";
+        vm.DefaultZoom = 2.0;
+
+        vm.ConfirmCommand.Execute(null);
+
+        _settingsMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.ShowGrid == false &&
+            a.SnapToGrid == false &&
+            a.AutosaveIntervalMinutes == 10 &&
+            a.DefaultSheetFormat == "A4" &&
+            a.DefaultZoom == 2.0)), Times.Once);
+    }
+
+    [Fact]
+    public void Confirm_PreservesFieldsNotExposedInViewModel()
+    {
+        var latest = new AppSettings
+        {
+            LastUsedSheetFormat = "A2",
+            LastUsedSheetOrientation = "Portrait",
+            CustomSettings = new Dictionary<string, string> { ["k"] = "v" }
+        };
+        // Конструктор использует Get(), а не Load() — Load() вызывается ровно один раз, в Confirm().
+        _settingsMock.Setup(s => s.Load()).Returns(latest);
+
+        var vm = new SettingsViewModel(_settingsMock.Object);
+        vm.ConfirmCommand.Execute(null);
+
+        // Поля, которых нет в SettingsViewModel, берутся из актуального Load() и не теряются
+        _settingsMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.LastUsedSheetFormat == "A2" &&
+            a.LastUsedSheetOrientation == "Portrait" &&
+            a.CustomSettings["k"] == "v")), Times.Once);
+    }
 }

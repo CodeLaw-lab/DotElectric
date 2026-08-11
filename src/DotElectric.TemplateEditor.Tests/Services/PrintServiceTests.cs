@@ -1,6 +1,9 @@
+using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.Tests.Helpers;
 using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.Services;
@@ -276,68 +279,121 @@ public class PrintServiceTests
 
     #endregion
 
-    #region Scaling Math — чистые вычисления (без WPF)
+}
 
-    /// <summary>
-    /// Тесты для логики масштабирования FitToPage.
-    /// Формула: scale = Min(printableWidth / elementWidth, printableHeight / elementHeight)
-    /// </summary>
-
-    [Fact]
-    public void FitToPageScale_UniformScaling_CorrectCalculation()
+/// <summary>
+/// STA-тесты PrintService с реальным FrameworkElement (Border):
+/// FitToPage scale, restore RenderTransform, zero-size no-op.
+/// </summary>
+public class PrintServiceStaTests
+{
+    private static (Mock<IPrintDialogFactory> factory, Mock<IPrintDialogWrapper> dialog) CreateMocks()
     {
-        // Область 800x600, элемент 400x300 → scale = Min(2.0, 2.0) = 2.0
-        double printableW = 800.0;
-        double printableH = 600.0;
-        double elementW = 400.0;
-        double elementH = 300.0;
+        var factory = new Mock<IPrintDialogFactory>();
+        var dialog = new Mock<IPrintDialogWrapper>();
+        factory.Setup(f => f.Create()).Returns(dialog.Object);
+        return (factory, dialog);
+    }
 
-        double scale = Math.Min(printableW / elementW, printableH / elementH);
-
-        Assert.Equal(2.0, scale);
+    private static Border CreateMeasuredElement(double width, double height)
+    {
+        var border = new Border { Width = width, Height = height };
+        border.Measure(new Size(width, height));
+        border.Arrange(new Rect(0, 0, width, height));
+        return border;
     }
 
     [Fact]
-    public void FitToPageScale_WidthConstrained_CorrectCalculation()
+    public void PrintWithVisual_FitToPage_FrameworkElement_AppliesScale()
     {
-        // Область 800x600, элемент 200x400 → scaleX=4, scaleY=1.5 → min=1.5
-        double printableW = 800.0;
-        double printableH = 600.0;
-        double elementW = 200.0;
-        double elementH = 400.0;
+        WpfContext.Execute(() =>
+        {
+            var (factory, dialog) = CreateMocks();
+            dialog.SetupGet(d => d.PrintableAreaWidth).Returns(800.0);
+            dialog.SetupGet(d => d.PrintableAreaHeight).Returns(600.0);
+            dialog.Setup(d => d.ShowDialog()).Returns(true);
 
-        double scale = Math.Min(printableW / elementW, printableH / elementH);
+            var border = CreateMeasuredElement(400, 300);
+            ScaleTransform? capturedScale = null;
+            dialog.Setup(d => d.PrintVisual(It.IsAny<Visual>(), It.IsAny<string>()))
+                .Callback(() => capturedScale = border.RenderTransform as ScaleTransform);
 
-        Assert.Equal(1.5, scale);
+            var service = new PrintService(factory.Object);
+            var result = service.PrintWithVisual(border, "test", new PrintSettings { Scaling = "FitToPage" });
+
+            Assert.True(result);
+            Assert.NotNull(capturedScale);
+            Assert.Equal(2.0, capturedScale.ScaleX, precision: 3);
+            Assert.Equal(2.0, capturedScale.ScaleY, precision: 3);
+        });
     }
 
     [Fact]
-    public void FitToPageScale_HeightConstrained_CorrectCalculation()
+    public void PrintWithVisual_FitToPage_RestoresOriginalTransformInFinally()
     {
-        // Область 800x600, элемент 600x200 → scaleX=1.33, scaleY=3.0 → min=1.33
-        double printableW = 800.0;
-        double printableH = 600.0;
-        double elementW = 600.0;
-        double elementH = 200.0;
+        WpfContext.Execute(() =>
+        {
+            var (factory, dialog) = CreateMocks();
+            dialog.SetupGet(d => d.PrintableAreaWidth).Returns(800.0);
+            dialog.SetupGet(d => d.PrintableAreaHeight).Returns(600.0);
+            dialog.Setup(d => d.ShowDialog()).Returns(true);
 
-        double scale = Math.Min(printableW / elementW, printableH / elementH);
+            var border = CreateMeasuredElement(400, 300);
+            var original = new RotateTransform(45);
+            border.RenderTransform = original;
 
-        Assert.Equal(1.3333333333333333, scale);
+            var service = new PrintService(factory.Object);
+            service.PrintWithVisual(border, "test", new PrintSettings { Scaling = "FitToPage" });
+
+            Assert.Same(original, border.RenderTransform);
+        });
     }
 
     [Fact]
-    public void FitToPageScale_ElementLargerThanPage_ScaleLessThanOne()
+    public void PrintWithVisual_FitToPage_ZeroElementSize_NoTransform()
     {
-        // Область 800x600, элемент 1600x1200 → scale = Min(0.5, 0.5) = 0.5
-        double printableW = 800.0;
-        double printableH = 600.0;
-        double elementW = 1600.0;
-        double elementH = 1200.0;
+        WpfContext.Execute(() =>
+        {
+            var (factory, dialog) = CreateMocks();
+            dialog.SetupGet(d => d.PrintableAreaWidth).Returns(800.0);
+            dialog.SetupGet(d => d.PrintableAreaHeight).Returns(600.0);
+            dialog.Setup(d => d.ShowDialog()).Returns(true);
 
-        double scale = Math.Min(printableW / elementW, printableH / elementH);
+            // Без Measure/Arrange ActualWidth/Height == 0 → transform не применяется
+            var border = new Border { Width = 400, Height = 300 };
+            var original = new RotateTransform(45);
+            border.RenderTransform = original;
 
-        Assert.Equal(0.5, scale);
+            var service = new PrintService(factory.Object);
+            service.PrintWithVisual(border, "test", new PrintSettings { Scaling = "FitToPage" });
+
+            Assert.Same(original, border.RenderTransform);
+            // Размер страницы запрашивается, но scale-transform НЕ применяется
+            // (elementSize == 0 → ветка с установкой RenderTransform не выполняется).
+            dialog.VerifyGet(d => d.PrintableAreaWidth, Times.Once);
+        });
     }
 
-    #endregion
+    [Fact]
+    public void PrintWithVisual_FitToPage_Cancel_NoPrintVisualAndRestoresTransform()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (factory, dialog) = CreateMocks();
+            dialog.SetupGet(d => d.PrintableAreaWidth).Returns(800.0);
+            dialog.SetupGet(d => d.PrintableAreaHeight).Returns(600.0);
+            dialog.Setup(d => d.ShowDialog()).Returns(false);
+
+            var border = CreateMeasuredElement(400, 300);
+            var original = new RotateTransform(45);
+            border.RenderTransform = original;
+
+            var service = new PrintService(factory.Object);
+            var result = service.PrintWithVisual(border, "test", new PrintSettings { Scaling = "FitToPage" });
+
+            Assert.False(result);
+            dialog.Verify(d => d.PrintVisual(It.IsAny<Visual>(), It.IsAny<string>()), Times.Never);
+            Assert.Same(original, border.RenderTransform);
+        });
+    }
 }

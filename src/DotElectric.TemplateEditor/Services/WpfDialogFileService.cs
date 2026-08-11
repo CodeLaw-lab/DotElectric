@@ -14,14 +14,7 @@ public sealed class WpfDialogFileService : IDialogFileService
 
     public string? OpenFileDialog(string filter)
     {
-        var dialog = new OpenFileDialog
-        {
-            Filter = filter ?? "DotElectric Template|*.tdel",
-            DefaultExt = ".tdel",
-            Multiselect = false,
-            CheckFileExists = true,
-            CheckPathExists = true
-        };
+        var dialog = CreateOpenDialog(filter);
 
         var result = dialog.ShowDialog();
         if (result == true)
@@ -33,14 +26,7 @@ public sealed class WpfDialogFileService : IDialogFileService
 
     public string? SaveFileDialog(string filter, string defaultFileName)
     {
-        var dialog = new SaveFileDialog
-        {
-            Filter = filter ?? "DotElectric Template|*.tdel|All Files|*.*",
-            DefaultExt = ".tdel",
-            FileName = defaultFileName,
-            CheckPathExists = true,
-            OverwritePrompt = true
-        };
+        var dialog = CreateSaveDialog(filter, defaultFileName);
 
         var result = dialog.ShowDialog();
         if (result == true)
@@ -48,5 +34,29 @@ public sealed class WpfDialogFileService : IDialogFileService
             _logger?.LogInformation("Открыт диалог сохранения: filePath={FileName}", dialog.FileName);
         }
         return result == true ? dialog.FileName : null;
+    }
+
+    internal static OpenFileDialog CreateOpenDialog(string? filter)
+    {
+        return new OpenFileDialog
+        {
+            Filter = filter ?? "DotElectric Template|*.tdel",
+            DefaultExt = ".tdel",
+            Multiselect = false,
+            CheckFileExists = true,
+            CheckPathExists = true
+        };
+    }
+
+    internal static SaveFileDialog CreateSaveDialog(string? filter, string? defaultFileName)
+    {
+        return new SaveFileDialog
+        {
+            Filter = filter ?? "DotElectric Template|*.tdel|All Files|*.*",
+            DefaultExt = ".tdel",
+            FileName = defaultFileName,
+            CheckPathExists = true,
+            OverwritePrompt = true
+        };
     }
 }

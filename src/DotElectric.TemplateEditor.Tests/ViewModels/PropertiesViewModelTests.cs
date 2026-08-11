@@ -1374,4 +1374,451 @@ public class PropertiesViewModelTests
         cmdHistory.Redo();
         Assert.Equal(8000, text.FontSizeMicrons);
     }
+
+    // ============================================================
+    // TextPropertiesViewModel — непокрытые команды (Key, IsEditable,
+    // DefaultValue, Foreground, TextWrapping, TextAlignment, FontName, TextType)
+    // ============================================================
+
+    [Fact]
+    public void Text_ChangeKey_UpdatesKeyAndNotifies()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.TextVM.ChangeKeyCommand.Execute("my_key");
+
+        Assert.Equal("my_key", text.Key);
+        Assert.Equal("my_key", vm.TextVM.Key);
+        Assert.Contains(nameof(TextPropertiesViewModel.Key), raised);
+    }
+
+    [Fact]
+    public void Text_ChangeIsEditable_UpdatesIsEditable()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000) { IsEditable = true };
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeIsEditableCommand.Execute(false);
+
+        Assert.False(text.IsEditable);
+        Assert.False(vm.TextVM.IsEditable);
+    }
+
+    [Fact]
+    public void Text_ChangeDefaultValue_UpdatesDefaultValueAndNotifies()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.TextVM.ChangeDefaultValueCommand.Execute("42");
+
+        Assert.Equal("42", text.DefaultValue);
+        Assert.Equal("42", vm.TextVM.DefaultValue);
+        Assert.Contains(nameof(TextPropertiesViewModel.DefaultValue), raised);
+    }
+
+    [Fact]
+    public void Text_ChangeForeground_ValidColor_UpdatesForeground()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeForegroundCommand.Execute("#FF0000");
+
+        Assert.Equal("#FF0000", text.Foreground);
+        Assert.Equal("#FF0000", vm.TextVM.Foreground);
+        Assert.Null(vm.ValidationError);
+    }
+
+    [Fact]
+    public void Text_ChangeForeground_InvalidColor_SetsValidationError()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000) { Foreground = "#000000" };
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeForegroundCommand.Execute("not-a-color");
+
+        Assert.NotEmpty(vm.ValidationError!);
+        Assert.Equal("#000000", text.Foreground); // не изменился
+    }
+
+    [Fact]
+    public void Text_ChangeTextWrapping_UpdatesTextWrapping()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeTextWrappingCommand.Execute(true);
+
+        Assert.True(text.TextWrapping);
+        Assert.True(vm.TextVM.TextWrapping);
+    }
+
+    [Fact]
+    public void Text_ChangeTextAlignment_UpdatesTextAlignment()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeTextAlignmentCommand.Execute("Center");
+
+        Assert.Equal("Center", text.TextAlignment);
+        Assert.Equal("Center", vm.TextVM.TextAlignment);
+    }
+
+    [Fact]
+    public void Text_ChangeFontNameFromString_UpdatesFontName()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeFontNameFromStringCommand.Execute("ГОСТ Б");
+
+        Assert.Equal("ГОСТ Б", text.FontName);
+        Assert.Equal("ГОСТ Б", vm.TextVM.FontName);
+    }
+
+    [Fact]
+    public void Text_ChangeFontNameFromString_EmptyValue_DoesNothing()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000) { FontName = "ГОСТ А" };
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeFontNameFromStringCommand.Execute("   ");
+
+        Assert.Equal("ГОСТ А", text.FontName);
+    }
+
+    [Theory]
+    [InlineData("Текст", TextType.Text)]
+    [InlineData("Размер", TextType.Dimension)]
+    [InlineData("Допуск", TextType.Tolerance)]
+    [InlineData("Примечание", TextType.Note)]
+    [InlineData("Обозначение", TextType.Label)]
+    [InlineData("Неизвестный", TextType.Text)]
+    public void Text_ChangeTextTypeFromString_MapsCorrectly(string input, TextType expected)
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.TextVM.ChangeTextTypeFromStringCommand.Execute(input);
+
+        Assert.Equal(expected, text.TextType);
+    }
+
+    [Fact]
+    public void Text_UpdateObject_ForwardsPropertyChangedForRemainingProperties()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        text.FontName = "ГОСТ Б";
+        text.Key = "k1";
+        text.IsEditable = false;
+        text.DefaultValue = "dv";
+        text.Foreground = "#123456";
+        text.TextWrapping = true;
+        text.TextAlignment = "Right";
+
+        Assert.Contains(nameof(TextPropertiesViewModel.FontName), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Key), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.IsEditable), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.DefaultValue), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Foreground), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextWrapping), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextAlignment), raised);
+    }
+
+    [Fact]
+    public void Text_Dispose_UnsubscribesFromTextPropertyChanged()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.Dispose();
+        text.Foreground = "#FF0000";
+
+        Assert.DoesNotContain(nameof(TextPropertiesViewModel.Foreground), raised);
+    }
+
+    // ============================================================
+    // RectanglePropertiesViewModel — StrokeColor/FillColor/Thickness/LineType
+    // ============================================================
+
+    [Fact]
+    public void Rectangle_ChangeStrokeColor_Valid_UpdatesStrokeColor()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeStrokeColorCommand.Execute("#00FF00");
+
+        Assert.Equal("#00FF00", rect.StrokeColor);
+        Assert.Equal("#00FF00", vm.RectVM.StrokeColor);
+        Assert.Null(vm.ValidationError);
+    }
+
+    [Fact]
+    public void Rectangle_ChangeStrokeColor_Invalid_SetsValidationError()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000) { StrokeColor = "#000000" };
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeStrokeColorCommand.Execute("bad");
+
+        Assert.NotEmpty(vm.ValidationError!);
+        Assert.Equal("#000000", rect.StrokeColor);
+    }
+
+    [Fact]
+    public void Rectangle_ChangeFillColor_Valid_UpdatesFillColor()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeFillColorCommand.Execute("#FF0000");
+
+        Assert.Equal("#FF0000", rect.FillColor);
+        Assert.Equal("#FF0000", vm.RectVM.FillColor);
+    }
+
+    [Fact]
+    public void Rectangle_ChangeFillColor_Invalid_SetsValidationError()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000) { FillColor = "Transparent" };
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeFillColorCommand.Execute("zzz");
+
+        Assert.NotEmpty(vm.ValidationError!);
+        Assert.Equal("Transparent", rect.FillColor);
+    }
+
+    [Fact]
+    public void Rectangle_ChangeStrokeThickness_UpdatesThickness()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeStrokeThicknessCommand.Execute(800);
+
+        Assert.Equal(800, rect.StrokeThicknessMicrons);
+        Assert.Equal(800, vm.RectVM.StrokeThickness);
+    }
+
+    [Theory]
+    [InlineData("Сплошная", LineType.Solid)]
+    [InlineData("Штриховая", LineType.Dashed)]
+    [InlineData("Штрихпунктирная", LineType.DashDot)]
+    [InlineData("Штрихпунктирная с двумя штрихами", LineType.DashDotDot)]
+    [InlineData("Unknown", LineType.Solid)]
+    public void Rectangle_ChangeLineTypeFromString_MapsCorrectly(string input, LineType expected)
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.RectVM.ChangeLineTypeFromStringCommand.Execute(input);
+
+        Assert.Equal(expected, rect.LineType);
+    }
+
+    [Fact]
+    public void Rectangle_UpdateObject_ForwardsPropertyChangedForColorAndThickness()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        rect.StrokeThicknessMicrons = 900;
+        rect.StrokeColor = "#111111";
+        rect.FillColor = "#222222";
+
+        Assert.Contains(nameof(RectanglePropertiesViewModel.StrokeThickness), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.StrokeColor), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.FillColor), raised);
+    }
+
+    [Fact]
+    public void Rectangle_Dispose_UnsubscribesFromRectPropertyChanged()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.Dispose();
+        rect.StrokeColor = "#FF0000";
+
+        Assert.DoesNotContain(nameof(RectanglePropertiesViewModel.StrokeColor), raised);
+    }
+
+    // ============================================================
+    // LinePropertiesViewModel — StrokeColor/Thickness/LineType
+    // ============================================================
+
+    [Fact]
+    public void Line_ChangeStrokeColor_Valid_UpdatesStrokeColor()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.LineVM.ChangeStrokeColorCommand.Execute("#00FF00");
+
+        Assert.Equal("#00FF00", line.StrokeColor);
+        Assert.Equal("#00FF00", vm.LineVM.StrokeColor);
+        Assert.Null(vm.ValidationError);
+    }
+
+    [Fact]
+    public void Line_ChangeStrokeColor_Invalid_SetsValidationError()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000) { StrokeColor = "#000000" };
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.LineVM.ChangeStrokeColorCommand.Execute("bad");
+
+        Assert.NotEmpty(vm.ValidationError!);
+        Assert.Equal("#000000", line.StrokeColor);
+    }
+
+    [Fact]
+    public void Line_ChangeStrokeThickness_UpdatesThickness()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.LineVM.ChangeStrokeThicknessCommand.Execute(700);
+
+        Assert.Equal(700, line.StrokeThicknessMicrons);
+        Assert.Equal(700, vm.LineVM.StrokeThickness);
+    }
+
+    [Fact]
+    public void Line_ChangeStrokeThickness_Invalid_SetsValidationError()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000) { StrokeThicknessMicrons = 500 };
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.LineVM.ChangeStrokeThicknessCommand.Execute(-5);
+
+        Assert.NotEmpty(vm.ValidationError!);
+        Assert.Equal(500, line.StrokeThicknessMicrons);
+    }
+
+    [Theory]
+    [InlineData("Сплошная", LineType.Solid)]
+    [InlineData("Штриховая", LineType.Dashed)]
+    [InlineData("Штрихпунктирная", LineType.DashDot)]
+    [InlineData("Штрихпунктирная с двумя штрихами", LineType.DashDotDot)]
+    [InlineData("Unknown", LineType.Solid)]
+    public void Line_ChangeLineTypeFromString_MapsCorrectly(string input, LineType expected)
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        vm.LineVM.ChangeLineTypeFromStringCommand.Execute(input);
+
+        Assert.Equal(expected, line.LineType);
+    }
+
+    [Fact]
+    public void Line_UpdateObject_ForwardsPropertyChangedForColorAndThickness()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        line.StrokeThicknessMicrons = 900;
+        line.StrokeColor = "#111111";
+
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeThickness), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeColor), raised);
+    }
+
+    [Fact]
+    public void Line_Dispose_UnsubscribesFromLinePropertyChanged()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.Dispose();
+        line.StrokeColor = "#FF0000";
+
+        Assert.DoesNotContain(nameof(LinePropertiesViewModel.StrokeColor), raised);
+    }
 }

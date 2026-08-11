@@ -12,11 +12,8 @@ public sealed class WpfDialogHostService : IDialogHostService
 {
     public bool? ShowDialog(object viewModel, object? owner = null)
     {
-        Window window = viewModel switch
-        {
-            SettingsViewModel _ => new SettingsView((SettingsViewModel)viewModel),
-            _ => new CustomSheetDialog { DataContext = viewModel }
-        };
+        var (windowType, dataContext) = ResolveWindowDescriptor(viewModel);
+        var window = CreateWindow(windowType, dataContext);
 
         if (owner is Window ownerWindow)
             window.Owner = ownerWindow;
@@ -42,5 +39,26 @@ public sealed class WpfDialogHostService : IDialogHostService
 
         // SettingsViewModel handles confirm/cancel internally
         return window.ShowDialog();
+    }
+
+    internal static (Type WindowType, object? DataContext) ResolveWindowDescriptor(object viewModel)
+    {
+        return viewModel switch
+        {
+            SettingsViewModel _ => (typeof(SettingsView), viewModel),
+            _ => (typeof(CustomSheetDialog), viewModel)
+        };
+    }
+
+    private static Window CreateWindow(Type windowType, object? dataContext)
+    {
+        if (windowType.GetConstructor(Type.EmptyTypes) != null)
+        {
+            var window = (Window)Activator.CreateInstance(windowType)!;
+            window.DataContext = dataContext;
+            return window;
+        }
+
+        return (Window)Activator.CreateInstance(windowType, dataContext)!;
     }
 }

@@ -1,5 +1,7 @@
 using System.Linq;
+using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Commands;
+using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
@@ -376,6 +378,91 @@ public class EditorViewModelTests
         var vm = CreateViewModel();
         vm.PasteFromClipboardCommand.Execute(null);
         Assert.Empty(vm.Template.Objects);
+    }
+
+    [Fact]
+    public void PasteFromClipboard_SelectsPastedObjects()
+    {
+        var vm = CreateViewModel();
+        var line = new Line(0, 0, 1000, 1000);
+        vm.Template.Objects.Add(line);
+        vm.SelectSingle(line);
+        vm.CopySelectedCommand.Execute(null);
+
+        vm.PasteFromClipboardCommand.Execute(null);
+
+        Assert.Equal(2, vm.Template.Objects.Count);
+        Assert.Single(vm.SelectedObjects);
+        Assert.NotSame(line, vm.SelectedObjects[0]);
+    }
+
+    [Fact]
+    public void CopySelected_EmptySelection_DoesNotAddToClipboard()
+    {
+        var vm = CreateViewModel();
+        vm.CopySelectedCommand.Execute(null);
+        Assert.Empty(vm.Template.Objects);
+    }
+
+    // === Close tab (messenger) ===
+
+    [Fact]
+    public void CloseTabCommand_SendsCloseTabRequestMessage()
+    {
+        var vm = CreateViewModel();
+        CloseTabRequestMessage? received = null;
+        WeakReferenceMessenger.Default.Register<CloseTabRequestMessage>(this, (r, m) => received = m);
+
+        try
+        {
+            vm.CloseTabCommand.Execute(null);
+
+            Assert.NotNull(received);
+            Assert.Same(vm, received.Tab);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.Unregister<CloseTabRequestMessage>(this);
+        }
+    }
+
+    [Fact]
+    public void CloseOtherTabsCommand_SendsCloseOtherTabsRequestMessage()
+    {
+        var vm = CreateViewModel();
+        CloseOtherTabsRequestMessage? received = null;
+        WeakReferenceMessenger.Default.Register<CloseOtherTabsRequestMessage>(this, (r, m) => received = m);
+
+        try
+        {
+            vm.CloseOtherTabsCommand.Execute(null);
+
+            Assert.NotNull(received);
+            Assert.Same(vm, received.Tab);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.Unregister<CloseOtherTabsRequestMessage>(this);
+        }
+    }
+
+    [Fact]
+    public void CloseAllTabsCommand_SendsCloseAllTabsRequestMessage()
+    {
+        var vm = CreateViewModel();
+        var received = false;
+        WeakReferenceMessenger.Default.Register<CloseAllTabsRequestMessage>(this, (r, m) => received = true);
+
+        try
+        {
+            vm.CloseAllTabsCommand.Execute(null);
+
+            Assert.True(received);
+        }
+        finally
+        {
+            WeakReferenceMessenger.Default.Unregister<CloseAllTabsRequestMessage>(this);
+        }
     }
 
     // === Nudge ===

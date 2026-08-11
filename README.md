@@ -1,13 +1,13 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2140, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2295, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 76.3% line-rate (CI gate 75%)
-**Последнее обновление:** 22.07.2026 — Grid Refactoring: GridHelper → IGridNodeGenerator (DI), абсолютные координаты узлов, настройки сетки
+**Покрытие:** 80.22% line-rate (CI gate 75%)
+**Последнее обновление:** 11.08.2026 — Sprint "Tech debt + coverage": text markers tech debt закрыт, WPF-обёртки покрыты, coverage 80.22%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
-[![Coverage](https://img.shields.io/badge/coverage-75%25-green)](https://github.com/anomalyco/dotelectric/actions)
+[![Coverage](https://img.shields.io/badge/coverage-80%25-green)](https://github.com/anomalyco/dotelectric/actions)
 
 ---
 
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2140 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2295 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,8 +245,8 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2140 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 76.3% line-rate (CI gate 75%)
+- ✅ **2295 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 80.22% line-rate (CI gate 75%)
 - ✅ **Сборка:** 0 errors, 0 warnings
 - ✅ **Sprint 56-57:** Colors (V-005), Half-formats, Settings UI, MultiLine, Library
 - ✅ **Sprint 52-55:** Free rotation, IDateTimeProvider, DialogService, 1599+ тестов
@@ -405,7 +405,7 @@ src/
 
 ---
 
-**Последнее обновление:** 22.07.2026 — Grid Refactoring: GridHelper → IGridNodeGenerator, абсолютные координаты узлов, настройки сетки (2140 тестов, 76.3%)
+**Последнее обновление:** 11.08.2026 — Sprint "Tech debt + coverage": text markers tech debt закрыт, WPF-обёртки изолированы (internal static + STA-тесты), inline edit guards, coverage 80.22% (2295 тестов)
 
 
 
