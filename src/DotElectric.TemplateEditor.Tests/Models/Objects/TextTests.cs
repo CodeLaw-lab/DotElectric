@@ -722,6 +722,38 @@ public class TextTests : IDisposable
         Assert.Equal(20000 + text.HeightMicrons, text.RotatedCorner0Y);
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(45)]
+    [InlineData(90)]
+    [InlineData(135)]
+    [InlineData(180)]
+    [InlineData(270)]
+    public void RotatedCorners_AllLieOnBoundingBoxEdges(int angle)
+    {
+        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
+        var bb = text.GetBoundingBox();
+
+        var corners = new[]
+        {
+            (text.RotatedCorner0X, text.RotatedCorner0Y),
+            (text.RotatedCorner1X, text.RotatedCorner1Y),
+            (text.RotatedCorner2X, text.RotatedCorner2Y),
+            (text.RotatedCorner3X, text.RotatedCorner3Y)
+        };
+
+        foreach (var (x, y) in corners)
+        {
+            Assert.InRange(x, bb.Left, bb.Right);
+            Assert.InRange(y, bb.Bottom, bb.Top);
+            // Каждый маркер — вершина повёрнутого прямоугольника, поэтому лежит
+            // на границе bounding box (хотя бы одна координата равна границе).
+            Assert.True(x == bb.Left || x == bb.Right || y == bb.Bottom || y == bb.Top,
+                $"Corner ({x},{y}) is not on bounding box edge at {angle}°");
+        }
+    }
+
     // === Helper: compute expected LayoutTransform offset (minX, minY) ===
 
     private static (long offsetX, long offsetY) ExpectedOffset(long w, long h, int angle)

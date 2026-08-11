@@ -432,4 +432,78 @@ public class SettingsServiceTests : IDisposable
         // Восстанавливаем
         service.Save(original);
     }
+
+    [Fact]
+    public void Load_CorruptJson_ReturnsDefaults()
+    {
+        File.WriteAllText(_testSettingsFile, "this is not json {{");
+
+        var service = CreateService();
+        var settings = service.Load();
+
+        // Файл повреждён → возвращаются настройки по умолчанию, без исключения
+        Assert.NotNull(settings);
+        Assert.Equal(250000, settings.GridMaxNodes);
+    }
+
+    [Fact]
+    public void Get_CustomSettings_ConvertibleValue_ReturnsConverted()
+    {
+        var service = CreateService();
+        service.Set("CustomIntKey", "42");
+
+        var result = service.Get("CustomIntKey", 0);
+
+        Assert.Equal(42, result);
+    }
+
+    [Fact]
+    public void Get_CustomSettings_NonConvertibleValue_ReturnsDefault()
+    {
+        var service = CreateService();
+        service.Set("CustomBadKey", "not-a-number");
+
+        var result = service.Get("CustomBadKey", 0);
+
+        // Convert.ChangeType("not-a-number" → int) не удаётся → default
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public void Set_CustomKey_StoresInCustomSettings()
+    {
+        var service = CreateService();
+        service.Set("MyCustomKey", "myValue");
+
+        var settings = service.Load();
+        Assert.True(settings.CustomSettings.ContainsKey("MyCustomKey"));
+        Assert.Equal("myValue", settings.CustomSettings["MyCustomKey"]);
+
+        var result = service.Get("MyCustomKey", "fallback");
+        Assert.Equal("myValue", result);
+    }
+
+    [Fact]
+    public void Set_NullKey_DoesNothing()
+    {
+        var service = CreateService();
+        var before = service.Load();
+
+        service.Set<string?>(null!, "value");
+
+        var after = service.Load();
+        Assert.Same(before, after); // кэш не пересоздан, Save не вызван
+    }
+
+    [Fact]
+    public void Get_LastUsedOrientation_NonStringDefault_ReturnsDefault()
+    {
+        var service = CreateService();
+        service.Set("LastUsedSheetOrientation", "Portrait");
+
+        // default не string → ветка `defaultValue is string` не выполняется → возвращается default
+        var result = service.Get("LastUsedSheetOrientation", 42);
+
+        Assert.Equal(42, result);
+    }
 }

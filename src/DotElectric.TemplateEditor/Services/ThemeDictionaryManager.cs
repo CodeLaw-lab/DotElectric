@@ -16,9 +16,7 @@ public sealed class ThemeDictionaryManager : IThemeDictionaryManager
         var dictionaries = Application.Current.Resources.MergedDictionaries;
 
         // Находим и удаляем текущую тему
-        var oldTheme = dictionaries.FirstOrDefault(d =>
-            d.Source?.OriginalString.Contains(LightThemeMarker) == true ||
-            d.Source?.OriginalString.Contains(DarkThemeMarker) == true);
+        var oldTheme = FindThemeDictionary(dictionaries);
 
         if (oldTheme != null)
         {
@@ -41,10 +39,16 @@ public sealed class ThemeDictionaryManager : IThemeDictionaryManager
     {
         var dictionaries = Application.Current.Resources.MergedDictionaries;
 
-        var currentTheme = dictionaries.FirstOrDefault(d =>
-            d.Source?.OriginalString.Contains(LightThemeMarker) == true ||
-            d.Source?.OriginalString.Contains(DarkThemeMarker) == true);
+        var currentTheme = FindThemeDictionary(dictionaries);
 
         return currentTheme?.Source?.OriginalString;
+    }
+
+    internal static ResourceDictionary? FindThemeDictionary(IEnumerable<ResourceDictionary> dictionaries)
+    {
+        return dictionaries.FirstOrDefault(d =>
+            d.Source != null &&
+            (d.Source.OriginalString.Contains(LightThemeMarker) ||
+             d.Source.OriginalString.Contains(DarkThemeMarker)));
     }
 }

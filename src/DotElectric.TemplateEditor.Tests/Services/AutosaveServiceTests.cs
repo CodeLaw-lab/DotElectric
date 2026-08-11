@@ -315,6 +315,119 @@ public class AutosaveServiceTests : IDisposable
         await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
         // Should not throw, exception is logged
     }
+
+    [Fact]
+    public async Task AutosaveAllTabsAsync_TemplateNotOfTypeTemplate_DoesNotSave()
+    {
+        // Вкладка с Template, который НЕ является Models.Template → ветка `is Models.Template` не выполняется
+        var tabs = new List<MockAutosaveTab>
+        {
+            new MockAutosaveTab { TabId = "tab1", IsDirty = true, Template = "not a template" }
+        };
+
+        await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
+
+        _mockTemplateService.Verify(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task AutosaveAllTabsAsync_NoDirtyTabs_DeletesStaleSessionFile()
+    {
+        // session.json существует, но dirty-вкладок нет → SaveSession удаляет файл
+        var sessionFile = Path.Combine(_testAutosaveFolder, "session.json");
+        Directory.CreateDirectory(_testAutosaveFolder);
+        File.WriteAllText(sessionFile, "{}");
+
+        try
+        {
+            var tabs = new List<MockAutosaveTab>
+            {
+                new MockAutosaveTab { TabId = "tab1", IsDirty = false }
+            };
+
+            await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
+
+            Assert.False(File.Exists(sessionFile));
+        }
+        finally
+        {
+            if (File.Exists(sessionFile)) File.Delete(sessionFile);
+        }
+    }
+
+    [Fact]
+    public async Task AutosaveAllTabsAsync_CleansUpOldAutosaveFiles()
+    {
+        // CutoffDate = _dateTimeProvider.UtcNow.AddDays(-7) = FixedDate - 7 дней.
+        // Поэтому LastWriteTime файлов задаём ОТНОСИТЕЛЬНО FixedDate, а не реального времени.
+        var oldFile = Path.Combine(_testAutosaveFolder, "autosave_tab_old_20240101_000000.tdel");
+        File.WriteAllText(oldFile, "stale");
+        File.SetLastWriteTimeUtc(oldFile, FixedDate.AddDays(-10)); // старше 7 дней от FixedDate
+
+        var freshFile = Path.Combine(_testAutosaveFolder, "autosave_tab_fresh_20250101_000000.tdel");
+        File.WriteAllText(freshFile, "fresh");
+        File.SetLastWriteTimeUtc(freshFile, FixedDate.AddHours(-1)); // свежее cutoff
+
+        var template = new Template(
+            new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow },
+            Sheet.FromFormat("A3"));
+
+        var tabs = new List<MockAutosaveTab>
+        {
+            new MockAutosaveTab { TabId = "tab1", IsDirty = true, Template = template }
+        };
+
+        try
+        {
+            await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
+
+            Assert.False(File.Exists(oldFile), "Файл старше 7 дней должен быть удалён");
+            Assert.True(File.Exists(freshFile), "Свежий файл должен сохраниться");
+        }
+        finally
+        {
+            if (File.Exists(oldFile)) File.Delete(oldFile);
+            if (File.Exists(freshFile)) File.Delete(freshFile);
+        }
+    }
+
+    [Fact]
+    public async Task AutosaveAllTabsAsync_NoTabId_UsesFileNameFromPath()
+    {
+        // TabId == null, FilePath задан → GetTabAutosaveId = имя файла без расширения
+        var template = new Template(
+            new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow },
+            Sheet.FromFormat("A3"));
+
+        var tabs = new List<MockAutosaveTab>
+        {
+            new MockAutosaveTab
+            {
+                TabId = null,
+                FilePath = @"C:\templates\drawing.tdel",
+                IsDirty = true,
+                Template = template
+            }
+        };
+
+        await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
+
+        _mockTemplateService.Verify(s => s.Save(
+            It.IsAny<Template>(),
+            It.Is<string>(path => path.Contains("autosave_drawing_"))), Times.Once);
+    }
+
+    [Fact]
+    public async Task AutosaveAllTabsAsync_CancelledToken_ThrowsOperationCanceled()
+    {
+        using var cts = new CancellationTokenSource();
+        cts.Cancel();
+
+        var tabs = new List<MockAutosaveTab>();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(
+            () => _service.AutosaveAllTabsAsync(tabs, cts.Token));
+    }
 }
 
 /// <summary>
