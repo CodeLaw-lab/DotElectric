@@ -41,6 +41,10 @@ public static class EditorCanvasBehavior
             canvas.MouseMove -= State_MouseMove;
             canvas.MouseUp -= State_MouseUp;
             canvas.PreviewMouseWheel -= State_MouseWheel;
+            canvas.PreviewKeyDown -= State_PreviewKeyDown;
+            canvas.KeyDown -= State_KeyDown;
+            canvas.Unloaded -= Canvas_Unloaded;
+            canvas.PreviewMouseLeftButtonDown -= Canvas_PreviewMouseLeftButtonDown;
             SetState(canvas, null!);
         }
 
@@ -57,9 +61,14 @@ public static class EditorCanvasBehavior
             canvas.KeyDown += State_KeyDown;
 
             canvas.Unloaded += Canvas_Unloaded;
-            canvas.PreviewMouseLeftButtonDown += (s, args) => canvas.Focus();
+            canvas.PreviewMouseLeftButtonDown += Canvas_PreviewMouseLeftButtonDown;
             canvas.Dispatcher.BeginInvoke(() => canvas.Focus(), System.Windows.Threading.DispatcherPriority.Loaded);
         }
+    }
+
+    private static void Canvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is Canvas canvas) canvas.Focus();
     }
 
     private static void Canvas_Unloaded(object sender, RoutedEventArgs e)
@@ -73,6 +82,7 @@ public static class EditorCanvasBehavior
         canvas.PreviewMouseWheel -= State_MouseWheel;
         canvas.PreviewKeyDown -= State_PreviewKeyDown;
         canvas.KeyDown -= State_KeyDown;
+        canvas.PreviewMouseLeftButtonDown -= Canvas_PreviewMouseLeftButtonDown;
 
         SetState(canvas, null!);
     }

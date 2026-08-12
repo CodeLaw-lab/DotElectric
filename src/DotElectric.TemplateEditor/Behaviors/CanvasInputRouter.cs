@@ -30,15 +30,7 @@ public static class CanvasInputRouter
         if (e.ChangedButton == MouseButton.Middle)
         {
             var window = Window.GetWindow(canvas);
-            if (window != null)
-                state.PanStartWpfPoint = e.GetPosition(window);
-            state.PanAppliedModelDelta = default;
-
-            var modelPoint = ToModelPoint(canvas, state, e.GetPosition(canvas));
-            var panTool = state.Editor.GetOrCreateTool<PanTool>();
-            panTool.OnMouseDown(modelPoint, ToolMouseButton.Middle, ToToolModifiers(Keyboard.Modifiers));
-            state.IsPanning = true;
-            canvas.CaptureMouse();
+            RoutePanDown(canvas, state, window != null ? e.GetPosition(window) : null, e.GetPosition(canvas), ToolMouseButton.Middle);
             e.Handled = true;
             return;
         }
@@ -47,15 +39,7 @@ public static class CanvasInputRouter
             (Keyboard.IsKeyDown(Key.Space) || Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)))
         {
             var window = Window.GetWindow(canvas);
-            if (window != null)
-                state.PanStartWpfPoint = e.GetPosition(window);
-            state.PanAppliedModelDelta = default;
-
-            var modelPoint = ToModelPoint(canvas, state, e.GetPosition(canvas));
-            var panTool = state.Editor.GetOrCreateTool<PanTool>();
-            panTool.OnMouseDown(modelPoint, ToolMouseButton.Left, ToToolModifiers(Keyboard.Modifiers));
-            state.IsPanning = true;
-            canvas.CaptureMouse();
+            RoutePanDown(canvas, state, window != null ? e.GetPosition(window) : null, e.GetPosition(canvas), ToolMouseButton.Left);
             e.Handled = true;
             return;
         }
@@ -82,19 +66,7 @@ public static class CanvasInputRouter
         {
             var window = Window.GetWindow(canvas);
             if (window != null)
-            {
-                var currentWpfPoint = e.GetPosition(window);
-                var deltaPx = currentWpfPoint - state.PanStartWpfPoint;
-                var zoom = state.Editor.Zoom;
-
-                var totalModelDelta = new Point(deltaPx.X / zoom, -deltaPx.Y / zoom);
-                var incrementalDelta = new Point(
-                    totalModelDelta.X - state.PanAppliedModelDelta.X,
-                    totalModelDelta.Y - state.PanAppliedModelDelta.Y);
-
-                state.Editor.PanCanvas(incrementalDelta.X, incrementalDelta.Y);
-                state.PanAppliedModelDelta = totalModelDelta;
-            }
+                ApplyPan(state, e.GetPosition(window));
 
             canvas.Cursor = Cursors.SizeAll;
             return;
@@ -104,17 +76,7 @@ public static class CanvasInputRouter
         var tool = GetCurrentTool(state.Editor);
         tool.OnMouseMove(modelPoint: modelPt, state.LastButton, ToToolModifiers(Keyboard.Modifiers));
 
-        var cursor = tool.GetCursor();
-        canvas.Cursor = cursor switch
-        {
-            ToolCursor.Hand => Cursors.Hand,
-            ToolCursor.Cross => Cursors.Cross,
-            ToolCursor.SizeNWSE => Cursors.SizeNWSE,
-            ToolCursor.SizeNESW => Cursors.SizeNESW,
-            ToolCursor.SizeNS => Cursors.SizeNS,
-            ToolCursor.SizeWE => Cursors.SizeWE,
-            _ => Cursors.Arrow
-        };
+        canvas.Cursor = ToWpfCursor(tool.GetCursor());
     }
 
     public static void RouteMouseUp(Canvas canvas, MouseButtonEventArgs e, EditorCanvasState state)
@@ -194,18 +156,53 @@ public static class CanvasInputRouter
     private static void UpdateCursor(Canvas canvas, EditorViewModel editor)
     {
         var tool = GetCurrentTool(editor);
-        var cursor = tool.GetCursor();
-        canvas.Cursor = cursor switch
-        {
-            ToolCursor.Hand => Cursors.Hand,
-            ToolCursor.Cross => Cursors.Cross,
-            ToolCursor.SizeNWSE => Cursors.SizeNWSE,
-            ToolCursor.SizeNESW => Cursors.SizeNESW,
-            ToolCursor.SizeNS => Cursors.SizeNS,
-            ToolCursor.SizeWE => Cursors.SizeWE,
-            _ => Cursors.Arrow
-        };
+        canvas.Cursor = ToWpfCursor(tool.GetCursor());
     }
+
+    /// <summary>
+    /// Общая логика начала панорамирования (средняя кнопка или Space/Alt+Left).
+    /// </summary>
+    internal static void RoutePanDown(Canvas canvas, EditorCanvasState state, Point? windowPoint, Point canvasPoint, ToolMouseButton button)
+    {
+        if (windowPoint.HasValue)
+            state.PanStartWpfPoint = windowPoint.Value;
+        state.PanAppliedModelDelta = default;
+
+        var modelPoint = ToModelPoint(canvas, state, canvasPoint);
+        var panTool = state.Editor.GetOrCreateTool<PanTool>();
+        panTool.OnMouseDown(modelPoint, button, ToToolModifiers(Keyboard.Modifiers));
+        state.IsPanning = true;
+        canvas.CaptureMouse();
+    }
+
+    /// <summary>
+    /// Инкрементальное применение пана по движению мыши в Window-координатах.
+    /// </summary>
+    internal static void ApplyPan(EditorCanvasState state, Point currentWpfPoint)
+    {
+        var deltaPx = currentWpfPoint - state.PanStartWpfPoint;
+        var zoom = state.Editor.Zoom;
+
+        var totalModelDelta = new Point(deltaPx.X / zoom, -deltaPx.Y / zoom);
+        var incrementalDelta = new Point(
+            totalModelDelta.X - state.PanAppliedModelDelta.X,
+            totalModelDelta.Y - state.PanAppliedModelDelta.Y);
+
+        state.Editor.PanCanvas(incrementalDelta.X, incrementalDelta.Y);
+        state.PanAppliedModelDelta = totalModelDelta;
+    }
+
+    internal static Cursor ToWpfCursor(ToolCursor cursor) => cursor switch
+    {
+        ToolCursor.Hand => Cursors.Hand,
+        ToolCursor.Cross => Cursors.Cross,
+        ToolCursor.SizeNWSE => Cursors.SizeNWSE,
+        ToolCursor.SizeNESW => Cursors.SizeNESW,
+        ToolCursor.SizeNS => Cursors.SizeNS,
+        ToolCursor.SizeWE => Cursors.SizeWE,
+        ToolCursor.IBeam => Cursors.IBeam,
+        _ => Cursors.Arrow
+    };
 
     private static PointMicrons ToModelPoint(Canvas canvas, EditorCanvasState state, Point wpfPoint)
     {
@@ -213,7 +210,7 @@ public static class CanvasInputRouter
         return CoordinateTransform.ToModelPoint(wpfPoint, editor.ZoomPanManager.Zoom, editor.Template.Sheet.HeightMm);
     }
 
-    private static ITool GetCurrentTool(EditorViewModel editor)
+    internal static ITool GetCurrentTool(EditorViewModel editor)
     {
         return editor.ToolManager.ActiveTool switch
         {
