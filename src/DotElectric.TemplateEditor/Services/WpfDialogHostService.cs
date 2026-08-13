@@ -50,7 +50,7 @@ public sealed class WpfDialogHostService : IDialogHostService
         };
     }
 
-    private static Window CreateWindow(Type windowType, object? dataContext)
+    internal static Window CreateWindow(Type windowType, object? dataContext)
     {
         if (windowType.GetConstructor(Type.EmptyTypes) != null)
         {
