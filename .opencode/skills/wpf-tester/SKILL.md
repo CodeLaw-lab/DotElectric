@@ -102,14 +102,14 @@ public class EditorViewModelTests
 - `PresentationSource` в .NET 10 — требует `GetCompositionTargetCore()`, `RootVisual` get/set, `IsDisposed`.
 
 ### Coverage
-- CI gate: ≥75% line-rate. Перед пушем: `dotnet test --collect:"XPlat Code Coverage"`
+- CI gate: ≥80% line-rate. Перед пушем: `dotnet test --collect:"XPlat Code Coverage"`
 - Новый код: ≥80% coverage
 - Если coverage упал, ищи не тестированные ветки в новых классах.
 - Формат отчёта:
   ```markdown
   ### Coverage
   - New code: 85% (target ≥80%)
-  - Total: 78% (gate ≥75%)
+  - Total: 78% (gate ≥80%)
   ```
 
 ## 4. Типичные WPF-баги в проекте
@@ -189,7 +189,7 @@ public class EditorViewModelTests
 
 ### Coverage
 - New code: 85% (target ≥80%)
-- Total: 78% (gate ≥75%)
+- Total: 78% (gate ≥80%)
 
 ### Test report
 | # | File | Method | Happy | Edge | Error | Concurrency |

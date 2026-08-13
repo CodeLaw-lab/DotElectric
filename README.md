@@ -1,13 +1,13 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2295, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2515, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 80.22% line-rate (CI gate 75%)
-**Последнее обновление:** 11.08.2026 — Sprint "Tech debt + coverage": text markers tech debt закрыт, WPF-обёртки покрыты, coverage 80.22%
+**Покрытие:** 88.45% line-rate (CI gate 80%)
+**Последнее обновление:** 14.08.2026 — Coverage series + Docs/CI (13.08.2026): CI coverage gate 75%→80%, CHANGELOG BOM удалён, coverage 88.45%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
-[![Coverage](https://img.shields.io/badge/coverage-80%25-green)](https://github.com/anomalyco/dotelectric/actions)
+[![Coverage](https://img.shields.io/badge/coverage-88%25-green)](https://github.com/anomalyco/dotelectric/actions)
 
 ---
 
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2295 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2515 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -177,7 +177,7 @@ dotnet build src/DotElectric.TemplateEditor.slnx
 # Запуск
 dotnet run --project src/DotElectric.TemplateEditor/DotElectric.TemplateEditor
 
-# Тесты (покрытие >= 75%)
+# Тесты (покрытие >= 80%)
 dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 ```
 
@@ -245,8 +245,8 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2295 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 80.22% line-rate (CI gate 75%)
+- ✅ **2515 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 88.45% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
 - ✅ **Sprint 56-57:** Colors (V-005), Half-formats, Settings UI, MultiLine, Library
 - ✅ **Sprint 52-55:** Free rotation, IDateTimeProvider, DialogService, 1599+ тестов
@@ -405,7 +405,7 @@ src/
 
 ---
 
-**Последнее обновление:** 11.08.2026 — Sprint "Tech debt + coverage": text markers tech debt закрыт, WPF-обёртки изолированы (internal static + STA-тесты), inline edit guards, coverage 80.22% (2295 тестов)
+**Последнее обновление:** 14.08.2026 — Coverage series + Docs/CI (13.08.2026): 5 coverage-спринтов (input routing, TabOperations, MainViewModel async, TemplateLibrary, dialog wrappers), CI gate 75%→80%, coverage 88.45% (2515 тестов)
 
 
 
