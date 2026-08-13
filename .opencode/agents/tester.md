@@ -29,7 +29,7 @@ steps: 45
 
 ### 1. Coverage goals
 - Минимум 80% для нового кода
-- Минимум 75% total line-rate (CI gate)
+- Минимум 80% total line-rate (CI gate)
 - Если coverage падает — добавь недостающие тесты
 
 ### 2. Per-method testing dimensions
@@ -113,7 +113,7 @@ steps: 45
 
 ### Coverage
 - New code: 85% (target ≥80%)
-- Total: 78% (gate ≥75%)
+- Total: 78% (gate ≥80%)
 
 ### Test report
 | # | File | Method | Happy | Edge | Error | Concurrency |
