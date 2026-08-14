@@ -7,6 +7,12 @@ public sealed class FontMetrics : IFontMetrics
 {
     public static readonly FontMetrics Default = new();
 
+    private static readonly IReadOnlyList<int> SampleChars = Enumerable.Range('A', 26)
+        .Concat(Enumerable.Range('a', 26))
+        .Concat(Enumerable.Range('А', 32))
+        .Concat(Enumerable.Range('а', 32))
+        .ToList();
+
     private readonly Dictionary<string, double> _heightRatios = new();
     private readonly Dictionary<string, double> _widthRatios = new();
     private bool _initialized;
@@ -39,43 +45,53 @@ public sealed class FontMetrics : IFontMetrics
                 if (typeface.TryGetGlyphTypeface(out var glyphTypeface))
                 {
                     _heightRatios[fontName] = glyphTypeface.Height;
-
-                    var sampleChars = Enumerable.Range('A', 26)
-                        .Concat(Enumerable.Range('a', 26))
-                        .Concat(Enumerable.Range('А', 32))
-                        .Concat(Enumerable.Range('а', 32))
-                        .ToList();
-
-                    double totalWidth = 0;
-                    int count = 0;
-
-                    foreach (var c in sampleChars)
-                    {
-                        var codePoint = (ushort)c;
-                        if (glyphTypeface.CharacterToGlyphMap.TryGetValue(codePoint, out var glyphIndex))
-                        {
-                            if (glyphTypeface.AdvanceWidths.TryGetValue(glyphIndex, out var advWidth))
-                            {
-                                totalWidth += advWidth;
-                                count++;
-                            }
-                        }
-                    }
-
-                    _widthRatios[fontName] = count > 0 ? totalWidth / count : fallbackWidth;
+                    _widthRatios[fontName] = ComputeAverageAdvanceWidth(glyphTypeface.CharacterToGlyphMap, glyphTypeface.AdvanceWidths, SampleChars, fallbackWidth);
                     return;
                 }
             }
 
-            _heightRatios[fontName] = fallbackHeight;
-            _widthRatios[fontName] = fallbackWidth;
+            ApplyFallback(fontName, fallbackHeight, fallbackWidth);
         }
         catch (Exception ex)
         {
-            Log.Warning("Failed to load font {FontName}: {Message}", fontName, ex.Message);
-            _heightRatios[fontName] = fallbackHeight;
-            _widthRatios[fontName] = fallbackWidth;
+            HandleFallbackWithLog(fontName, ex.Message, fallbackHeight, fallbackWidth);
         }
+    }
+
+    private void HandleFallbackWithLog(string fontName, string message,
+        double fallbackHeight, double fallbackWidth)
+    {
+        Log.Warning("Failed to load font {FontName}: {Message}", fontName, message);
+        ApplyFallback(fontName, fallbackHeight, fallbackWidth);
+    }
+
+    private void ApplyFallback(string fontName, double fallbackHeight, double fallbackWidth)
+    {
+        _heightRatios[fontName] = fallbackHeight;
+        _widthRatios[fontName] = fallbackWidth;
+    }
+
+    internal static double ComputeAverageAdvanceWidth(
+        IDictionary<int, ushort> charToGlyphMap,
+        IDictionary<ushort, double> advanceWidths,
+        IEnumerable<int> sampleChars,
+        double fallbackWidth)
+    {
+        double totalWidth = 0;
+        int count = 0;
+        foreach (var c in sampleChars)
+        {
+            var codePoint = (ushort)c;
+            if (charToGlyphMap.TryGetValue(codePoint, out var glyphIndex))
+            {
+                if (advanceWidths.TryGetValue(glyphIndex, out var advWidth))
+                {
+                    totalWidth += advWidth;
+                    count++;
+                }
+            }
+        }
+        return count > 0 ? totalWidth / count : fallbackWidth;
     }
 
     public void Reset()

@@ -33,6 +33,12 @@ public sealed class TemplateValidator : ITemplateValidator
             yield break;
         }
 
+        if (template.Sheet == null)
+        {
+            yield return new ValidationError("V-006", "Параметры листа не заданы.");
+            yield break;
+        }
+
         foreach (var error in ValidateSheetFormat(template.Sheet))
             yield return error;
 
@@ -135,6 +141,12 @@ public sealed class TemplateValidator : ITemplateValidator
     private static IEnumerable<ValidationError> ValidateObjectCoordinates(
         TemplateObjectBase obj, Sheet sheet)
     {
+        if (sheet == null)
+        {
+            yield return new ValidationError("V-006", "Параметры листа не заданы.");
+            yield break;
+        }
+
         if (obj is Line line)
         {
             if (line.StartMicronsX < 0 || line.StartMicronsX > sheet.WidthMicrons ||

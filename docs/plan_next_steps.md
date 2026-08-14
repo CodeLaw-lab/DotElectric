@@ -58,7 +58,7 @@ FR-021/022 — отложенные фичи Этапа 2, не актуальн
 
 **Что проверить:**
 - DOCS_MANIFEST.md — убрать ссылку на `docs/1.md`
-- Все метрики (test_count=2140, coverage=76.3%) синхронизированы
+- Все метрики (test_count=2636, coverage=90.18%) синхронизированы
 - Обновить CONSISTENCY_REPORT.md
 
 ---
@@ -74,10 +74,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests
 
 ## Критерии приёмки
 
-- [ ] `docs/1.md` удалён
-- [ ] `CHANGELOG.md` без mojibake
-- [ ] `AGENTS.md` Next Steps чисты
-- [ ] DOCS_MANIFEST.md не ссылается на удалённый файл
-- [ ] Build: 0 errors, 0 warnings
-- [ ] Tests: 2139 passed, 1 pre-existing skip (2140 total)
-- [ ] CONSISTENCY_REPORT.md: PASS
+- [x] `docs/1.md` удалён
+- [x] `CHANGELOG.md` без mojibake
+- [x] `AGENTS.md` Next Steps чисты
+- [x] DOCS_MANIFEST.md не ссылается на удалённый файл
+- [x] Build: 0 errors, 0 warnings
+- [x] Tests: 2514 passed, 1 pre-existing skip (2515 total)
+- [x] CONSISTENCY_REPORT.md: PASS

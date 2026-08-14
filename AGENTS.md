@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Sprint "Tech debt + coverage" завершён (11.08.2026): line-rate 80.22% (было 76.4%).** Text markers tech debt закрыт — regression-тест `RotatedCorners_AllLieOnBoundingBoxEdges` (6 углов: 0/45/90/135/180/270°) подтверждает, что маркеры выделения (RotatedCorner0-3) лежат на границе `GetBoundingBox()`; `TextSelectionMarkerBehavior` не существует, пустой `<Canvas/>` внутри DataTemplate Text удалён, маркеры Text рендерятся в ItemsControl через `MarkerPosition` (RotatedCorner0-3X/Y). Inline edit защищён guards: +5 тестов InlineEditManager (Start_NonEditable_NoOp, Commit_UnchangedText_NoCommand, Commit_Twice_PushesSingleCommand, Cancel_WhenNotEditing_NoThrow, Start_WhileEditing_SwitchesObject) + 2 STA-теста AutoFocusOnVisibleBehavior (реальный фокус + SelectAll). Тестируемая логика изолирована в `internal static` в 5 WPF-обёртках (`WpfMessageBoxProvider`: ToWpfButtons/ToWpfIcon/ToMsgrResult; `WpfDispatcherService`: ctor с `Dispatcher?`; `WpfDialogFileService`: CreateOpenDialog/CreateSaveDialog; `WpfDialogHostService`: ResolveWindowDescriptor; `ThemeDictionaryManager`: FindThemeDictionary) + 27 новых тестов (WpfMessageBoxProviderTests 11, WpfDispatcherServiceTests 3 STA, WpfDialogFileServiceTests 6 STA, WpfDialogHostServiceTests 2, ThemeDictionaryManagerTests 4 STA, PrintDialogFactoryTests 1 STA). Закрыты 6 MINOR-замечаний ревью (удалены misleading-тесты: AutoFocus fake, WpfApplicationLifecycle placeholder, 4 FitToPageScale тавтологии; CustomResizeCommandTests → ChangePropertyCommandResizeTests; ThemeDictionaryManagerTestCollection DisableParallelization; AutoFocus retry-Activate). Ранее: цепочка настройки → вкладки замкнута — `GridSettings.FromAppSettings(AppSettings)` + `EditorViewModelFactory.ResolveGridSettings()` (explicit → AppSettings → FromDefaultGrid) применяют настройки сетки ко всем новым/открытым вкладкам; архитектурный рефакторинг P2 — `ITabOperationsService`, конструктор `MainViewModel` сокращён с 13 до 10 зависимостей.
+**Sprint "Coverage weak zones" завершён (14.08.2026): line-rate 90.18% (было 88.45%), тесты 2636 (2635 passed + 1 pre-existing skip).** Спринт закрыл 6 слабых зон покрытия (пункт 7 backlog): ResizeMathTests.cs (новый файл, 78 кейсов — ResizeMath 97.35%), PanToolTests +8 (100%), FontMetricsTests +15 (91.11%, было ~40%), ConverterTests +2 (IsNullConverter/NotNullToVisibilityConverter 100%), ValidationServiceTests +24 (TemplateValidator 98.95%, было 65–93%). Production-изменения (2): `TemplateValidator` null-sheet guard — `Validate()` ранний return V-006 при `Sheet == null` (фикс NRE, дублирование N+1→1) + guard в `ValidateObjectCoordinates` (защита `ValidateObject` path); `FontMetrics` рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно). Review: APPROVED, 3 MINOR закрыты. Ранее: Coverage series + Docs/CI — CI coverage gate 75%→80%, CHANGELOG BOM удалён, метрики синхронизированы (2515 тестов, 88.45%).
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -17,7 +17,7 @@
 | Resize | 520 строк (switch) | ResizeMath + полиморфный ApplyResize |
 | Shortcuts | switch в code-behind | ShortcutRegistry |
 | Extended тесты | 16 файлов | все слиты в родительские |
-| CI | нет coverage-gate, нет NuGet кэша | coverage-gate 75% + actions/cache |
+| CI | нет coverage-gate, нет NuGet кэша | coverage-gate 80% + actions/cache |
 | CPM | нет | Directory.Packages.props |
 | **Print Preview** | **нет** | **Ctrl+Shift+P → DocumentViewer** |
 | **EditorConstants** | **36-line proxy** | **удалён → PhysicalConstants/EditorSettings** |
@@ -30,10 +30,12 @@
 | **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
 | **Text markers tech debt** | **открыт (Sprint 61: маркеры смещены при повороте)** | **закрыт: regression-тест RotatedCorners_AllLieOnBoundingBoxEdges (6 углов), маркеры на границе GetBoundingBox()** |
 | **WPF-обёртки** | **private логика (нетестируема)** | **internal static handlers + 27 тестов (unit + STA)** |
-| **Coverage** | **76.4% line-rate** | **80.22% line-rate (≥80% достигнут)** |
+| **Coverage** | **76.4% line-rate** | **90.18% line-rate (gate 80% достигнут)** |
+| **CI coverage gate** | **75%** | **80% (факт 90.18%)** |
+| **Weak zones coverage** | **6 зон 40–93% (FontMetrics ~40%, TemplateValidator 65–93%)** | **все цели ≥90%: FontMetrics 91.11%, TemplateValidator 98.95%, ResizeMath 97.35%, PanTool/IsNull/NotNullToVisibility 100%** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2295 total (2294 passed, 1 pre-existing skip)
+**Tests:** 2636 total (2635 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -168,12 +170,12 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones (coverage 90.18%) завершены)
 
-- **Tests:** 2295 total (2294 passed, 1 pre-existing skip)
-- **Coverage:** 80.22% line-rate ✅
+- **Tests:** 2636 total (2635 passed, 1 pre-existing skip)
+- **Coverage:** 90.18% line-rate ✅
 - **Build:** 0 errors, 0 warnings
-- **CI/CD:** GitHub Actions — build + test + coverage-gate 75% + NuGet кэш
+- **CI/CD:** GitHub Actions — build + test + coverage-gate 80% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
 - **Managers:** ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState
 - **Tools:** ITool + IEditorContext + ResizeMath (чистые функции) + ShortcutRegistry
@@ -1201,7 +1203,7 @@ Tests:  1780 passed, 1 skip
 55. `ShortcutRegistry` — add new keyboard shortcuts to `Helpers/ShortcutRegistry.cs`, NOT to `MainWindow.xaml.cs`.
 56. `CaptureResizeState`/`ApplyResize` — every new model subclass of `TemplateObjectBase` MUST implement these two methods for undoable resize to work.
 57. Test file merging — after R4.4, there are NO Extended/Additional test files. All tests live in the parent files. Create tests in the parent, not in separate files.
-58. Coverage gate — CI checks coverage ≥75%. On failure, the build is red. Generate coverage locally with `dotnet test --collect:"XPlat Code Coverage"` before pushing.
+58. Coverage gate — CI checks coverage ≥80%. On failure, the build is red. Generate coverage locally with `dotnet test --collect:"XPlat Code Coverage"` before pushing.
 59. Forwarding properties after R3.1 — after XAML was migrated to bind to managers directly (R3.1), forwarding properties on EditorViewModel became dead code. Remove them: delete the property, delete the `OnPropertyChanged()` in setters of IEditorContext-required properties, remove PropertyChanged forwarding handlers (`_zoomPanHandler`, `_previewHandler`, `_dirtyStateHandler`, `_toolManagerHandler`), remove `OnZoomChangedInternal()`, and simplify `OnSelectionChangedInternal()`. IAutosaveTab properties become explicit interface implementation. Test references must use `editor.XManager.Y` instead of `editor.Y`.
 60. `[ObservableProperty]` on reference-type fields with re-assign — the source-generated setter uses `EqualityComparer<T>.Default.Equals()`, which for reference types defaults to `ReferenceEquals`. If you mutate the same instance and re-assign it, `PropertyChanged` is suppressed. Use manual setters with unconditional `OnPropertyChanged()` for preview/re-assign patterns.
 61. Computed properties (expression-bodied, no `[ObservableProperty]`) on ObservableObject managers that are bound from XAML must fire `OnPropertyChanged()` explicitly when their dependencies change. The binding engine only re-evaluates when `PropertyChanged` fires for that property name — it does NOT infer dependencies from the expression body.
@@ -1703,4 +1705,59 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2295 total, 2294 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 80.22% line-rate ✅
+
+## Sprint — Coverage series + Docs/CI (11–13.08.2026)
+
+### Feature CS-1: Input routing chain coverage (11.08.2026)
+**Решение:** Минимальный рефакторинг `CanvasInputRouter.cs` (private static → internal static: `GetCurrentTool`, `RoutePanDown`, `ApplyPan`, `ToWpfCursor`) + 69 новых тестов: CanvasInputRouterTests (35), CoordinateTransformTests (7), EditorCanvasStateTests (14), EditorCanvasBehaviorTests (+13 STA). Покрытие: CanvasInputRouter 97.2%, CoordinateTransform/EditorCanvasState/EditorCanvasBehavior 100%.
+**Файлы:** `Behaviors/CanvasInputRouter.cs`, `Tests/Behaviors/*`
+
+### Feature CS-2: TabOperationsService coverage (12.08.2026)
+**Решение:** `TabOperationsService` покрыт на 100% (было 24%, +51 тест).
+**Файлы:** `Tests/Services/TabOperationsServiceTests.cs`
+
+### Feature CS-3: MainViewModel async flows coverage (12.08.2026)
+**Решение:** Async-потоки `MainViewModel` (autosave, async-void, print, tab ops) покрыты до 97.1% (+35 тестов).
+**Файлы:** `Tests/ViewModels/MainViewModelAsyncTests.cs`
+
+### Feature CS-4: TemplateLibraryService/ViewModel coverage (12.08.2026)
+**Решение:** TemplateLibraryService/ViewModel покрыты 35%/51% → 100% (+41 тест).
+**Файлы:** `Tests/ViewModels/TemplateLibrary*Tests.cs`, `Tests/Services/TemplateLibraryServiceTests.cs`
+
+### Feature CS-5: Dialog wrappers coverage (12.08.2026)
+**Решение:** WpfDialogHostService 100%, WpfDispatcherService 92.3%, PrintDialogWrapper 68.2% (+18 тестов).
+**Файлы:** `Tests/Services/WpfDialogHostServiceTests.cs`, `WpfDispatcherServiceTests.cs`, `PrintDialogWrapperTests.cs`
+
+### Feature CS-6: Docs + CI gate 80% (13.08.2026)
+**Решение:** Coverage gate поднят 75% → 80% в `.github/workflows/ci.yml` + `opencode-pipeline.yml`; CHANGELOG.md: UTF-8 BOM удалён (контент уже чистый); метрики синхронизированы во всех источниках (README, AGENTS.md, CONTRIBUTING.md, docs/00, docs/19, CODING_STANDARDS, agents, skills, .coverage-baseline.txt).
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2515 total, 2514 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 88.45% line-rate ✅ (gate 80% достигнут)
+
+## Sprint — Coverage weak zones (14.08.2026)
+
+### Feature WZ-1: ResizeMathTests.cs (новый файл, 78 кейсов)
+**Решение:** Новый тестовый файл `Tests/Tools/ResizeMathTests.cs` — 78 unit-кейсов (100% line coverage `Tools/ResizeMath.cs`, итоговая zone line-rate 97.35%): ClampLong (2), ComputeRectangleResize (30: все 8 хендлов + Shift aspect-ratio на диагоналях + clamp к листу, None/invalid handle → no-op), ComputeLineResize (27: все 8 хендлов для start/end граней, Shift на диагоналях), ComputeTextResize (14: все 8 хендлов + Shift, guard divide-by-zero), ApplyTextFontSizeClamp (2), IsResizeHandle (2), CursorForHandle (1).
+**Файлы:** `Tests/Tools/ResizeMathTests.cs`
+
+### Feature WZ-2: Остальные зоны — PanTool, FontMetrics, Converters, TemplateValidator
+**Решение:** PanToolTests +8 → 100% (66/66), FontMetricsTests +15 → 91.11% (было ~40%, рефакторинг тестируемости), ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%, ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%).
+**Файлы:** `Tests/Tools/PanToolTests.cs`, `Tests/Models/FontMetricsTests.cs`, `Tests/Converters/ConverterTests.cs`, `Tests/Helpers/ValidationServiceTests.cs`
+
+### Fix WZ-3: TemplateValidator null-sheet guard (фикс NRE)
+**Проблема:** `TemplateValidator.Validate()` при `template.Sheet == null` кидал NullReferenceException (через ValidateSheetFormat/ValidateCoordinates/ValidateObject); при нескольких объектах дублировал ошибку (N+1 вместо 1).
+**Исправление:** Ранний return V-006 при `Sheet == null` ДО вызова остальных валидаторов; guard в `ValidateObjectCoordinates()` (sheet==null → V-006 + yield break) защищает `ValidateObject` path. Regression-тесты: `Validate_SheetNullWithObjects_NoThrow_ReturnsV006` (усилен `Assert.Single`), `ValidateObject_NullSheet_ReturnsV006_NoThrow`.
+
+### Feature WZ-4: FontMetrics рефакторинг тестируемости
+**Решение:** `ComputeAverageAdvanceWidth` → `internal static` (чистое вычисление по `IDictionary<int,ushort>`/`IDictionary<ushort,double>`), sampleChars (A-Z/a-z/А-Я/а-я) → `private static readonly SampleChars`, fallback-присваивания → `ApplyFallback()`, catch-логика → `HandleFallbackWithLog()`. Поведение не изменено, публичные сигнатуры не тронуты (2-й production-change спринта, оправдан тестируемостью).
+
+### Review findings (3× MINOR закрыты)
+1. TemplateValidator: ранний return V-006 в `Validate()` (N+1→1), guard в `ValidateObjectCoordinates` оставлен как defense-in-depth, тест усилен `Assert.Single(errors, e => e.RuleId == "V-006")`.
+2. ValidationServiceTests.cs:398 — комментарий A4 Portrait исправлен (300мм > 210мм, было вводящее в заблуждение).
+3. ResizeMathTests.cs:402 — mojibake `90В°` → `90°`.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2636 total, 2635 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 90.18% line-rate ✅ (gate 80% достигнут)
 

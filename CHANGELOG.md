@@ -1,4 +1,4 @@
-﻿# Changelog
+# Changelog
 
 All notable changes to this project will be documented in this file.
 
@@ -169,6 +169,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Metrics
 - **Tests:** 2295 total (2294 passed, 0 failures, 1 pre-existing skip)
 - **Coverage:** 80.22% line-rate ✅
+- **Build:** 0 errors, 0 warnings
+
+### Added
+- Coverage sprint series (11–13.08.2026): input routing chain (CanvasInputRouter/EditorCanvasState/CoordinateTransform/EditorCanvasBehavior — internal static + 69 STA/pure тестов; CanvasInputRouter 97.2%, остальные 100%), TabOperationsService 24%→100% (+51), MainViewModel async flows → 97.1% (+35), TemplateLibraryService/ViewModel 35%/51%→100% (+41), dialog wrappers (WpfDialogHostService 100%, WpfDispatcherService 92.3%, PrintDialogWrapper, +18)
+
+### Changed
+- CI: coverage gate raised 75% → 80% (ci.yml + opencode-pipeline.yml); actual 88.45% line-rate
+- CHANGELOG.md: UTF-8 BOM removed (content encoding already clean) — file is now BOM-less UTF-8 (CRLF preserved)
+
+### Metrics
+- **Tests:** 2515 total (2514 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 88.45% line-rate ✅
+- **Build:** 0 errors, 0 warnings
+
+### Added
+- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%)
+
+### Changed
+- FontMetrics: рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно, публичные сигнатуры не тронуты)
+
+### Fixed
+- TemplateValidator: null-sheet guard — `Validate()` ранний return V-006 при `Sheet == null` (фикс NRE, дублирование N+1→1); `ValidateObjectCoordinates` guard V-006 (защита `ValidateObject` path)
+
+### Metrics
+- **Tests:** 2636 total (2635 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 90.18% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 
 ---

@@ -2,6 +2,7 @@ using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
+using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.Helpers;
 
@@ -294,6 +295,301 @@ public class ValidationServiceTests
     {
         Assert.NotNull(ValidationService.ValidateHexColor(""));
         Assert.NotNull(ValidationService.ValidateHexColor(null));
+    }
+
+    // ===== V-001: Пустой ID =====
+
+    [Fact]
+    public void Validate_V001_EmptyId_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new TestTemplateObject("   ", 0, 0));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-001");
+    }
+
+    // ===== V-002: Метаданные =====
+
+    [Fact]
+    public void Validate_V002_AuthorNull_ReturnsWarning()
+    {
+        var template = CreateValidTemplate();
+        template.Metadata.Author = null!;
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        var v002Errors = errors.Where(e => e.RuleId == "V-002").ToList();
+        Assert.Single(v002Errors);
+        Assert.Equal(ValidationSeverity.Warning, v002Errors[0].Severity);
+    }
+
+    [Fact]
+    public void Validate_V002_AuthorWhitespace_ReturnsWarning()
+    {
+        var template = CreateValidTemplate();
+        template.Metadata.Author = "   ";
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-002" && e.Severity == ValidationSeverity.Warning);
+    }
+
+    [Fact]
+    public void Validate_V002_MetadataNull_NoV002()
+    {
+        var template = CreateValidTemplate();
+        template.Metadata = null!;
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.DoesNotContain(errors, e => e.RuleId == "V-002");
+    }
+
+    // ===== V-002: Ключи изменяемых полей =====
+
+    [Fact]
+    public void Validate_V002_DuplicateTextKeys_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(0, 0, "A", 2500, key: "field1"));
+        template.Objects.Add(new Text(1000, 0, "B", 2500, key: "field1"));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-002");
+    }
+
+    [Fact]
+    public void Validate_V002_DuplicateKeysCaseInsensitive_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(0, 0, "A", 2500, key: "Key"));
+        template.Objects.Add(new Text(1000, 0, "B", 2500, key: "key"));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-002");
+    }
+
+    [Fact]
+    public void Validate_V002_NonEditableDuplicateKey_NoError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(0, 0, "A", 2500, key: "field1", isEditable: false));
+        template.Objects.Add(new Text(1000, 0, "B", 2500, key: "field1"));
+
+        var errors = new TemplateValidator().Validate(template).Where(e => e.RuleId == "V-002").ToList();
+        Assert.Empty(errors);
+    }
+
+    [Fact]
+    public void Validate_V002_EmptyOrWhitespaceKey_Skipped()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(0, 0, "A", 2500, key: "", isEditable: true));
+        template.Objects.Add(new Text(1000, 0, "B", 2500, key: "  ", isEditable: true));
+
+        var errors = new TemplateValidator().Validate(template).Where(e => e.RuleId == "V-002").ToList();
+        Assert.Empty(errors);
+    }
+
+    // ===== V-003: Координаты за пределами листа =====
+
+    [Fact]
+    public void Validate_V003_RectangleRightBeyondSheet_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        // A4 Portrait: width=210mm. right = 200+100 = 300мм > 210мм
+        template.Objects.Add(new Rectangle(200000, 0, 100000, 1000));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+    }
+
+    [Fact]
+    public void Validate_V003_RectangleTopBeyondSheet_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        // A4 Portrait: 210x297 мм. top = 250+100 = 350 мм > 297 мм
+        template.Objects.Add(new Rectangle(0, 250000, 1000, 100000));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+    }
+
+    [Fact]
+    public void Validate_V003_TextOutsideSheet_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(300000, 0, "Test", 2500)); // 300 мм > 297 мм
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+    }
+
+    [Fact]
+    public void Validate_V003_LineEndBeyondSheet_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Line(0, 0, 300000, 0)); // end 300 мм > 297 мм
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+    }
+
+    // ===== V-004: Отрицательные размеры (нулевые покрыты выше) =====
+
+    [Fact]
+    public void Validate_V004_RectangleNegativeWidth_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        var rect = new Rectangle(1000, 1000, 1000, 1000);
+        rect.WidthMicrons = -500;
+        template.Objects.Add(rect);
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-004");
+    }
+
+    [Fact]
+    public void Validate_V004_TextNegativeFontSize_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Text(1000, 1000, "Test", -2500));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-004");
+    }
+
+    // ===== V-006: Пустой формат / Custom с нулевой высотой =====
+
+    [Fact]
+    public void Validate_V006_EmptyFormat_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Sheet.Format = "";
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-006");
+    }
+
+    [Fact]
+    public void Validate_V006_CustomSheetZeroHeight_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Sheet.Format = "Custom";
+        template.Sheet.WidthMicrons = 500000;
+        template.Sheet.HeightMicrons = 0;
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-006");
+    }
+
+    // ===== Regression: null Sheet (NRE fix) =====
+
+    [Fact]
+    public void Validate_SheetNullWithObjects_NoThrow_ReturnsV006()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Line(0, 0, 1000, 1000));
+        template.Objects.Add(new Rectangle(0, 0, 1000, 1000));
+        template.Objects.Add(new Text(0, 0, "Test", 2500));
+        template.Sheet = null!;
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-006");
+        Assert.Single(errors, e => e.RuleId == "V-006");
+    }
+
+    [Fact]
+    public void ValidateObject_NullSheet_ReturnsV006_NoThrow()
+    {
+        var errors = new TemplateValidator()
+            .ValidateObject(new Line(0, 0, 1000, 1000), null!)
+            .ToList();
+
+        Assert.Contains(errors, e => e.RuleId == "V-006");
+    }
+
+    // ===== V-007: Некорректный тип линии =====
+
+    [Fact]
+    public void Validate_V007_InvalidLineTypeOnLine_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Line(0, 0, 1000, 1000, (LineType)999));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-007");
+    }
+
+    [Fact]
+    public void Validate_V007_InvalidLineTypeOnRectangle_ReturnsError()
+    {
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Rectangle(0, 0, 1000, 1000, (LineType)999));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-007");
+    }
+
+    // ===== V-005: Мок IValidationService =====
+
+    [Fact]
+    public void Validate_V005_MockReturnsError_ReturnsV005()
+    {
+        var mock = new Mock<IValidationService>();
+        mock.Setup(s => s.ValidateHexColor(It.IsAny<string?>())).Returns("error");
+        var validator = new TemplateValidator(mock.Object);
+
+        var template = CreateValidTemplate();
+        template.Objects.Add(new Line(0, 0, 1000, 1000, strokeColor: "#000000"));
+
+        var errors = validator.Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-005");
+    }
+
+    [Fact]
+    public void Validate_V005_MockReturnsNull_NoV005()
+    {
+        var mock = new Mock<IValidationService>();
+        mock.Setup(s => s.ValidateHexColor(It.IsAny<string?>())).Returns((string?)null);
+        var validator = new TemplateValidator(mock.Object);
+
+        var template = CreateValidTemplate();
+        var line = new Line(0, 0, 1000, 1000);
+        line.StrokeColor = "bad-color";
+        template.Objects.Add(line);
+
+        var errors = validator.Validate(template).Where(e => e.RuleId == "V-005").ToList();
+        Assert.Empty(errors);
+    }
+
+    // ===== E2E: Комбо и положительный контроль =====
+
+    [Fact]
+    public void Validate_MultipleErrors_AllReported()
+    {
+        var template = CreateValidTemplate();
+        // V-001: дублирующиеся ID
+        template.Objects.Add(new TestTemplateObject("combo-1", 0, 0));
+        template.Objects.Add(new TestTemplateObject("combo-1", 5000, 5000));
+        // V-005: плохой цвет
+        var line = new Line(0, 0, 1000, 1000);
+        line.StrokeColor = "bad-color";
+        template.Objects.Add(line);
+        // V-003: прямоугольник за пределами листа
+        template.Objects.Add(new Rectangle(200000, 0, 100000, 1000));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Contains(errors, e => e.RuleId == "V-001");
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+        Assert.Contains(errors, e => e.RuleId == "V-005");
+    }
+
+    [Fact]
+    public void Validate_ValidTemplate_NoErrors()
+    {
+        var template = CreateValidTemplate();
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Empty(errors);
     }
 
     // ===== Test Helper =====

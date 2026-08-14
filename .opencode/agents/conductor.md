@@ -121,7 +121,7 @@ question: ...
 1. Запусти `tester` с файлами изменений
 2. Прочитай результат
 3. Если тесты падают → вернись к implementor (до 3 циклов)
-4. Если coverage <75% → warnings к implementor
+4. Если coverage <80% → warnings к implementor
 5. Если всё ок → Phase 4 (full) или Phase 6 (quick)
 
 ### Phase 4: Review (только full)

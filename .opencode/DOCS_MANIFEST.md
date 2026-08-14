@@ -10,16 +10,16 @@
 
 | # | Path | Category | Что содержит | Last verified |
 |---|------|----------|--------------|---------------|
-| 1 | `AGENTS.md` | status | Sprint history, Common Mistakes, build status, test count, coverage | 2026-08-11 |
-| 2 | `CHANGELOG.md` | release | [Unreleased] секция, Added/Changed/Fixed/Removed, метрики | 2026-08-11 |
+| 1 | `AGENTS.md` | status | Sprint history, Common Mistakes, build status, test count, coverage | 2026-08-14 |
+| 2 | `CHANGELOG.md` | release | [Unreleased] секция, Added/Changed/Fixed/Removed, метрики | 2026-08-14 |
 | 3 | `README.md` | readme | Описание проекта, build, dependencies, structure | 2026-07-20 |
-| 4 | `docs/00_Индекс_документов.md` | index | Реестр всех docs/ файлов, метрики, даты, статус | 2026-08-11 |
+| 4 | `docs/00_Индекс_документов.md` | index | Реестр всех docs/ файлов, метрики, даты, статус | 2026-08-14 |
 | 5 | `docs/01_Техническое_задание_Этап1.md` | spec | FR-001 — FR-074, критерии приёмки, требования | 2026-07-20 |
 | 6 | `docs/02_User_Stories_Этап1.md` | spec | US-1.1 — US-7.x, 25 stories в 7 эпиках | 2026-07-20 |
 | 7 | `docs/03_Спецификация_требований_Этап1.md` | spec | Архитектура, V-XXX (валидация), модель данных | 2026-07-20 |
 | 8 | `docs/05_Руководство_пользователя_черновик.md` | user | Инструкции для пользователя, hotkeys, FR-XXX | 2026-07-20 |
 | 9 | `docs/09_UI_решения.md` | ui | Layout, Material Design, диалоги, XAML-binding | 2026-07-20 |
-| 10 | `docs/19_Статус_проекта.md` | status | Test count, coverage, sprint list, FR coverage, динамика | 2026-08-11 |
+| 10 | `docs/19_Статус_проекта.md` | status | Test count, coverage, sprint list, FR coverage, динамика | 2026-08-14 |
 | 11 | `docs/47_План_развития_Этап2.md` | roadmap | Этап 2 направления, FR-XXX | 2026-07-20 |
 | 12 | `docs/48_Архитектурный_анализ_и_план_рефакторинга.md` | arch | 25 замечаний, file:line, метрики | 2026-07-20 |
 | 13 | `docs/49_План_рефакторинга_R1-R4.md` | arch | 30 задач, file:line, XAML-маппинги | 2026-07-20 |
@@ -227,5 +227,6 @@ PASS | FAIL
 | 2026-07-20 | Initial creation (15 files, 6 metrics, 8 rules) | Phase 5 docs consistency fix |
 | 2026-08-01 | Removed `docs/1.md` (orphan deleted), registered `docs/plan_next_steps.md` | Docs hygiene |
 | 2026-08-10 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "AppSettings → GridSettings chain": test_count 2160, coverage 76.4%) | Sprint docs sync |
-| 2026-08-11 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "Tech debt + coverage": test_count 2295, coverage 80.22%) | Sprint docs sync |
+| 2026-08-14 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Coverage series + Docs/CI: test_count 2515, coverage 88.45%, CI gate 80%) | Sprint docs sync |
+| 2026-08-14 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "Coverage weak zones": test_count 2636, coverage 90.18%, 6 слабых зон закрыты) | Sprint docs sync |
 | 2026-08-10 | CHANGELOG.md: исправлен UTF-8 double-encoding (mojibake) в старых строках (21 строка: в†’→→, вЂ”→—, В°→°, Вµ→µ, С‘→ё); BOM/CRLF сохранены, метрики не менялись | Encoding fix (backlog docs/plan_next_steps.md Задача 2) |

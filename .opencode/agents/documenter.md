@@ -75,16 +75,16 @@ rg -n '\b\d{2}\.\d{2}\.\d{4}\b' docs/00_Индекс_документов.md doc
 Пример:
 ```
 test_count:
-  AGENTS.md: 2035
-  CHANGELOG.md: 2069  ← расхождение
-  docs/19: 2035
-  docs/00: 2035
+  AGENTS.md: 2636
+  CHANGELOG.md: 2637  ← расхождение
+  docs/19: 2636
+  docs/00: 2636
 
 coverage:
-  AGENTS.md: 75.15%
-  CHANGELOG.md: 75.3%  ← расхождение
-  docs/19: 75.15%
-  docs/00: 75.15%
+  AGENTS.md: 90.18%
+  CHANGELOG.md: 90.2%  ← расхождение
+  docs/19: 90.18%
+  docs/00: 90.18%
 ```
 
 ### 4. UPDATE
@@ -121,16 +121,16 @@ PASS | FAIL
 <число>
 
 ### Metrics verified
-- test_count: 2069 (4/4 sources)
-- coverage: 75.3% (4/4 sources)
-- sprint_count: 61 (3/3 sources)
-- last_update: 20.07.2026 (3/3 sources)
+- test_count: 2636 (4/4 sources)
+- coverage: 90.18% (4/4 sources)
+- sprint_count: 42 (3/3 sources)
+- last_update: 14.08.2026 (3/3 sources)
 
 ### Report
 .consistency_report: .opencode/workflow/current/CONSISTENCY_REPORT.md
 
 ### Mismatches (если FAIL)
-- <file>:<line> — test_count=2035, expected=2069
+- <file>:<line> — test_count=2636, expected=2637
 ```
 
 ## Правила

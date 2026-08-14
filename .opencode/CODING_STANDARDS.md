@@ -6,8 +6,8 @@ All agents MUST read this file before any code operation.
 Если правило в AGENTS.md, skill или любом другом документе противоречит этому — побеждает этот документ.
 
 **Build:** 0 errors, 0 warnings  
-**Tests:** 1840 passed, 1 pre-existing skip  
-**Coverage:** ≥75% line-rate (CI gate)
+**Tests:** 2636 passed, 1 pre-existing skip  
+**Coverage:** ≥80% line-rate (CI gate)
 
 ---
 
@@ -309,7 +309,7 @@ public sealed class MicronsToPixelConverter : IValueConverter
 - Нет `Thread.Sleep` → `IDateTimeProvider` + `SetupSequence`
 
 ### 10.2 Coverage
-- CI gate: ≥75% line-rate
+- CI gate: ≥80% line-rate
 - Новый код: ≥80%
 - Coverage exclusions: `.xaml`, `.xaml.cs`, `App.xaml.cs`
 - `dotnet test --collect:"XPlat Code Coverage"` перед push

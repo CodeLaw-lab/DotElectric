@@ -110,7 +110,7 @@ Closes #123"
 ## Checklist
 - [ ] Build: 0 errors, 0 warnings
 - [ ] Tests: all pass
-- [ ] Coverage: ≥75%
+- [ ] Coverage: ≥80%
 - [ ] AGENTS.md updated
 - [ ] Changelog updated
 

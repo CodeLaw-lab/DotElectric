@@ -37,7 +37,7 @@ jobs:
       - name: Test with coverage
         run: dotnet test src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults/
 
-      - name: Check coverage gate (≥75%)
+      - name: Check coverage gate (≥80%)
         shell: pwsh
         run: |
           $coverageFile = Get-ChildItem -Path TestResults -Recurse -Filter "*.cobertura.xml" | Select-Object -First 1
@@ -49,11 +49,11 @@ jobs:
           $lineRate = [double]$xml.coverage.'line-rate'
           $pct = [math]::Round($lineRate * 100, 2)
           Write-Host "📊 Line coverage: $pct%"
-          if ($pct -lt 75) {
-            Write-Host "❌ Coverage $pct% is below gate 75%"
+          if ($pct -lt 80) {
+            Write-Host "❌ Coverage $pct% is below gate 80%"
             exit 1
           }
-          Write-Host "✅ Coverage gate passed ($pct% ≥ 75%)"
+          Write-Host "✅ Coverage gate passed ($pct% ≥ 80%)"
 
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
