@@ -1,6 +1,6 @@
-line-rate: 0.8845
-branch-rate: 0.6941
+line-rate: 0.9018
+branch-rate: 0.8518
 date: 2026-08-14
-tests: 2515
-commit: 9f79338
+tests: 2636
+commit: 70a3203
 threshold: 80.0

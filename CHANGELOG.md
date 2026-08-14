@@ -183,6 +183,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Coverage:** 88.45% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 
+### Added
+- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%)
+
+### Changed
+- FontMetrics: рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно, публичные сигнатуры не тронуты)
+
+### Fixed
+- TemplateValidator: null-sheet guard — `Validate()` ранний return V-006 при `Sheet == null` (фикс NRE, дублирование N+1→1); `ValidateObjectCoordinates` guard V-006 (защита `ValidateObject` path)
+
+### Metrics
+- **Tests:** 2636 total (2635 passed, 0 failures, 1 pre-existing skip)
+- **Coverage:** 90.18% line-rate ✅
+- **Build:** 0 errors, 0 warnings
+
 ---
 
 ## [0.1.0] — 2026-04-01

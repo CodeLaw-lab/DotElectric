@@ -111,7 +111,7 @@ APPROVED | CHANGES_REQUESTED
 ### Findings
 | # | Phase | Severity | Issue |
 |---|-------|----------|-------|
-| 1 | docs  | CRITICAL | test_count mismatch: AGENTS.md=2515, docs/19=2516 |
+| 1 | docs  | CRITICAL | test_count mismatch: AGENTS.md=2636, docs/19=2637 |
 | 2 | impl  | MAJOR    | ...   |
 
 ### Recommendation

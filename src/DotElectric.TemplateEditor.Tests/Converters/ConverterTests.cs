@@ -167,6 +167,13 @@ public class IsNullConverterTests
         var result = _converter.Convert("text", typeof(bool), null, CultureInfo.InvariantCulture);
         Assert.False((bool)result);
     }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(true, typeof(object), null, CultureInfo.InvariantCulture));
+    }
 }
 
 public class ZeroToVisibilityConverterTests
@@ -339,6 +346,13 @@ public class NotNullToVisibilityConverterTests
     {
         var result = _converter.Convert(null, typeof(Visibility), null, CultureInfo.InvariantCulture);
         Assert.Equal(Visibility.Collapsed, result);
+    }
+
+    [Fact]
+    public void ConvertBack_ThrowsNotSupported()
+    {
+        Assert.Throws<NotSupportedException>(() =>
+            _converter.ConvertBack(Visibility.Visible, typeof(object), null, CultureInfo.InvariantCulture));
     }
 }
 
