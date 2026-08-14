@@ -1,4 +1,5 @@
 using DotElectric.TemplateEditor.Models;
+using DotElectric.TemplateEditor.Tests.Helpers;
 using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.Models;
@@ -241,6 +242,75 @@ public class FontMetricsTests : IDisposable
         Assert.False(fm.IsInitialized);
     }
 
+    // ---- Initialize() real path (fallbacks in testhost; real TTF loading is
+    //      impossible in testhost: Application.ResourceAssembly is locked to the
+    //      test assembly and FontFamily/GlyphTypeface cannot open TTF streams) ----
+
+    [Fact]
+    public void Initialize_WithoutResourceAssembly_AppliesFallbackRatios()
+    {
+        WpfContext.Execute(() =>
+        {
+            var fm = new FontMetrics();
+            fm.Initialize();
+
+            Assert.True(fm.IsInitialized);
+            Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ А"));
+            Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"));
+            Assert.Equal(0.65, fm.GetAdvWidthRatio("ГОСТ Б"));
+        });
+    }
+
+    [Fact]
+    public void Initialize_CalledTwice_IsIdempotent()
+    {
+        WpfContext.Execute(() =>
+        {
+            var fm = new FontMetrics();
+
+            fm.Initialize();
+            fm.Initialize();
+
+            Assert.True(fm.IsInitialized);
+            Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ А"));
+            Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"));
+            Assert.Equal(0.65, fm.GetAdvWidthRatio("ГОСТ Б"));
+        });
+    }
+
+    [Fact]
+    public void Reset_AfterInitialize_ReturnsToFallbacks()
+    {
+        WpfContext.Execute(() =>
+        {
+            var fm = new FontMetrics();
+            fm.Initialize();
+            Assert.True(fm.IsInitialized);
+
+            fm.Reset();
+
+            Assert.False(fm.IsInitialized);
+            Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ А"));
+            Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"));
+        });
+    }
+
+    [Fact]
+    public void LoadFont_UnknownFamily_AppliesFallbackDefaults()
+    {
+        WpfContext.Execute(() =>
+        {
+            var fm = new FontMetrics();
+            var method = typeof(FontMetrics).GetMethod(
+                "LoadFont", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+            method!.Invoke(fm, new object[] { "Тест", "NonExistentFamily", 0.7, 0.4 });
+
+            Assert.Equal(0.7, fm.GetHeightRatio("Тест"));
+            Assert.Equal(0.4, fm.GetAdvWidthRatio("Тест"));
+        });
+    }
+
     // ---- Unknown font behavior ----
 
     [Fact]
@@ -292,5 +362,95 @@ public class FontMetricsTests : IDisposable
         var fm = new FontMetrics();
 
         Assert.Equal(0.6, fm.GetAdvWidthRatio(""));
+    }
+
+    // ---- ComputeAverageAdvanceWidth (pure internal static, no STA) ----
+
+    [Fact]
+    public void ComputeAverageAdvanceWidth_SampleChars_FoundAll()
+    {
+        var charToGlyphMap = new Dictionary<int, ushort>
+        {
+            [65] = 1, // 'A'
+            [66] = 2  // 'B'
+        };
+        var advanceWidths = new Dictionary<ushort, double>
+        {
+            [1] = 200,
+            [2] = 400
+        };
+
+        var result = FontMetrics.ComputeAverageAdvanceWidth(
+            charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
+
+        Assert.Equal(300.0, result);
+    }
+
+    [Fact]
+    public void ComputeAverageAdvanceWidth_MissingGlyphs_Skips()
+    {
+        var charToGlyphMap = new Dictionary<int, ushort>
+        {
+            [65] = 1 // 'A' есть, 'B'(66) отсутствует
+        };
+        var advanceWidths = new Dictionary<ushort, double>
+        {
+            [1] = 200,
+            [2] = 400
+        };
+
+        var result = FontMetrics.ComputeAverageAdvanceWidth(
+            charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
+
+        Assert.Equal(200.0, result);
+    }
+
+    [Fact]
+    public void ComputeAverageAdvanceWidth_MissingWidths_Skips()
+    {
+        var charToGlyphMap = new Dictionary<int, ushort>
+        {
+            [65] = 1, // 'A'
+            [66] = 2  // 'B' — glyph есть
+        };
+        var advanceWidths = new Dictionary<ushort, double>
+        {
+            [1] = 200 // для glyph 2 ширины нет
+        };
+
+        var result = FontMetrics.ComputeAverageAdvanceWidth(
+            charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
+
+        Assert.Equal(200.0, result);
+    }
+
+    [Fact]
+    public void ComputeAverageAdvanceWidth_AllMissing_ReturnsFallback()
+    {
+        var charToGlyphMap = new Dictionary<int, ushort>();
+        var advanceWidths = new Dictionary<ushort, double>
+        {
+            [1] = 200,
+            [2] = 400
+        };
+
+        var result = FontMetrics.ComputeAverageAdvanceWidth(
+            charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
+
+        Assert.Equal(100.0, result);
+    }
+
+    [Fact]
+    public void HandleFallbackWithLog_AppliesDefaultRatios_NoThrow()
+    {
+        var fm = new FontMetrics();
+        var method = typeof(FontMetrics).GetMethod(
+            "HandleFallbackWithLog",
+            System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
+        method!.Invoke(fm, new object[] { "Тест", "some error", 0.7, 0.4 });
+
+        Assert.Equal(0.7, fm.GetHeightRatio("Тест"));
+        Assert.Equal(0.4, fm.GetAdvWidthRatio("Тест"));
     }
 }
