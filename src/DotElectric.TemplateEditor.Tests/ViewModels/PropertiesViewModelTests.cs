@@ -1940,4 +1940,76 @@ public class PropertiesViewModelTests
         Assert.Equal(1000, line.StartMicronsX);
         Assert.DoesNotContain(nameof(LinePropertiesViewModel.StartX), raised);
     }
+
+    // ============================================================
+    // RectanglePropertiesViewModel на глубокой базе — диспетчеризация
+    // по карте для всех свойств и afterSet-уведомления зависимых
+    // координат (Width → X, Height → Y)
+    // ============================================================
+
+    [Fact]
+    public void Rect_ModelPropertyChanged_DispatchedForAllMappedProperties()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        rect.MicronsX = 1100;
+        rect.MicronsY = 2100;
+        rect.WidthMicrons = 5100;
+        rect.HeightMicrons = 3100;
+        rect.LineType = LineType.Dashed;
+        rect.StrokeThicknessMicrons = 600;
+        rect.StrokeColor = "#00FF00";
+        rect.FillColor = "#0000FF";
+
+        Assert.Contains(nameof(RectanglePropertiesViewModel.X), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Y), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Width), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Height), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.LineTypeValue), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.StrokeThickness), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.StrokeColor), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.FillColor), raised);
+    }
+
+    [Fact]
+    public void Rect_ChangeWidth_AlsoNotifiesX()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.RectVM.ChangeWidthCommand.Execute(8000);
+
+        Assert.Equal(8000, rect.WidthMicrons);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Width), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.X), raised);
+    }
+
+    [Fact]
+    public void Rect_ChangeHeight_AlsoNotifiesY()
+    {
+        var collection = CreateCollection();
+        var rect = new Rectangle(1000, 2000, 5000, 3000);
+        collection.Add(rect);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.RectVM.ChangeHeightCommand.Execute(6000);
+
+        Assert.Equal(6000, rect.HeightMicrons);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Height), raised);
+        Assert.Contains(nameof(RectanglePropertiesViewModel.Y), raised);
+    }
 }
