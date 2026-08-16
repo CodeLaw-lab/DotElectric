@@ -168,9 +168,10 @@ All agents MUST read this file before any code operation.
 - При failed Undo — rollback + логирование через Serilog
 - `[RelayCommand]` на `void` с `Async` суффиксом — имя команды = `MethodAsyncCommand` (суффикс НЕ обрезается)
 
-### 5.6 CustomResizeCommand
+### 5.6 Resize undo
+- Resize undo через `ChangePropertyCommand<ResizeState>` (initial state → `ApplyResize` setter → final state)
 - Полиморфный `ApplyResize(CaptureResizeState())` на объекте
-- НЕ switch по типу объекта
+- НЕ switch по типу объекта (старый `CustomResizeCommand` удалён)
 - `ResizeMath` — чистые функции, не в ResizeTool напрямую
 
 ---
