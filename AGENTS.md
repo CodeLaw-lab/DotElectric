@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Sprint "Coverage weak zones" завершён (14.08.2026): line-rate 90.18% (было 88.45%), тесты 2636 (2635 passed + 1 pre-existing skip).** Спринт закрыл 6 слабых зон покрытия (пункт 7 backlog): ResizeMathTests.cs (новый файл, 78 кейсов — ResizeMath 97.35%), PanToolTests +8 (100%), FontMetricsTests +15 (91.11%, было ~40%), ConverterTests +2 (IsNullConverter/NotNullToVisibilityConverter 100%), ValidationServiceTests +24 (TemplateValidator 98.95%, было 65–93%). Production-изменения (2): `TemplateValidator` null-sheet guard — `Validate()` ранний return V-006 при `Sheet == null` (фикс NRE, дублирование N+1→1) + guard в `ValidateObjectCoordinates` (защита `ValidateObject` path); `FontMetrics` рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно). Review: APPROVED, 3 MINOR закрыты. Ранее: Coverage series + Docs/CI — CI coverage gate 75%→80%, CHANGELOG BOM удалён, метрики синхронизированы (2515 тестов, 88.45%).
+**Рефакторинг панелей свойств «Глубокая база» (#45–#48) завершён (17.08.2026): тесты 2649 (2648 passed + 1 pre-existing skip), line-rate 89.99% (gate 80%).** Создана глубокая база `ObjectPropertiesViewModel<TObject>` (`ViewModels/ObjectPropertiesViewModel.cs`): конструктор-тройка (CommandHistory?, markDirty, setValidationError), абстрактная декларативная nameof-карта `PropertyMap` («свойство модели → свойство VM») для диспетчеризации INPC и notify-all, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → `ChangePropertyCommand<T>` → уведомление → afterSet), `ChangeFromMmString`, `ParseLineType`. Мигрированы все 3 sub-VM: `LinePropertiesViewModel` (карта 7 пар, 12 RelayCommand), `RectanglePropertiesViewModel` (карта 8 пар, 14 RelayCommand, afterSet Width→X / Height→Y), `TextPropertiesViewModel` (карта 13 пар, 18 RelayCommand; особые команды с null-coalescing `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` сохранены в sub-VM, поведение неизменно). Инфраструктурное дублирование трёх sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены. Ранее: Sprint "Coverage weak zones" (14.08.2026) — 6 слабых зон покрытия закрыты (ResizeMath 97.35%, PanTool 100%, FontMetrics 91.11%, TemplateValidator 98.95%, IsNull/NotNullToVisibility 100%), line-rate 90.18%, 2636 тестов.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -30,12 +30,13 @@
 | **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
 | **Text markers tech debt** | **открыт (Sprint 61: маркеры смещены при повороте)** | **закрыт: regression-тест RotatedCorners_AllLieOnBoundingBoxEdges (6 углов), маркеры на границе GetBoundingBox()** |
 | **WPF-обёртки** | **private логика (нетестируема)** | **internal static handlers + 27 тестов (unit + STA)** |
-| **Coverage** | **76.4% line-rate** | **90.18% line-rate (gate 80% достигнут)** |
-| **CI coverage gate** | **75%** | **80% (факт 90.18%)** |
+| **Coverage** | **76.4% line-rate** | **89.99% line-rate (gate 80% достигнут)** |
+| **CI coverage gate** | **75%** | **80% (факт 89.99%)** |
 | **Weak zones coverage** | **6 зон 40–93% (FontMetrics ~40%, TemplateValidator 65–93%)** | **все цели ≥90%: FontMetrics 91.11%, TemplateValidator 98.95%, ResizeMath 97.35%, PanTool/IsNull/NotNullToVisibility 100%** |
+| **Панели свойств** | **3 sub-VM с дублирующейся инфраструктурой (UpdateObject/Dispose/INPC-dispatch/SetProperty в каждой)** | **глубокая база ObjectPropertiesViewModel<TObject> + декларативные nameof-карты (7/8/13 пар)** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2636 total (2635 passed, 1 pre-existing skip)
+**Tests:** 2649 total (2648 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -170,10 +171,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones (coverage 90.18%) завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones + Глубокая база панелей свойств (#45–#48) завершены)
 
-- **Tests:** 2636 total (2635 passed, 1 pre-existing skip)
-- **Coverage:** 90.18% line-rate ✅
+- **Tests:** 2649 total (2648 passed, 1 pre-existing skip)
+- **Coverage:** 89.99% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 80% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
@@ -181,7 +182,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **Tools:** ITool + IEditorContext + ResizeMath (чистые функции) + ShortcutRegistry
 - **Converters:** 29 файлов (все sealed; +GridNodeColorConverter, +InverseBooleanConverter)
 - **Naming:** `TemplateObjectBase` (не `ITemplateObject`)
-- **Commands:** `IUndoCommand` + `CustomResizeCommand` (полиморфный ApplyResize)
+- **Commands:** `IUndoCommand`, `CommandHistory`, `AddObjectCommand`, `DeleteObjectCommand`, `ChangePropertyCommand<T>` (в т.ч. resize через `ResizeState` + полиморфный `ApplyResize`), `BatchCommand`
 - **Model INPC:** `[ObservableProperty]` sourcegen на Line, Rectangle, Text; `Template` → ObservableObject (INPC на `Sheet`)
 - **Constants:** `PhysicalConstants` + `EditorSettings` (вместо `EditorConstants.cs`-прокладки)
 - **Validation:** `ITemplateValidator`/`TemplateValidator` (domain) + `ValidationService` (UI)
@@ -189,6 +190,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **FontMetrics:** `IFontMetrics` + `FontMetrics.Default` static Singleton (DI-registered)
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
 - **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`; `GridSettings.FromAppSettings` + `EditorViewModelFactory.ResolveGridSettings` — настройки применяются к вкладкам
+- **Панели свойств:** глубокая база `ObjectPropertiesViewModel<TObject>` (конструктор-тройка, декларативная nameof-карта `PropertyMap`, `UpdateObject`/notify-all, `Dispose`, `SetProperty<T>`, `ChangeFromMmString`, `ParseLineType`) + 3 тонких наследника: Line (7 пар), Rectangle (8 пар), Text (13 пар + особые null-coalescing команды в sub-VM)
 
 ## Sprint — Coverage Improvement (19.07.2026)
 
@@ -1192,13 +1194,13 @@ Tests:  1780 passed, 1 skip
 45. File name ≠ type name — `Commands/IUndoCommand.cs` contains interface `IUndoCommand` (renamed from `ICommand.cs` to avoid WPF conflict). The file name is misleading and may cause wrong `using` imports. Rename to `IUndoCommand.cs`.
 46. `IAutosaveTab` defined inside service — `Services/AutosaveService.cs` contains `public interface IAutosaveTab`. EditorViewModel explicitly implements it. Service dictates interface to ViewModel (inverted dependency). Always define interfaces near their consumer, not provider.
 47. `PrintVisualProvider` leaks WPF type — `Func<System.Windows.Media.Visual?>` on EditorViewModel exposes WPF rendering to ViewModel. View sets it, creating a potential dangling reference after tab close. Encapsulate via interface or use WeakReference/Messenger.
-48. `CustomResizeCommand` reuses `_newHeight` as FontSize for Text — semantic confusion in the same field. The command's `Execute()`/`Undo()` use `switch (_object)` instead of polymorphism, violating OCP. Prefer `ApplyResize(CaptureState())` on the object.
+48. Resize undo — use `ChangePropertyCommand<ResizeState>` (initial state, `ApplyResize` setter, final state), NOT a dedicated command class with `switch (_object)` per type (the old `CustomResizeCommand` violated OCP and reused `_newHeight` as FontSize for Text — it was removed). Polymorphic `CaptureResizeState()`/`ApplyResize()` on the object is the single source of truth.
 49. `ValidationService` is static and untestable — `Helpers/ValidationService` is a `static class` called directly from PropertiesViewModel and TemplateService. Cannot be mocked. Make domain validation injectable (`ITemplateValidator`). UI field validators can stay static as pure functions.
 50. No Central Package Management — package versions are hardcoded in two csproj files. No `Directory.Packages.props`. Versions drift independently. Adopt CPM (`<ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>` + `Directory.Packages.props`).
 51. csproj duplicates Directory.Build.props — `TargetFramework`, `Nullable`, `ImplicitUsings` declared in both `Directory.Build.props` and each csproj. Remove duplicates from csproj, keep only project-specific properties (`OutputType`, `UseWPF`).
 52. `TreatWarningsAsErrors` only in CI — local builds don't catch warnings. CI `analyze` job uses `/warnaserror`, but developers see warnings only after push. Add `<TreatWarningsAsErrors>true</TreatWarningsAsErrors>` in `Directory.Build.props`.
 
-53. `CustomResizeCommand` refactoring — after R4.3, the constructor takes `(TemplateObjectBase, ResizeState, ResizeState, Action?)` NOT 9 `long` params. The factory methods `ForRectangle`, `ForText`, `ForLine` are kept for backward compatibility.
+53. `ResizeTool.OnMouseUp` pushes `ChangePropertyCommand<ResizeState>(initialState, s => captured.ApplyResize(s), finalState, "размер", MarkDirty)`. Do NOT pass raw `long` coordinates to resize commands and do NOT create per-type factory methods — resize is expressed through the object's `CaptureResizeState()`/`ApplyResize()`.
 54. `ResizeMath` — all pure resize calculations live in `Tools/ResizeMath.cs`. `ResizeTool.cs` delegates to it. Do NOT add new resize math to ResizeTool directly.
 55. `ShortcutRegistry` — add new keyboard shortcuts to `Helpers/ShortcutRegistry.cs`, NOT to `MainWindow.xaml.cs`.
 56. `CaptureResizeState`/`ApplyResize` — every new model subclass of `TemplateObjectBase` MUST implement these two methods for undoable resize to work.
@@ -1738,7 +1740,7 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 ## Sprint — Coverage weak zones (14.08.2026)
 
 ### Feature WZ-1: ResizeMathTests.cs (новый файл, 78 кейсов)
-**Решение:** Новый тестовый файл `Tests/Tools/ResizeMathTests.cs` — 78 unit-кейсов (100% line coverage `Tools/ResizeMath.cs`, итоговая zone line-rate 97.35%): ClampLong (2), ComputeRectangleResize (30: все 8 хендлов + Shift aspect-ratio на диагоналях + clamp к листу, None/invalid handle → no-op), ComputeLineResize (27: все 8 хендлов для start/end граней, Shift на диагоналях), ComputeTextResize (14: все 8 хендлов + Shift, guard divide-by-zero), ApplyTextFontSizeClamp (2), IsResizeHandle (2), CursorForHandle (1).
+**Решение:** Новый тестовый файл `Tests/Tools/ResizeMathTests.cs` — 78 unit-кейсов / 46 тест-методов (100% line coverage `Tools/ResizeMath.cs`, итоговая zone line-rate 97.35%): ComputeRectangleResize (21: все 8 хендлов + Ctrl от центра + Shift aspect-ratio на диагоналях + snap + min-size clamp + clamp к листу), ComputeTextResize (13: non-corner move, height/width-based, corner shift, Ctrl scale sign, проекция дельт при повороте 90°/45°, snap, min font clamp), ComputeLineEndpoint (6: snap/clamp/non-endpoint), CursorForHandle (14), VisualCursorForHandle (24: ротация диагональных курсоров на 90°/270°/±углы, прямые углы, edge-хендлы).
 **Файлы:** `Tests/Tools/ResizeMathTests.cs`
 
 ### Feature WZ-2: Остальные зоны — PanTool, FontMetrics, Converters, TemplateValidator
@@ -1760,4 +1762,48 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2636 total, 2635 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 90.18% line-rate ✅ (gate 80% достигнут)
+
+## Sprint — Глубокая база панелей свойств (#45–#48, 16–17.08.2026)
+
+### Проблема
+Три sub-VM панелей свойств (`LinePropertiesViewModel`, `RectanglePropertiesViewModel`, `TextPropertiesViewModel`) дублировали одну и ту же инфраструктуру: конструктор-тройку зависимостей, поля `_commandHistory`/`_markDirty`/`_setValidationError`, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → undo-команда → уведомление), `ChangeFromMmString`, switch-диспетчеризацию `PropertyChanged` модели по сырым строкам.
+
+### Feature PB-1: ObjectPropertiesViewModel<TObject> (#46)
+**Решение:** Новая абстрактная generic-база `ViewModels/ObjectPropertiesViewModel.cs` (127 строк, `where TObject : TemplateObjectBase`):
+- конструктор-тройка (`CommandHistory?`, `Action? markDirty`, `Action<string?> setValidationError`) — private-поля, наружу только через protected-механику;
+- `protected abstract IReadOnlyDictionary<string, string> PropertyMap` — декларативная карта «свойство модели → свойство VM», только `nameof`; одна карта обслуживает и диспетчеризацию `PropertyChanged` модели (`OnModelPropertyChanged`), и notify-all в `UpdateObject`;
+- `UpdateObject(TObject?)` — отписка от старого объекта, присвоение, подписка, notify-all по `PropertyMap.Values`;
+- `Dispose()` — отписка + обнуление `CurrentObject`;
+- `SetProperty<T>(value, getter, setter, validator, propertyName, commandName, afterSet)` — валидация (reject → `_setValidationError`, без команды и без уведомления) → `ChangePropertyCommand<T>` → `CommandHistory.Push` → `OnPropertyChanged` → `afterSet`;
+- `ChangeFromMmString` (InvariantCulture-парсинг мм → микроны) и `ParseLineType` (русские имена → `LineType`, неизвестные → Solid) — protected, переиспользуются наследниками.
+
+### Feature PB-2: Миграция Line (#46), Rectangle (#47), Text (#48)
+**Решение:** Каждый sub-VM — тонкий наследник: static readonly карта + `override PropertyMap` + именованные свойства-делегаты к `CurrentObject?` + `[RelayCommand]`-команды.
+- **Line:** карта 7 пар (`StartMicronsX`→`StartX` … `StrokeColor`), 12 RelayCommand (7 типизированных + 5 строковых).
+- **Rectangle:** карта 8 пар (+`FillColor`), 14 RelayCommand; afterSet-хуки `Width`→notify `X` и `Height`→notify `Y` дословно перенесены.
+- **Text:** карта 13 пар (сырые строки `"MicronsX"`/`"MicronsY"` заменены на `nameof`), 18 RelayCommand. Три особые команды с null-coalescing сохранены в sub-VM и не обобщены в базу: `ChangeContent` (валидация `value ?? ""` эквивалентна — `ValidateTextContent` на `IsNullOrWhiteSpace`; setter с `?? string.Empty` сохранён), `ChangeDefaultValue` (null → `""`), `ChangeFontNameFromString` (whitespace-guard до команды) — выражены через base `SetProperty<string?>` с coalescing на стороне вызова, поведение неотличимо.
+
+### Итоги
+- Инфраструктурное дублирование трёх sub-VM устранено полностью (−44/−44/−45 строк в sub-VM; вся механика — в базе 127 строк).
+- Внешняя поверхность байт-в-байт: XAML (`PropertiesPanelContent.xaml`), `PropertiesViewModel`-держатель, code-behind (`OnTextIsEditableClick` → `ChangeIsEditableCommand`) не изменены; имена свойств и команд сохранены.
+- +13 тестов механики карты в `PropertiesViewModelTests.cs` (диспетчеризация по всем свойствам карты, notify-all, отписка при смене объекта и в Dispose, validation-reject, null-coalescing особых команд Text); тесты через существующий шов `PropertiesViewModel`→sub-VM, реальные `CommandHistory`/модели, без моков.
+- Документация (#49): секция в AGENTS.md, устаревшие упоминания `CustomResizeCommand`/`ComputeLineResize` почищены, метрики синхронизированы (README, CONTRIBUTING, docs/00, docs/19, CODING_STANDARDS, CHANGELOG [Unreleased], .coverage-baseline.txt, DOCS_MANIFEST).
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2649 total, 2648 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 89.99% line-rate ✅ (gate 80% достигнут)
+
+## Agent skills
+
+### Issue tracker
+
+Issues и спеки живут в GitHub Issues CodeLaw-lab/DotElectric (через `gh` CLI). См. `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Пять дефолтных ролей: needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix. См. `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` в корне (создаётся лениво) + `docs/adr/`. См. `docs/agents/domain.md`.
 

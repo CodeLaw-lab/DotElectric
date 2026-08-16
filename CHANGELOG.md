@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PointMicrons operator+ и operator- (компонентное сложение/вычитание)
 
 ### Changed
+- Рефакторинг панелей свойств «Глубокая база» (#45–#48): новая абстрактная база `ObjectPropertiesViewModel<TObject>` (конструктор-тройка CommandHistory/markDirty/setValidationError, декларативная nameof-карта `PropertyMap` для диспетчеризации INPC и notify-all, `UpdateObject`, `Dispose`, `SetProperty<T>`, `ChangeFromMmString`, `ParseLineType`); миграция всех 3 sub-VM — Line (карта 7 пар), Rectangle (карта 8 пар, afterSet Width→X / Height→Y), Text (карта 13 пар; особые команды `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` с null-coalescing сохранены в sub-VM); дублирование инфраструктуры sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены; +13 тестов механики карты
 - AGENTS.md: обновлены счётчики тестов (2035) и покрытие (75.15%)
 
 ### Fixed
