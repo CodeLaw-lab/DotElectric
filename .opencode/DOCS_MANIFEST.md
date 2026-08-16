@@ -229,4 +229,5 @@ PASS | FAIL
 | 2026-08-10 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "AppSettings → GridSettings chain": test_count 2160, coverage 76.4%) | Sprint docs sync |
 | 2026-08-14 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Coverage series + Docs/CI: test_count 2515, coverage 88.45%, CI gate 80%) | Sprint docs sync |
 | 2026-08-14 | Last verified обновлён для AGENTS.md, CHANGELOG.md, docs/00, docs/19 (Sprint "Coverage weak zones": test_count 2636, coverage 90.18%, 6 слабых зон закрыты) | Sprint docs sync |
+| 2026-08-17 | Last verified обновлён для AGENTS.md, CHANGELOG.md [Unreleased], README.md, CONTRIBUTING.md, docs/00, docs/19, CODING_STANDARDS.md, .coverage-baseline.txt (рефакторинг панелей свойств «Глубокая база» #45–#48: test_count 2649, coverage 89.99%; устаревшие упоминания CustomResizeCommand/ComputeLineResize почищены) | Sprint docs sync (#49) |
 | 2026-08-10 | CHANGELOG.md: исправлен UTF-8 double-encoding (mojibake) в старых строках (21 строка: в†’→→, вЂ”→—, В°→°, Вµ→µ, С‘→ё); BOM/CRLF сохранены, метрики не менялись | Encoding fix (backlog docs/plan_next_steps.md Задача 2) |

@@ -70,7 +70,7 @@ View (XAML) → ViewModel → Manager/Tool → Service → Model
 - `BatchCommand` — группировка для multi-object операций (Move, Rotate, Delete, Paste).
 - `CommandHistory` — 50 уровней, `Undo()`/`Redo()` вызывают `PurgeOrphanedSelection()`.
 - `MarkDirty()` — только через команды, не вручную.
-- `CustomResizeCommand` — использует `ApplyResize`, не switch по типу объекта.
+- Resize undo — `ChangePropertyCommand<ResizeState>` + `ApplyResize`, не switch по типу объекта.
 
 ### Сериализация
 - Формат: `.tdel` = XML в ZIP.

@@ -53,7 +53,7 @@ src/
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
 │   └── Messages/                        # WeakReferenceMessenger сообщения
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2636 tests, 1 pre-existing skip)
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2649 tests, 1 pre-existing skip)
 ```
 
 ### Coding Standards
@@ -66,7 +66,7 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: ≥80% line-rate (CI gate, actual 90.18%)
+- Target coverage: ≥80% line-rate (CI gate, actual 89.99%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
@@ -86,7 +86,7 @@ feat: add symbol editor panel
 fix: correct line hit-testing tolerance
 refactor: extract magic numbers to PhysicalConstants/EditorSettings
 docs: update AGENTS.md with Sprint 29 metrics
-test: add CustomResizeCommand tests
+test: add ChangePropertyCommand tests
 ```
 
 ### Pull Requests
