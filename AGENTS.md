@@ -1787,7 +1787,7 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 - Инфраструктурное дублирование трёх sub-VM устранено полностью (−44/−44/−45 строк в sub-VM; вся механика — в базе 127 строк).
 - Внешняя поверхность байт-в-байт: XAML (`PropertiesPanelContent.xaml`), `PropertiesViewModel`-держатель, code-behind (`OnTextIsEditableClick` → `ChangeIsEditableCommand`) не изменены; имена свойств и команд сохранены.
 - +13 тестов механики карты в `PropertiesViewModelTests.cs` (диспетчеризация по всем свойствам карты, notify-all, отписка при смене объекта и в Dispose, validation-reject, null-coalescing особых команд Text); тесты через существующий шов `PropertiesViewModel`→sub-VM, реальные `CommandHistory`/модели, без моков.
-- Документация (#49): секция в AGENTS.md, устаревшие упоминания `CustomResizeCommand`/`ComputeLineResize` почищены, метрики синхронизированы (README, CONTRIBUTING, docs/00, docs/19, CODING_STANDARDS, CHANGELOG [Unreleased], .coverage-baseline.txt, DOCS_MANIFEST).
+- Документация (#49): секция в AGENTS.md, устаревшие упоминания `CustomResizeCommand`/`ComputeLineResize` почищены в current-state секциях (исторические записи сохранены, запись CHANGELOG аннотирована), метрики синхронизированы (README, CONTRIBUTING, docs/00, docs/19, CODING_STANDARDS, CHANGELOG [Unreleased], .coverage-baseline.txt, DOCS_MANIFEST).
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2649 total, 2648 passed (0 failures, 1 pre-existing skip)

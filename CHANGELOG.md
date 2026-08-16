@@ -185,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build:** 0 errors, 0 warnings
 
 ### Added
-- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%)
+- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%). *(Примечание от 17.08.2026: список функций в скобках был неточным уже на момент записи; фактический API ResizeMath: ComputeRectangleResize, ComputeTextResize, ComputeLineEndpoint, CursorForHandle, VisualCursorForHandle — см. AGENTS.md WZ-1)*
 
 ### Changed
 - FontMetrics: рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно, публичные сигнатуры не тронуты)
