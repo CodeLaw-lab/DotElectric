@@ -2012,4 +2012,131 @@ public class PropertiesViewModelTests
         Assert.Contains(nameof(RectanglePropertiesViewModel.Height), raised);
         Assert.Contains(nameof(RectanglePropertiesViewModel.Y), raised);
     }
+
+    // ============================================================
+    // TextPropertiesViewModel на глубокой базе — диспетчеризация
+    // по карте для всех 13 свойств и неизменность поведения особых
+    // команд (null → пустая строка, пропуск whitespace)
+    // ============================================================
+
+    [Fact]
+    public void Text_ModelPropertyChanged_DispatchedForAllMappedProperties()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        text.MicronsX = 1100;
+        text.MicronsY = 2100;
+        text.Content = "Changed";
+        text.FontSizeMicrons = 5100;
+        text.FontName = "ГОСТ Б";
+        text.TextType = TextType.Dimension;
+        text.RotationAngle = 45;
+        text.Key = "k1";
+        text.IsEditable = false;
+        text.DefaultValue = "dv";
+        text.Foreground = "#123456";
+        text.TextWrapping = true;
+        text.TextAlignment = "Right";
+
+        Assert.Contains(nameof(TextPropertiesViewModel.X), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Y), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Content), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.FontSize), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.FontName), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextTypeValue), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Rotation), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Key), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.IsEditable), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.DefaultValue), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Foreground), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextWrapping), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextAlignment), raised);
+    }
+
+    [Fact]
+    public void Text_UpdateObject_RaisesNotifyAllForEveryMappedProperty()
+    {
+        var collection = CreateCollection();
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        collection.Add(new Text(1000, 2000, "Hello", 5000));
+
+        Assert.Contains(nameof(TextPropertiesViewModel.X), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Y), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Content), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.FontSize), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.FontName), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextTypeValue), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Rotation), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Key), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.IsEditable), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.DefaultValue), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.Foreground), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextWrapping), raised);
+        Assert.Contains(nameof(TextPropertiesViewModel.TextAlignment), raised);
+    }
+
+    [Fact]
+    public void Text_UpdateObject_SwitchObject_UnsubscribesOldAndSubscribesNew()
+    {
+        var collection = CreateCollection();
+        var text1 = new Text(1000, 2000, "First", 5000);
+        collection.Add(text1);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        var text2 = new Text(5000, 6000, "Second", 7000);
+        collection[0] = text2;
+
+        raised.Clear();
+        text1.MicronsX = 9999;
+        Assert.DoesNotContain(nameof(TextPropertiesViewModel.X), raised);
+
+        text2.MicronsX = 12345;
+        Assert.Contains(nameof(TextPropertiesViewModel.X), raised);
+        Assert.Equal(12345, vm.TextVM.X);
+    }
+
+    [Fact]
+    public void Text_ChangeDefaultValue_NullValue_CoalescesToEmptyString()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var cmdHistory = CreateCommandHistory();
+        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+
+        vm.TextVM.ChangeDefaultValueCommand.Execute(null);
+
+        Assert.Equal(string.Empty, text.DefaultValue);
+        Assert.Equal(string.Empty, vm.TextVM.DefaultValue);
+        Assert.Equal(1, cmdHistory.UndoCount);
+    }
+
+    [Fact]
+    public void Text_ChangeContent_NullValue_SetsValidationError_NoCommand()
+    {
+        var collection = CreateCollection();
+        var text = new Text(1000, 2000, "Hello", 5000);
+        collection.Add(text);
+        var cmdHistory = CreateCommandHistory();
+        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+
+        vm.TextVM.ChangeContentCommand.Execute(null);
+
+        Assert.NotNull(vm.ValidationError);
+        Assert.Equal("Hello", text.Content);
+        Assert.Equal(0, cmdHistory.UndoCount);
+    }
 }
