@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - PointMicrons operator+ и operator- (компонентное сложение/вычитание)
 
 ### Changed
+- Рефакторинг панелей свойств «Глубокая база» (#45–#48): новая абстрактная база `ObjectPropertiesViewModel<TObject>` (конструктор-тройка CommandHistory/markDirty/setValidationError, декларативная nameof-карта `PropertyMap` для диспетчеризации INPC и notify-all, `UpdateObject`, `Dispose`, `SetProperty<T>`, `ChangeFromMmString`, `ParseLineType`); миграция всех 3 sub-VM — Line (карта 7 пар), Rectangle (карта 8 пар, afterSet Width→X / Height→Y), Text (карта 13 пар; особые команды `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` с null-coalescing сохранены в sub-VM); дублирование инфраструктуры sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены; +13 тестов механики карты
 - AGENTS.md: обновлены счётчики тестов (2035) и покрытие (75.15%)
 
 ### Fixed
@@ -184,7 +185,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Build:** 0 errors, 0 warnings
 
 ### Added
-- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%)
+- Sprint "Coverage weak zones" (14.08.2026): ResizeMathTests.cs — новый файл, 78 unit-кейсов (ClampLong, ComputeRectangleResize/ComputeLineResize/ComputeTextResize, ApplyTextFontSizeClamp, IsResizeHandle, CursorForHandle) — ResizeMath 97.35%; PanToolTests +8 → 100%; FontMetricsTests +15 → 91.11% (было ~40%); ConverterTests +2 → IsNullConverter/NotNullToVisibilityConverter 100%; ValidationServiceTests +24 → TemplateValidator 98.95% (было 65–93%). *(Примечание от 17.08.2026: список функций в скобках был неточным уже на момент записи; фактический API ResizeMath: ComputeRectangleResize, ComputeTextResize, ComputeLineEndpoint, CursorForHandle, VisualCursorForHandle — см. AGENTS.md WZ-1)*
 
 ### Changed
 - FontMetrics: рефакторинг тестируемости — `ComputeAverageAdvanceWidth` → internal static, `SampleChars` → static readonly, fallback через `ApplyFallback`/`HandleFallbackWithLog` (поведение-эквивалентно, публичные сигнатуры не тронуты)

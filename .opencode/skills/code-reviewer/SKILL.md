@@ -57,7 +57,7 @@ description: Tech Lead code review — checks plan compliance, architecture, Com
 - [ ] Нет static Service'ов (ValidationService — injectable)
 - [ ] Нет dual-write (два manager'а с копией одного settings)
 - [ ] `ITool.OnMouseWheel` возвращает `bool`, не `void`
-- [ ] `CustomResizeCommand` использует `ApplyResize`, не switch по типу
+- [ ] Resize undo через `ChangePropertyCommand<ResizeState>` + `ApplyResize`, не switch по типу
 
 ### Undo/Redo
 - [ ] Multi-object операции (Move, Rotate, Delete, Paste) — в `BatchCommand`

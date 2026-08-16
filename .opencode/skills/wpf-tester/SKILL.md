@@ -145,7 +145,7 @@ public class EditorViewModelTests
 
 ### 4.6. Undo/Redo
 - Multi-object операции (Move, Rotate, Delete, Paste) — группировать в BatchCommand.
-- CustomResizeCommand: `ApplyResize`, не switch по типу объекта.
+- Resize undo: `ChangePropertyCommand<ResizeState>` + `ApplyResize`, не switch по типу объекта.
 - `MarkDirty()` — только через команды. Не вручную.
 
 ## 5. Проверка утечек памяти
