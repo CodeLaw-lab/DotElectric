@@ -1821,4 +1821,123 @@ public class PropertiesViewModelTests
 
         Assert.DoesNotContain(nameof(LinePropertiesViewModel.StrokeColor), raised);
     }
+
+    // ============================================================
+    // ObjectPropertiesViewModel — механика карты пересылки
+    // «свойство модели → свойство VM» (диспетчеризация, notify-all,
+    // отписка при смене объекта и в Dispose)
+    // ============================================================
+
+    [Fact]
+    public void Line_ModelPropertyChanged_DispatchedForAllMappedProperties()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        line.StartMicronsX = 1100;
+        line.StartMicronsY = 2100;
+        line.EndMicronsX = 3100;
+        line.EndMicronsY = 4100;
+        line.LineType = LineType.Dashed;
+        line.StrokeThicknessMicrons = 600;
+        line.StrokeColor = "#00FF00";
+
+        Assert.Contains(nameof(LinePropertiesViewModel.StartX), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StartY), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.EndX), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.EndY), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.LineTypeValue), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeThickness), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeColor), raised);
+    }
+
+    [Fact]
+    public void Line_UpdateObject_RaisesNotifyAllForEveryMappedProperty()
+    {
+        var collection = CreateCollection();
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        collection.Add(new Line(1000, 2000, 3000, 4000));
+
+        Assert.Contains(nameof(LinePropertiesViewModel.StartX), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StartY), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.EndX), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.EndY), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.LineTypeValue), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeThickness), raised);
+        Assert.Contains(nameof(LinePropertiesViewModel.StrokeColor), raised);
+    }
+
+    [Fact]
+    public void Line_UpdateObject_SwitchObject_UnsubscribesOldAndSubscribesNew()
+    {
+        var collection = CreateCollection();
+        var line1 = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line1);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        var line2 = new Line(5000, 6000, 7000, 8000);
+        collection[0] = line2;
+
+        raised.Clear();
+        line1.StartMicronsX = 9999;
+        Assert.DoesNotContain(nameof(LinePropertiesViewModel.StartX), raised);
+
+        line2.StartMicronsX = 12345;
+        Assert.Contains(nameof(LinePropertiesViewModel.StartX), raised);
+        Assert.Equal(12345, vm.LineVM.StartX);
+    }
+
+    [Fact]
+    public void Line_Dispose_NoEventsForAnyMappedPropertyChange()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var vm = new PropertiesViewModel(collection);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.Dispose();
+
+        line.StartMicronsX = 1100;
+        line.EndMicronsY = 4100;
+        line.LineType = LineType.DashDot;
+        line.StrokeThicknessMicrons = 700;
+        line.StrokeColor = "#00FF00";
+
+        Assert.Empty(raised);
+    }
+
+    [Fact]
+    public void Line_SetProperty_ValidationRejected_NoUndoEntryAndNoNotification()
+    {
+        var collection = CreateCollection();
+        var line = new Line(1000, 2000, 3000, 4000);
+        collection.Add(line);
+        var cmdHistory = CreateCommandHistory();
+        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+
+        var raised = new List<string?>();
+        ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
+
+        vm.LineVM.ChangeStartXCommand.Execute(-100);
+
+        Assert.NotNull(vm.ValidationError);
+        Assert.Equal(0, cmdHistory.UndoCount);
+        Assert.Equal(1000, line.StartMicronsX);
+        Assert.DoesNotContain(nameof(LinePropertiesViewModel.StartX), raised);
+    }
 }
