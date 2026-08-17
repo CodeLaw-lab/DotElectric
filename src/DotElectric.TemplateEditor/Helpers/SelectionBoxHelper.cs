@@ -106,7 +106,7 @@ public static class SelectionBoxHelper
         var result = new List<TemplateObjectBase>();
         foreach (var obj in objects)
         {
-            var objBounds = GetObjectBounds(obj);
+            var objBounds = obj.GetBoundingBox();
             if (box.Contains(objBounds))
                 result.Add(obj);
         }
@@ -123,15 +123,10 @@ public static class SelectionBoxHelper
         var result = new List<TemplateObjectBase>();
         foreach (var obj in objects)
         {
-            var objBounds = GetObjectBounds(obj);
+            var objBounds = obj.GetBoundingBox();
             if (box.Intersects(objBounds))
                 result.Add(obj);
         }
         return result;
     }
-
-    /// <summary>
-    /// Получить bounding box объекта в микронах (полиморфный, из модели).
-    /// </summary>
-    private static RectMicrons GetObjectBounds(TemplateObjectBase obj) => obj.GetBoundingBox();
 }
