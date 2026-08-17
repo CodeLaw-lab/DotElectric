@@ -1,4 +1,3 @@
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DotElectric.TemplateEditor.Tools;
 
@@ -47,17 +46,6 @@ public sealed partial class ToolManager : ObservableObject
         [ToolKind.Resize] = typeof(ResizeTool),
     };
 
-    /// <summary>
-    /// Карта горячих клавиш: клавиша → идентичность инструмента.
-    /// </summary>
-    public static IReadOnlyDictionary<Key, ToolKind> ShortcutMap { get; } = new Dictionary<Key, ToolKind>
-    {
-        [Key.V] = ToolKind.Select,
-        [Key.L] = ToolKind.Line,
-        [Key.R] = ToolKind.Rectangle,
-        [Key.T] = ToolKind.Text,
-    };
-
     private readonly Dictionary<Type, ITool> _toolCache = new();
     private readonly IEditorContext _editorCtx;
 
@@ -75,7 +63,7 @@ public sealed partial class ToolManager : ObservableObject
         get => ActiveToolKind.ToString();
         set
         {
-            if (Enum.TryParse<ToolKind>(value, out var kind))
+            if (TryParseKind(value, out var kind))
                 ActiveToolKind = kind;
         }
     }
@@ -119,7 +107,11 @@ public sealed partial class ToolManager : ObservableObject
         ActiveToolKind = kind;
     }
 
-    public void PushTool(string tool) => PushTool(ParseKind(tool));
+    public void PushTool(string tool)
+    {
+        if (TryParseKind(tool, out var kind))
+            PushTool(kind);
+    }
 
     public void PopTool()
     {
@@ -145,5 +137,20 @@ public sealed partial class ToolManager : ObservableObject
         }
     }
 
-    private static ToolKind ParseKind(string tool) => Enum.Parse<ToolKind>(tool);
+    /// <summary>
+    /// Парсит имя в идентичность. Числовые строки и неизвестные значения отбрасываются.
+    /// </summary>
+    private static bool TryParseKind(string? value, out ToolKind kind)
+    {
+        if (value != null &&
+            Enum.TryParse<ToolKind>(value, out var parsed) &&
+            string.Equals(parsed.ToString(), value, StringComparison.OrdinalIgnoreCase))
+        {
+            kind = parsed;
+            return true;
+        }
+
+        kind = default;
+        return false;
+    }
 }

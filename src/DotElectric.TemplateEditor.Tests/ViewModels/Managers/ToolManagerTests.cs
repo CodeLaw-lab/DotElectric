@@ -72,6 +72,17 @@ public class ToolManagerTests
         Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
     }
 
+    [Fact]
+    public void ActiveTool_SetNumericString_KeepsCurrentKind()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.ActiveTool = "2";
+
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
     [Theory]
     [InlineData(typeof(SelectTool), "Select")]
     [InlineData(typeof(DrawingLineTool), "Line")]
@@ -323,6 +334,17 @@ public class ToolManagerTests
     }
 
     [Fact]
+    public void PushTool_UnknownString_KeepsCurrentKind()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.PushTool("Bogus");
+
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
+    [Fact]
     public void PushTool_StringAndKind_Interoperate()
     {
         var vm = CreateVm();
@@ -336,21 +358,5 @@ public class ToolManagerTests
 
         sut.PopTool();
         Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
-    }
-
-    [Theory]
-    [InlineData(System.Windows.Input.Key.V, ToolKind.Select)]
-    [InlineData(System.Windows.Input.Key.L, ToolKind.Line)]
-    [InlineData(System.Windows.Input.Key.R, ToolKind.Rectangle)]
-    [InlineData(System.Windows.Input.Key.T, ToolKind.Text)]
-    public void ShortcutMap_MapsKeysToKinds(System.Windows.Input.Key key, ToolKind expected)
-    {
-        Assert.Equal(expected, ToolManager.ShortcutMap[key]);
-    }
-
-    [Fact]
-    public void ShortcutMap_ContainsOnlyToolSwitchingKeys()
-    {
-        Assert.Equal(4, ToolManager.ShortcutMap.Count);
     }
 }
