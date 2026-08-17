@@ -244,10 +244,10 @@ All agents MUST read this file before any code operation.
 | Manager | Responsibility | Key Property |
 |---------|---------------|--------------|
 | ZoomPanManager | Zoom, PanOffset, FitToScreen | Zoom, PanOffsetX/Y |
-| SelectionManager | SelectedObjects, SelectionBox | ShowSelectionMarkers |
+| SelectionManager | SelectedObjects | ShowSelectionMarkers |
 | ClipboardManager | Copy, Paste, Cut | GetClipboardContents() |
 | ToolRegistry | Идентичность (ToolKind), создание/кэш, active, стек, SwitchTo | ActiveToolKind, ActiveToolInstance |
-| PreviewManager | PreviewLine/Rectangle/Text | — |
+| PreviewManager | PreviewLine/Rectangle/Text, SelectionBox | SetSelectionBox()/ClearSelectionBox() |
 | InlineEditManager | Active inline editing state | — |
 | StatusBarManager | Status message, grid/snap state | StatusMessage |
 | GridManager | GridSettings (OWNER), refresh | IsGridEnabled, IsSnapEnabled, GridStepMm |
