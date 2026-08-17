@@ -264,11 +264,11 @@ public class SelectToolTests
         var tool = new SelectTool(vm);
         tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
 
-        Assert.Equal(0, vm.SelectionBoxLeft);
-        Assert.Equal(0, vm.SelectionBoxBottom);
-        Assert.Equal(0, vm.SelectionBoxWidth);
-        Assert.Equal(0, vm.SelectionBoxHeight);
-        Assert.Equal(SelectionDirection.LeftToRight, vm.SelectionDirection);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxLeft);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxBottom);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxHeight);
+        Assert.Equal(SelectionDirection.LeftToRight, vm.PreviewManager.SelectionBoxDirection);
     }
 
     [Fact]
@@ -304,7 +304,7 @@ public class SelectToolTests
         tool.OnMouseDown(new PointMicrons(1000, 1000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(new PointMicrons(1100, 1100), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(0, vm.SelectionBoxWidth);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxWidth);
     }
 
     [Fact]
@@ -316,10 +316,10 @@ public class SelectToolTests
         tool.OnMouseDown(new PointMicrons(1000, 1000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(new PointMicrons(10000, 8000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.True(vm.SelectionBoxWidth > 0);
-        Assert.True(vm.SelectionBoxHeight > 0);
-        Assert.Equal(1000, vm.SelectionBoxLeft);
-        Assert.Equal(1000, vm.SelectionBoxBottom);
+        Assert.True(vm.PreviewManager.SelectionBoxWidth > 0);
+        Assert.True(vm.PreviewManager.SelectionBoxHeight > 0);
+        Assert.Equal(1000, vm.PreviewManager.SelectionBoxLeft);
+        Assert.Equal(1000, vm.PreviewManager.SelectionBoxBottom);
     }
 
     [Fact]
@@ -331,7 +331,7 @@ public class SelectToolTests
         tool.OnMouseDown(new PointMicrons(10000, 1000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(new PointMicrons(1000, 8000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(SelectionDirection.RightToLeft, vm.SelectionDirection);
+        Assert.Equal(SelectionDirection.RightToLeft, vm.PreviewManager.SelectionBoxDirection);
     }
 
     [Fact]
@@ -346,8 +346,8 @@ public class SelectToolTests
         tool.OnMouseMove(new PointMicrons(50100, 50100), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseUp(new PointMicrons(50100, 50100), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(0, vm.SelectionBoxWidth);
-        Assert.Equal(0, vm.SelectionBoxHeight);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxHeight);
         Assert.Empty(vm.SelectedObjects);
     }
 
@@ -380,9 +380,9 @@ public class SelectToolTests
         tool.OnMouseMove(new PointMicrons(10000, 10000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseUp(new PointMicrons(10000, 10000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(0, vm.SelectionBoxWidth);
-        Assert.Equal(0, vm.SelectionBoxHeight);
-        Assert.Equal(SelectionDirection.LeftToRight, vm.SelectionDirection);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxHeight);
+        Assert.Equal(SelectionDirection.LeftToRight, vm.PreviewManager.SelectionBoxDirection);
     }
 
     // ============= Reset =============
@@ -400,8 +400,8 @@ public class SelectToolTests
 
         tool.Reset();
 
-        Assert.Equal(0, vm.SelectionBoxWidth);
-        Assert.Equal(0, vm.SelectionBoxHeight);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(0, vm.PreviewManager.SelectionBoxHeight);
     }
 
     // ============= Hover state =============

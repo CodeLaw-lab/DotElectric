@@ -182,33 +182,9 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         get => _previewManager.PreviewText;
         set => _previewManager.PreviewText = value;
     }
-    public long SelectionBoxLeft
-    {
-        get => _previewManager.SelectionBoxLeft;
-        set => _previewManager.SelectionBoxLeft = value;
-    }
-    public long SelectionBoxBottom
-    {
-        get => _previewManager.SelectionBoxBottom;
-        set => _previewManager.SelectionBoxBottom = value;
-    }
-    public long SelectionBoxTop => _previewManager.SelectionBoxTop;
-    public long SelectionBoxWidth
-    {
-        get => _previewManager.SelectionBoxWidth;
-        set => _previewManager.SelectionBoxWidth = value;
-    }
-    public long SelectionBoxRight => _previewManager.SelectionBoxRight;
-    public long SelectionBoxHeight
-    {
-        get => _previewManager.SelectionBoxHeight;
-        set => _previewManager.SelectionBoxHeight = value;
-    }
-    public SelectionDirection SelectionDirection
-    {
-        get => _previewManager.SelectionBoxDirection;
-        set => _previewManager.SelectionBoxDirection = value;
-    }
+    public void SetSelectionBox(long left, long bottom, long width, long height, SelectionDirection direction)
+        => _previewManager.SetSelectionBox(left, bottom, width, height, direction);
+    public void ClearSelectionBox() => _previewManager.ClearSelectionBox();
 
     /// <summary>
     /// Активный маркер изменения размера (null если не ресайзим).
