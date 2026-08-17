@@ -21,7 +21,6 @@ public sealed partial class ToolRegistry : ObservableObject
         [typeof(DrawingLineTool)] = ctx => new DrawingLineTool(ctx),
         [typeof(DrawingRectangleTool)] = ctx => new DrawingRectangleTool(ctx),
         [typeof(TextTool)] = ctx => new TextTool(ctx),
-        [typeof(PanTool)] = ctx => new PanTool(ctx),
         [typeof(ResizeTool)] = ctx => new ResizeTool(ctx),
     };
 

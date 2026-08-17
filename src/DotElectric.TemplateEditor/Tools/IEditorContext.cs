@@ -49,9 +49,6 @@ public interface IEditorContext
     void MarkDirty();
     void DeleteSelected();
 
-    // Actions
-    void PanCanvas(double deltaXMm, double deltaYMm);
-
     // Status
     string StatusMessage { get; set; }
 }
