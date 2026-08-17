@@ -212,15 +212,7 @@ public static class CanvasInputRouter
 
     internal static ITool GetCurrentTool(EditorViewModel editor)
     {
-        return editor.ToolManager.ActiveTool switch
-        {
-            "Select" => editor.GetOrCreateTool<SelectTool>(),
-            "Line" => editor.GetOrCreateTool<DrawingLineTool>(),
-            "Rectangle" => editor.GetOrCreateTool<DrawingRectangleTool>(),
-            "Text" => editor.GetOrCreateTool<TextTool>(),
-            "Resize" => editor.GetOrCreateTool<ResizeTool>(),
-            _ => editor.GetOrCreateTool<SelectTool>()
-        };
+        return editor.ToolManager.ActiveToolInstance;
     }
 
     internal static ToolMouseButton ToToolMouseButton(MouseButton button) => button switch

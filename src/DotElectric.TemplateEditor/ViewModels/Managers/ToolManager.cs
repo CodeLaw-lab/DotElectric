@@ -140,7 +140,7 @@ public sealed partial class ToolManager : ObservableObject
     /// <summary>
     /// Парсит имя в идентичность. Числовые строки и неизвестные значения отбрасываются.
     /// </summary>
-    internal static bool TryParseKind(string? value, out ToolKind kind)
+    private static bool TryParseKind(string? value, out ToolKind kind)
     {
         if (value != null &&
             Enum.TryParse<ToolKind>(value, out var parsed) &&

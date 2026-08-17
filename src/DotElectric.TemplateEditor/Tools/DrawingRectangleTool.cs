@@ -117,7 +117,7 @@ public sealed class DrawingRectangleTool : ITool
         if (key == ToolKey.Escape)
         {
             Reset();
-            _context.SetActiveToolCommand.Execute("Select");
+            _context.ActivateTool(ToolKind.Select);
             return true;
         }
         return false;

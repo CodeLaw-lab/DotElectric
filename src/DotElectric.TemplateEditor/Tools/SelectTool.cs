@@ -1,11 +1,9 @@
 using System;
-using System.Windows;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
-using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tools;
 
@@ -82,7 +80,7 @@ public sealed class SelectTool : ITool
             {
                 _context.ActiveResizeHandle = handle;
                 _context.HoveredHandle = handle;
-                _context.PushTool("Resize");
+                _context.PushTool(ToolKind.Resize);
                 // Делегируем ResizeTool
                 var resizeTool = _context.GetOrCreateTool<ResizeTool>();
                 resizeTool.OnMouseDown(modelPoint, button, modifiers);

@@ -1,9 +1,7 @@
 using System.Collections.ObjectModel;
-using System.Windows.Input;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
-using DotElectric.TemplateEditor.ViewModels.Managers;
 
 namespace DotElectric.TemplateEditor.Tools;
 
@@ -46,8 +44,9 @@ public interface IEditorContext
     long ClampY(long y);
 
     // Tool management
-    void PushTool(string tool);
+    void PushTool(ToolKind kind);
     void PopTool();
+    void ActivateTool(ToolKind kind);
     T GetOrCreateTool<T>() where T : class, ITool;
 
     // Commands / Undo
@@ -57,9 +56,6 @@ public interface IEditorContext
 
     // Actions
     void PanCanvas(double deltaXMm, double deltaYMm);
-
-    // Commands
-    ICommand SetActiveToolCommand { get; }
 
     // Status
     string StatusMessage { get; set; }

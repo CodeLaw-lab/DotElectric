@@ -87,7 +87,7 @@ public sealed class DrawingLineTool : ITool
         _startPoint = null;
         _previewLine = null;
         _context.PreviewLine = null;
-        _context.SetActiveToolCommand.Execute("Select");
+        _context.ActivateTool(ToolKind.Select);
     }
 
     public bool OnMouseWheel(int delta, PointMicrons modelPoint) => false;
@@ -109,7 +109,7 @@ public sealed class DrawingLineTool : ITool
         if (key == ToolKey.Escape)
         {
             Reset();
-            _context.SetActiveToolCommand.Execute("Select");
+            _context.ActivateTool(ToolKind.Select);
             return true;
         }
         return false;

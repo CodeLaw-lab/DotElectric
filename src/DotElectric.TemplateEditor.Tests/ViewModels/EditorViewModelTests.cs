@@ -314,26 +314,6 @@ public class EditorViewModelTests
         Assert.Equal(tool, vm.ToolManager.ActiveToolKind);
     }
 
-    [Fact]
-    public void SetActiveTool_LegacyStringParameter_StillSwitches()
-    {
-        var vm = CreateViewModel();
-
-        vm.SetActiveToolCommand.Execute("Line");
-
-        Assert.Equal(ToolKind.Line, vm.ToolManager.ActiveToolKind);
-    }
-
-    [Fact]
-    public void SetActiveTool_UnknownParameter_DoesNotSwitch()
-    {
-        var vm = CreateViewModel();
-
-        vm.SetActiveToolCommand.Execute(42);
-
-        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
-    }
-
     // === Undo/Redo ===
 
     [Fact]
@@ -1399,22 +1379,47 @@ public class EditorViewModelTests
     public void PushTool_PushesCurrentToolToStack()
     {
         var vm = CreateViewModel();
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
 
-        vm.PushTool("Resize");
+        vm.PushTool(ToolKind.Resize);
 
-        Assert.Equal("Resize", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Resize, vm.ToolManager.ActiveToolKind);
     }
 
     [Fact]
     public void PopTool_RestoresPreviousTool()
     {
         var vm = CreateViewModel();
-        vm.PushTool("Resize");
+        vm.PushTool(ToolKind.Resize);
 
         vm.PopTool();
 
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
+    }
+
+    [Fact]
+    public void ActivateTool_SwitchesAndClearsPreview()
+    {
+        var vm = CreateViewModel();
+        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+        vm.ToolManager.ActiveToolKind = ToolKind.Line;
+
+        vm.ActivateTool(ToolKind.Select);
+
+        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
+        Assert.Null(vm.PreviewLine);
+    }
+
+    [Fact]
+    public void ActivateTool_SameKind_DoesNotClearPreview()
+    {
+        var vm = CreateViewModel();
+        vm.ToolManager.ActiveToolKind = ToolKind.Line;
+        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+
+        vm.ActivateTool(ToolKind.Line);
+
+        Assert.NotNull(vm.PreviewLine);
     }
 
     // === FitToScreen ===
