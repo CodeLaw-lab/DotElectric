@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Рефакторинг панелей свойств «Глубокая база» (#45–#48) завершён (17.08.2026): тесты 2649 (2648 passed + 1 pre-existing skip), line-rate 89.99% (gate 80%).** Создана глубокая база `ObjectPropertiesViewModel<TObject>` (`ViewModels/ObjectPropertiesViewModel.cs`): конструктор-тройка (CommandHistory?, markDirty, setValidationError), абстрактная декларативная nameof-карта `PropertyMap` («свойство модели → свойство VM») для диспетчеризации INPC и notify-all, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → `ChangePropertyCommand<T>` → уведомление → afterSet), `ChangeFromMmString`, `ParseLineType`. Мигрированы все 3 sub-VM: `LinePropertiesViewModel` (карта 7 пар, 13 RelayCommand), `RectanglePropertiesViewModel` (карта 8 пар, 14 RelayCommand, afterSet Width→X / Height→Y), `TextPropertiesViewModel` (карта 13 пар, 18 RelayCommand; особые команды с null-coalescing `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` сохранены в sub-VM, поведение неизменно). Инфраструктурное дублирование трёх sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены. Ранее: Sprint "Coverage weak zones" (14.08.2026) — 6 слабых зон покрытия закрыты (ResizeMath 97.35%, PanTool 100%, FontMetrics 91.11%, TemplateValidator 98.95%, IsNull/NotNullToVisibility 100%), line-rate 90.18%, 2636 тестов.
+**Рефакторинг инструментов «ToolRegistry» (#53–#57) завершён (17.08.2026): тесты 2646 (2645 passed + 1 pre-existing skip), line-rate 89.98% (gate 80%).** Идентичность инструментов — enum `ToolKind` (Select/Line/Rectangle/Text/Resize; Пан — type-адресуемый, без идентичности); единый глубокий module `ToolRegistry` (`ViewModels/Managers/ToolRegistry.cs`, переименован из ToolManager): фабрики+кэш, `ActiveToolKind`/`ActiveToolInstance`, `Stack<ToolKind>`, `SwitchTo` с reset'ом предыдущего. Удалены: 4 строковые карты (ToolManager×2, switch роутера, XAML-параметры), строковая поверхность (`ActiveTool`-string, `PushTool(string)`, `ResetTool(string)`, `ToolNameMap`), мёртвый `ITool.Name` (0 потребителей), silent-default роутера; `IEditorContext` без WPF ICommand (типизированные `PushTool`/`PopTool`/`ActivateTool`); XAML — `{x:Static tools:ToolKind.X}` + OneWay; карта клавиш Key→ToolKind — в ShortcutRegistry (§3.1: WPF-типы не в ViewModels). Поведение байт-в-байт. Ранее: рефакторинг панелей свойств «Глубокая база» (#45–#48) — создана глубокая база `ObjectPropertiesViewModel<TObject>` (`ViewModels/ObjectPropertiesViewModel.cs`): конструктор-тройка (CommandHistory?, markDirty, setValidationError), абстрактная декларативная nameof-карта `PropertyMap` («свойство модели → свойство VM») для диспетчеризации INPC и notify-all, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → `ChangePropertyCommand<T>` → уведомление → afterSet), `ChangeFromMmString`, `ParseLineType`. Мигрированы все 3 sub-VM: `LinePropertiesViewModel` (карта 7 пар, 13 RelayCommand), `RectanglePropertiesViewModel` (карта 8 пар, 14 RelayCommand, afterSet Width→X / Height→Y), `TextPropertiesViewModel` (карта 13 пар, 18 RelayCommand; особые команды с null-coalescing `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` сохранены в sub-VM, поведение неизменно). Инфраструктурное дублирование трёх sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены. Ранее: Sprint "Coverage weak zones" (14.08.2026) — 6 слабых зон покрытия закрыты (ResizeMath 97.35%, PanTool 100%, FontMetrics 91.11%, TemplateValidator 98.95%, IsNull/NotNullToVisibility 100%), line-rate 90.18%, 2636 тестов.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -30,13 +30,14 @@
 | **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
 | **Text markers tech debt** | **открыт (Sprint 61: маркеры смещены при повороте)** | **закрыт: regression-тест RotatedCorners_AllLieOnBoundingBoxEdges (6 углов), маркеры на границе GetBoundingBox()** |
 | **WPF-обёртки** | **private логика (нетестируема)** | **internal static handlers + 27 тестов (unit + STA)** |
-| **Coverage** | **76.4% line-rate** | **89.99% line-rate (gate 80% достигнут)** |
-| **CI coverage gate** | **75%** | **80% (факт 89.99%)** |
+| **Coverage** | **76.4% line-rate** | **89.98% line-rate (gate 80% достигнут)** |
+| **CI coverage gate** | **75%** | **80% (факт 89.98%)** |
 | **Weak zones coverage** | **6 зон 40–93% (FontMetrics ~40%, TemplateValidator 65–93%)** | **все цели ≥90%: FontMetrics 91.11%, TemplateValidator 98.95%, ResizeMath 97.35%, PanTool/IsNull/NotNullToVisibility 100%** |
 | **Панели свойств** | **3 sub-VM с дублирующейся инфраструктурой (UpdateObject/Dispose/INPC-dispatch/SetProperty в каждой)** | **глубокая база ObjectPropertiesViewModel<TObject> + декларативные nameof-карты (7/8/13 пар)** |
+| **Идентичность инструментов** | **строки в 4 несинхронизированных картах, silent-default роутера, WPF ICommand в инструментах** | **enum ToolKind + глубокий ToolRegistry (фабрики/кэш/active/стек/SwitchTo); ITool без Name** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2649 total (2648 passed, 1 pre-existing skip)
+**Tests:** 2646 total (2645 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -171,15 +172,16 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones + Глубокая база панелей свойств (#45–#48) завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones + Глубокая база панелей свойств (#45–#48) + ToolRegistry (#53–#57) завершены)
 
-- **Tests:** 2649 total (2648 passed, 1 pre-existing skip)
-- **Coverage:** 89.99% line-rate ✅
+- **Tests:** 2646 total (2645 passed, 1 pre-existing skip)
+- **Coverage:** 89.98% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 80% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
-- **Managers:** ZoomPan, Selection, Clipboard, Tool, Preview, InlineEdit, StatusBar, Grid, DirtyState
-- **Tools:** ITool + IEditorContext + ResizeMath (чистые функции) + ShortcutRegistry
+- **Managers:** ZoomPan, Selection, Clipboard, ToolRegistry, Preview, InlineEdit, StatusBar, Grid, DirtyState
+- **Tools:** ITool (без Name) + IEditorContext (типизированные `PushTool`/`PopTool`/`ActivateTool`, без WPF ICommand) + `ToolKind` + ResizeMath (чистые функции) + ShortcutRegistry
+- **ToolRegistry:** глубокий module (бывший ToolManager) — идентичность `ToolKind`, фабрики+кэш, `ActiveToolKind`/`ActiveToolInstance`, `Stack<ToolKind>`, `SwitchTo` с reset'ом предыдущего; Пан type-адресуется (без идентичности); строковые карты удалены
 - **Converters:** 29 файлов (все sealed; +GridNodeColorConverter, +InverseBooleanConverter)
 - **Naming:** `TemplateObjectBase` (не `ITemplateObject`)
 - **Commands:** `IUndoCommand`, `CommandHistory`, `AddObjectCommand`, `DeleteObjectCommand`, `ChangePropertyCommand<T>` (в т.ч. resize через `ResizeState` + полиморфный `ApplyResize`), `BatchCommand`
@@ -1632,6 +1634,7 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 73. GridHelper — fully replaced by IGridNodeGenerator (DI Singleton). All grid logic (ComputeDisplayStep, GenerateGridNodes) is injectable. Never use static helper classes for testable domain logic.
 74. Defense-in-depth for budget constraints — GenerateGridNodes never returns empty due to MaxGridNodes budget: coarsen (double step) until fits. First gate (ComputeDisplayStep) respects user intent; second gate (generator) guarantees grid never silently disappears.
 75. Theme-aware resources — use "auto" (null) as default that follows theme (Light/Dark), and explicit user choice as permanent override. GridNodesLayer: NodeColor null → theme brush (#C0C0C0 Light / #808080 Dark); explicit HEX → always user color.
+76. Tool identity — enum `ToolKind`, NEVER strings. Строковые карты инструментов запрещены: исторически их было 4 (ToolManager×2, switch роутера, XAML), они расходились («Pan» недостижим) и давали silent-default в роутере. Новый инструмент: значение `ToolKind` (если переключаемый) + запись в `KindToToolType` + фабрика в `ToolRegistry` (+ пункт XAML с `{x:Static tools:ToolKind.X}` и, при необходимости, клавиша в `ShortcutRegistry`); Пан идентичности не имеет — type-адресуется через `GetOrCreateTool<PanTool>()`. Переключение — `ActivateTool(kind)`/`SwitchTo(kind)`; XAML-биндинги — к `ToolRegistry.ActiveToolKind` (OneWay).
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2140 total, 2139 passed (0 failures, 1 pre-existing skip)
@@ -1792,6 +1795,27 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2649 total, 2648 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 89.99% line-rate ✅ (gate 80% достигнут)
+
+## Sprint — ToolRegistry: единая типизированная идентичность инструментов (#53–#57, 17.08.2026)
+
+### Проблема
+Идентичность инструментов — строки в 4 несинхронизированных картах: ToolManager (`ToolNameMap` + параллельная `ToolFactories`), switch роутера ввода (с silent-default на SelectTool), `ShortcutRegistry` (Key→string), XAML (`CommandParameter` + `ConverterParameter` ×2 на кнопку тулбара). Наборы расходились: «Pan» присутствовал только в `ToolNameMap` и был недостижим (в роутере нет case), «Resize» отсутствовал в шорткатах/XAML. Добавление инструмента = синхронная правка 6+ мест; компилятор строковые опечатки не ловил. Инструменты переключали себя через WPF `ICommand` (`SetActiveToolCommand.Execute("Select")`) — WPF-тип в шве инструментов. `ITool.Name` объявлялся в 6 инструментах при 0 потребителях.
+
+### Решение — expand → migrate → contract (wide refactor: атомарный flip невозжен без временного дублирования)
+- **#54 Expand** (PR #58): enum `ToolKind { Select, Line, Rectangle, Text, Resize }` в Tools; Пан не входит — type-адресуется через `GetOrCreateTool<PanTool>()`. Типизированная поверхность в ToolManager рядом со строковой: `ActiveToolKind` (канон), `ActiveToolInstance`, `SwitchTo(kind)` с reset'ом предыдущего, типизированный стек; строковые шимы делегируют через parse (неизвестные значения игнорируются).
+- **#55 Migrate UI** (PR #59): relay-команда принимает идентичность; XAML — 8× `{x:Static tools:ToolKind.X}`, IsChecked RadioButtons — `Mode=OneWay` к `ActiveToolKind` (конвертер равенства не менялся); карта горячих клавиш Key→ToolKind создана в самом `ShortcutRegistry` (Helpers) — CODING_STANDARDS §3.1 запрещает WPF-типы (`Key`) в ViewModels, поэтому в реестр она не вошла. Побочный эффект OneWay: прежний TwoWay записывал строку до выполнения команды, из-за чего reset+очистка preview на кликах тулбара не выполнялись; теперь команда — единственный путь, поведение тулбара сравнялось с меню.
+- **#56 Migrate инструменты/контекст/роутер** (PR #60): `IEditorContext` — `PushTool(ToolKind)`/`PopTool()`/новый `ActivateTool(ToolKind)`, член WPF `ICommand` из интерфейса удалён; роутер — `ActiveToolInstance` из реестра вместо строкового switch с silent-default (неизвестная идентичность непредставима).
+- **#57 Contract** (PR #61): ToolManager → **ToolRegistry** (класс, файл, свойство EditorViewModel, пути биндингов XAML); строковая поверхность удалена целиком (`ActiveTool`-string, `PushTool(string)`, `ResetTool(string)`, `ToolNameMap`, parse-шимы); `ITool.Name` удалён из интерфейса и 6 реализаций; ToolManagerTests → ToolRegistryTests (in-place); `ShortcutRegistry` вызывает `ActivateTool` напрямую.
+
+### Итоги
+- 4 строковые карты и silent-default удалены; идентичность проверяется компилятором; поведение байт-в-байт (каждая правка — типизированная замена того же вызова).
+- Удалены только тесты несуществующего больше поведения (строковые шимы ×8, fallback роутера, `ITool.Name` ×6); сохранённое поведение re-covered в ToolRegistryTests.
+- CODING_STANDARDS синхронизирован: ToolRegistry в таблице менеджеров (§8.2) + санкционированное исключение Manager-suffix (§12.1 — реестр идентичности/фабрик, а не владелец UI-состояния).
+- Примечание для будущих работ: `ActiveToolInstance` создаёт/кэширует инструмент при первом чтении (семантика GetOrCreateTool, как в роутере до рефакторинга).
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2646 total, 2645 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 89.98% line-rate ✅ (gate 80% достигнут)
 
 ## Agent skills
 
