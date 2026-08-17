@@ -2,7 +2,7 @@
 
 ## Current Focus
 
-**Рефакторинг инструментов «ToolRegistry» (#53–#57) завершён (17.08.2026): тесты 2646 (2645 passed + 1 pre-existing skip), line-rate 89.98% (gate 80%).** Идентичность инструментов — enum `ToolKind` (Select/Line/Rectangle/Text/Resize; Пан — type-адресуемый, без идентичности); единый глубокий module `ToolRegistry` (`ViewModels/Managers/ToolRegistry.cs`, переименован из ToolManager): фабрики+кэш, `ActiveToolKind`/`ActiveToolInstance`, `Stack<ToolKind>`, `SwitchTo` с reset'ом предыдущего. Удалены: 4 строковые карты (ToolManager×2, switch роутера, XAML-параметры), строковая поверхность (`ActiveTool`-string, `PushTool(string)`, `ResetTool(string)`, `ToolNameMap`), мёртвый `ITool.Name` (0 потребителей), silent-default роутера; `IEditorContext` без WPF ICommand (типизированные `PushTool`/`PopTool`/`ActivateTool`); XAML — `{x:Static tools:ToolKind.X}` + OneWay; карта клавиш Key→ToolKind — в ShortcutRegistry (§3.1: WPF-типы не в ViewModels). Поведение байт-в-байт. Ранее: рефакторинг панелей свойств «Глубокая база» (#45–#48) — создана глубокая база `ObjectPropertiesViewModel<TObject>` (`ViewModels/ObjectPropertiesViewModel.cs`): конструктор-тройка (CommandHistory?, markDirty, setValidationError), абстрактная декларативная nameof-карта `PropertyMap` («свойство модели → свойство VM») для диспетчеризации INPC и notify-all, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → `ChangePropertyCommand<T>` → уведомление → afterSet), `ChangeFromMmString`, `ParseLineType`. Мигрированы все 3 sub-VM: `LinePropertiesViewModel` (карта 7 пар, 13 RelayCommand), `RectanglePropertiesViewModel` (карта 8 пар, 14 RelayCommand, afterSet Width→X / Height→Y), `TextPropertiesViewModel` (карта 13 пар, 18 RelayCommand; особые команды с null-coalescing `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` сохранены в sub-VM, поведение неизменно). Инфраструктурное дублирование трёх sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены; Sprint "Coverage weak zones" (14.08.2026) — 6 слабых зон покрытия закрыты (ResizeMath 97.35%, PanTool 100%, FontMetrics 91.11%, TemplateValidator 98.95%, IsNull/NotNullToVisibility 100%), line-rate 90.18%, 2636 тестов.
+**Рефакторинг настроек приложения «типизированный интерфейс» (#65–#66) завершён (17.08.2026): тесты 2619 (2618 passed + 1 pre-existing skip), line-rate 89.91% (gate 80%).** `ISettingsService` сужен до двух методов — `Load()` + `Save(AppSettings)`: строковые `Get<T>`/`Set<T>` и оба switch-диспетчера (12+12 кейсов) удалены целиком, 19 вызовов в 5 классах (SettingsViewModel, MainViewModel, ThemeService, AutosaveService, TabOperationsService) мигрированы на типизированный доступ; `AppSettings` перенесён Services → Models (инверсия слоёв устранена), мёртвый escape-hatch `CustomSettings` удалён; создание вкладки пишет файл настроек один раз вместо двух. Три дефекта исчезли структурно: сломанная типовая проверка `LastUsedSheetOrientation`, двойная запись файла, хрупкий culture-зависимый round-trip. Схема settings.json байт-совместима (legacy-ключ игнорируется при чтении), семантика Load/Save (кэш, corrupt → дефолты, null-guard) не изменена, поведение байт-в-байт. Ранее: рефакторинг инструментов «ToolRegistry» (#53–#57) — идентичность инструментов — enum `ToolKind` (Select/Line/Rectangle/Text/Resize; Пан — type-адресуемый, без идентичности); единый глубокий module `ToolRegistry` (`ViewModels/Managers/ToolRegistry.cs`, переименован из ToolManager): фабрики+кэш, `ActiveToolKind`/`ActiveToolInstance`, `Stack<ToolKind>`, `SwitchTo` с reset'ом предыдущего. Удалены: 4 строковые карты (ToolManager×2, switch роутера, XAML-параметры), строковая поверхность (`ActiveTool`-string, `PushTool(string)`, `ResetTool(string)`, `ToolNameMap`), мёртвый `ITool.Name` (0 потребителей), silent-default роутера; `IEditorContext` без WPF ICommand (типизированные `PushTool`/`PopTool`/`ActivateTool`); XAML — `{x:Static tools:ToolKind.X}` + OneWay; карта клавиш Key→ToolKind — в ShortcutRegistry (§3.1: WPF-типы не в ViewModels). Поведение байт-в-байт; рефакторинг панелей свойств «Глубокая база» (#45–#48) — создана глубокая база `ObjectPropertiesViewModel<TObject>` (`ViewModels/ObjectPropertiesViewModel.cs`): конструктор-тройка (CommandHistory?, markDirty, setValidationError), абстрактная декларативная nameof-карта `PropertyMap` («свойство модели → свойство VM») для диспетчеризации INPC и notify-all, `UpdateObject` (отписка → присвоение → подписка → notify-all), `Dispose` с отпиской, `SetProperty<T>` (валидация → `ChangePropertyCommand<T>` → уведомление → afterSet), `ChangeFromMmString`, `ParseLineType`. Мигрированы все 3 sub-VM: `LinePropertiesViewModel` (карта 7 пар, 13 RelayCommand), `RectanglePropertiesViewModel` (карта 8 пар, 14 RelayCommand, afterSet Width→X / Height→Y), `TextPropertiesViewModel` (карта 13 пар, 18 RelayCommand; особые команды с null-coalescing `ChangeContent`/`ChangeDefaultValue`/`ChangeFontNameFromString` сохранены в sub-VM, поведение неизменно). Инфраструктурное дублирование трёх sub-VM устранено полностью; XAML, `PropertiesViewModel`-держатель и code-behind не изменены; Sprint "Coverage weak zones" (14.08.2026) — 6 слабых зон покрытия закрыты (ResizeMath 97.35%, PanTool 100%, FontMetrics 91.11%, TemplateValidator 98.95%, IsNull/NotNullToVisibility 100%), line-rate 90.18%, 2636 тестов.
 
 ### Ключевые результаты
 | Область | Было | Стало |
@@ -30,14 +30,15 @@
 | **Grid settings chain** | **настройки сохранялись, но не применялись к вкладкам** | **FromAppSettings → применяются ко всем новым/открытым вкладкам** |
 | **Text markers tech debt** | **открыт (Sprint 61: маркеры смещены при повороте)** | **закрыт: regression-тест RotatedCorners_AllLieOnBoundingBoxEdges (6 углов), маркеры на границе GetBoundingBox()** |
 | **WPF-обёртки** | **private логика (нетестируема)** | **internal static handlers + 27 тестов (unit + STA)** |
-| **Coverage** | **76.4% line-rate** | **89.98% line-rate (gate 80% достигнут)** |
-| **CI coverage gate** | **75%** | **80% (факт 89.98%)** |
+| **Coverage** | **76.4% line-rate** | **89.91% line-rate (gate 80% достигнут)** |
+| **CI coverage gate** | **75%** | **80% (факт 89.91%)** |
 | **Weak zones coverage** | **6 зон 40–93% (FontMetrics ~40%, TemplateValidator 65–93%)** | **все цели ≥90%: FontMetrics 91.11%, TemplateValidator 98.95%, ResizeMath 97.35%, PanTool/IsNull/NotNullToVisibility 100%** |
 | **Панели свойств** | **3 sub-VM с дублирующейся инфраструктурой (UpdateObject/Dispose/INPC-dispatch/SetProperty в каждой)** | **глубокая база ObjectPropertiesViewModel<TObject> + декларативные nameof-карты (7/8/13 пар)** |
 | **Идентичность инструментов** | **строки в 4 несинхронизированных картах, silent-default роутера, WPF ICommand в инструментах** | **enum ToolKind + глубокий ToolRegistry (фабрики/кэш/active/стек/SwitchTo); ITool без Name** |
+| **Настройки приложения** | **строковый Get/Set + 2 switch-диспетчера (12+12), 12 ключей-литералов в 5 классах, тройной дефект** | **типизированный ISettingsService (Load/Save); AppSettings в Models; CustomSettings удалён; одна запись файла на вкладку** |
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2646 total (2645 passed, 1 pre-existing skip)
+**Tests:** 2619 total (2618 passed, 1 pre-existing skip)
 
 ### H1–H5 — Архитектурные исправления высокой важности (14.07.2026)
 - **H1: async-void AutosaveTick** — `event Action?` → `event Func<Task>?`. `IDispatcherService` получил `InvokeAsync(Func<Task>)`. `AutosaveService.OnAutosaveTick` вызывает `InvokeAsync`. `MainViewModel` — `async Task` вместо `async void`.
@@ -172,10 +173,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 21. Every model class participating in canvas DataTemplate bindings (`Canvas.Left`/`Canvas.Top`/`StrokeDashArray`/etc) MUST implement `INotifyPropertyChanged` with backing fields for persistent properties (coordinates, dimensions, LineType). This applies to ALL object types: `Line`, `Rectangle`, AND `Text`.
 22. Pan delta — compute from **Window-relative coordinates** (stable frame), NOT from `e.GetPosition(canvas)`. `e.GetPosition(canvas)` already accounts for `RenderTransform` (CanvasOffset), so comparing canvas-relative positions across `MouseMove` events where the canvas has moved produces a delta that includes the previous pan offset — causing runaway acceleration.
 
-## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones + Глубокая база панелей свойств (#45–#48) + ToolRegistry (#53–#57) завершены)
+## Current State (Sprint R1–R4 + R3.1 + A–D + Coverage Improvement + Sprint 60–63 + Fix Session 2 bugs + Grid Refactoring + AppSettings → GridSettings chain + Tech debt + coverage + Coverage series + Docs/CI (gate 80%) + Weak zones + Глубокая база панелей свойств (#45–#48) + ToolRegistry (#53–#57) + AppSettings типизированный интерфейс (#65–#66) завершены)
 
-- **Tests:** 2646 total (2645 passed, 1 pre-existing skip)
-- **Coverage:** 89.98% line-rate ✅
+- **Tests:** 2619 total (2618 passed, 1 pre-existing skip)
+- **Coverage:** 89.91% line-rate ✅
 - **Build:** 0 errors, 0 warnings
 - **CI/CD:** GitHub Actions — build + test + coverage-gate 80% + NuGet кэш
 - **EditorViewModel:** ~784 строк (де-bloat: −410 строк, 25 forwarding-свойств удалено, 4 INPC-обработчика удалены)
@@ -193,6 +194,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
 - **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`; `GridSettings.FromAppSettings` + `EditorViewModelFactory.ResolveGridSettings` — настройки применяются к вкладкам
 - **Панели свойств:** глубокая база `ObjectPropertiesViewModel<TObject>` (конструктор-тройка, декларативная nameof-карта `PropertyMap`, `UpdateObject`/notify-all, `Dispose`, `SetProperty<T>`, `ChangeFromMmString`, `ParseLineType`) + 3 тонких наследника: Line (7 пар), Rectangle (8 пар), Text (13 пар + особые null-coalescing команды в sub-VM)
+- **Настройки:** `ISettingsService` = только `Load()` + `Save(AppSettings)` (строковый Get/Set и switch-диспетчеры удалены); `AppSettings` — POCO в Models; одна запись файла на создание вкладки
 
 ## Sprint — Coverage Improvement (19.07.2026)
 
@@ -1635,6 +1637,7 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 74. Defense-in-depth for budget constraints — GenerateGridNodes never returns empty due to MaxGridNodes budget: coarsen (double step) until fits. First gate (ComputeDisplayStep) respects user intent; second gate (generator) guarantees grid never silently disappears.
 75. Theme-aware resources — use "auto" (null) as default that follows theme (Light/Dark), and explicit user choice as permanent override. GridNodesLayer: NodeColor null → theme brush (#C0C0C0 Light / #808080 Dark); explicit HEX → always user color.
 76. Tool identity — enum `ToolKind`, NEVER strings. Строковые карты инструментов запрещены: исторически их было 4 (ToolManager×2, switch роутера, XAML), они расходились («Pan» недостижим) и давали silent-default в роутере. Новый инструмент: значение `ToolKind` (если переключаемый) + запись в `KindToToolType` + фабрика в `ToolRegistry` (+ пункт XAML с `{x:Static tools:ToolKind.X}` и, при необходимости, клавиша в `ShortcutRegistry`); Пан идентичности не имеет — type-адресуется через `GetOrCreateTool<PanTool>()`. Переключение — `ActivateTool(kind)`/`SwitchTo(kind)`; XAML-биндинги — к `ToolRegistry.ActiveToolKind` (OneWay).
+77. App settings — only through the typed POCO: `ISettingsService` выставляет только `Load()` + `Save(AppSettings)`; строковые ключи и диспетчеры по ключам запрещены (исторически 12 ключей дублировались литералами в двух switch-блоках и 19 вызовах, породив дефекты: сломанная типовая проверка, двойная запись файла, culture-зависимый round-trip). Новая настройка: свойство в `AppSettings` (Models) + UI в SettingsViewModel — без строковых ключей. Паттерн записи — load-mutate-save в одной точке; `Load()` возвращает кэшированный экземпляр, поэтому мутации видны всем потребителям ещё до `Save()` (семантика осознанная, статус-кво).
 
 **Build:** 0 errors, 0 warnings
 **Tests:** 2140 total, 2139 passed (0 failures, 1 pre-existing skip)
@@ -1816,6 +1819,30 @@ SettingsView: 3 новых поля в секции СЕТКА (Макс. узл
 **Build:** 0 errors, 0 warnings
 **Tests:** 2646 total, 2645 passed (0 failures, 1 pre-existing skip)
 **Coverage:** 89.98% line-rate ✅ (gate 80% достигнут)
+
+## Sprint — AppSettings: типизированный интерфейс настроек (#65–#66, 17.08.2026)
+
+### Проблема
+Кандидат 4 архитектурного обзора №3. Настройки приложения жили в типизированном POCO, но сервис параллельно выставлял строковый API `Get<T>(key, default)`/`Set<T>(key, value)`: 12 ключей-литералов, продублированных в двух switch-диспетчерах (Get и Set) и в 19 вызовах пяти классов. Опечатку в ключе компилятор не ловил. Живые дефекты: (a) кейс `LastUsedSheetOrientation` в Get-диспетчере проверял рантайм-тип `defaultValue` вместо generic-параметра; (b) создание вкладки делало два `Set` подряд — каждый с полной сериализацией и записью файла; (c) fallback в `CustomSettings` сериализовал через `ToString()` и парсил `Convert.ChangeType` без формат-провайдера (culture-зависимость, null → "" необратимо). Плюс инверсия слоёв: `GridSettings` (Models) зависел от типа из Services.
+
+### Решение — атомарный flip (один PR #68 по спеке #65)
+- `ISettingsService` сужен до `Load()` + `Save(AppSettings)`; строковые `Get<T>`/`Set<T>` удалены из интерфейса и реализации, оба switch-диспетчера (12+12) удалены целиком.
+- 19 вызовов мигрированы: SettingsViewModel (10 Get → один `Load()`), MainViewModel (4 Get → `Load().LastUsed*`), ThemeService (Load в ctor + load-mutate-save в `SetTheme`), AutosaveService (`Load().AutosaveIntervalMinutes`, читается один раз при старте), TabOperationsService (2 Set → одна load-mutate-save).
+- `AppSettings` перенесён Services → Models (`git mv`, чистый POCO); `using DotElectric.TemplateEditor.Services` из GridSettings удалён — инверсия слоёв устранена; `FromAppSettings` + clamping остались в Models.
+- `CustomSettings` удалён из POCO (мёртвый escape-hatch: production в него не писал); legacy-файлы с этим ключом читаются — неизвестные JSON-ключи игнорируются (regression-тест `Load_LegacyFileWithCustomSettingsKey_IgnoresUnknownKey`).
+- Семантика Load/Save не изменена: кэшированный экземпляр, повреждённый JSON → warning + дефолты, `ArgumentNullException` на null, опции JSON (WriteIndented + relaxed-экранирование), путь `%APPDATA%\DotElectric\settings.json`; схема файла байт-совместима.
+- Два integration-теста больше не пишут в реальный пользовательский файл: один переведён на temp-путь, второй удалён вместе со строковым API.
+
+### Итоги
+- Три дефекта исчезли структурно: (a) — вместе с Get-диспетчером; (b) — одна запись файла на создание вкладки (`Verify(Save, Times.Once)`); (c) — вместе со строковым fallback'ом и `CustomSettings`.
+- 28 тестов умирающего поведения удалены (27 в SettingsServiceTests — весь строковой API — + 1 integration-тест Get/Set); типизированные round-trip/кэш/corrupt-json сохранены; +1 новый тест legacy-совместимости; моки 6 тестовых файлов переведены на Load/Save.
+- Покрытие затронутых классов: SettingsViewModel/AppSettings/GridSettings — 100%, SettingsService — 81% (не покрыта только ветка реального %APPDATA%-пути — тесты не должны трогать пользовательские настройки).
+- Документация (#67): секция в AGENTS.md, метрики синхронизированы (README, CONTRIBUTING, docs/00, docs/19, CHANGELOG [Unreleased], .coverage-baseline.txt, DOCS_MANIFEST).
+- Кандидат 4 архитектурного обзора №3 закрыт.
+
+**Build:** 0 errors, 0 warnings
+**Tests:** 2619 total, 2618 passed (0 failures, 1 pre-existing skip)
+**Coverage:** 89.91% line-rate ✅ (gate 80% достигнут)
 
 ## Agent skills
 
