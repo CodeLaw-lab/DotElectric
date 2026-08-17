@@ -9,6 +9,7 @@
         xmlns:vm="clr-namespace:DotElectric.TemplateEditor.ViewModels"
         xmlns:views="clr-namespace:DotElectric.TemplateEditor.Views"
         xmlns:behaviors="clr-namespace:DotElectric.TemplateEditor.Behaviors"
+        xmlns:tools="clr-namespace:DotElectric.TemplateEditor.Tools"
         mc:Ignorable="d"
          PreviewKeyDown="Window_PreviewKeyDown"
          Title="DotElectric — Редактор шаблонов"
@@ -234,21 +235,21 @@
             </MenuItem>
             <MenuItem Header="_Вставка">
                 <MenuItem Header="_Линия" Command="{Binding SelectedTab.SetActiveToolCommand}"
-                          CommandParameter="Line" InputGestureText="L">
+                          CommandParameter="{x:Static tools:ToolKind.Line}" InputGestureText="L">
                     <MenuItem.Icon><materialDesign:PackIcon Kind="Minus" Width="16" Height="16"/></MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Прямоугольник" Command="{Binding SelectedTab.SetActiveToolCommand}"
-                          CommandParameter="Rectangle" InputGestureText="R">
+                          CommandParameter="{x:Static tools:ToolKind.Rectangle}" InputGestureText="R">
                     <MenuItem.Icon><materialDesign:PackIcon Kind="SquareOutline" Width="16" Height="16"/></MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="_Текст" Command="{Binding SelectedTab.SetActiveToolCommand}"
-                          CommandParameter="Text" InputGestureText="T">
+                          CommandParameter="{x:Static tools:ToolKind.Text}" InputGestureText="T">
                     <MenuItem.Icon><materialDesign:PackIcon Kind="FormatText" Width="16" Height="16"/></MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="_Инструменты">
                 <MenuItem Header="_Выделение" Command="{Binding SelectedTab.SetActiveToolCommand}"
-                          CommandParameter="Select" InputGestureText="V">
+                          CommandParameter="{x:Static tools:ToolKind.Select}" InputGestureText="V">
                     <MenuItem.Icon><materialDesign:PackIcon Kind="CursorDefaultClickOutline" Width="16" Height="16"/></MenuItem.Icon>
                 </MenuItem>
                 <Separator/>
@@ -362,29 +363,29 @@
 
                 <!-- Инструменты рисования -->
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveTool, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Select}"
-                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="Select"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Select}"
+                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Select}"
                              GroupName="DrawingTools"
                              ToolTip="Выделение (V)">
                     <materialDesign:PackIcon Kind="CursorDefaultClickOutline" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveTool, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Line}"
-                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="Line"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Line}"
+                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Line}"
                              GroupName="DrawingTools"
                              ToolTip="Линия (L)">
                     <materialDesign:PackIcon Kind="Minus" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveTool, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Rectangle}"
-                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="Rectangle"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Rectangle}"
+                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Rectangle}"
                              GroupName="DrawingTools"
                              ToolTip="Прямоугольник (R)">
                     <materialDesign:PackIcon Kind="SquareOutline" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveTool, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Text}"
-                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="Text"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Text}"
+                             Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Text}"
                              GroupName="DrawingTools"
                              ToolTip="Текст (T)">
                     <materialDesign:PackIcon Kind="FormatText" Width="20" Height="20"/>

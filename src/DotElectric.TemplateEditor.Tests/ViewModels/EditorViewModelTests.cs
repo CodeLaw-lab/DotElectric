@@ -5,6 +5,7 @@ using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;
 using DotElectric.TemplateEditor.ViewModels.Managers;
 using Moq;
@@ -302,15 +303,35 @@ public class EditorViewModelTests
     // === SetActiveTool ===
 
     [Theory]
-    [InlineData("Select")]
-    [InlineData("Line")]
-    [InlineData("Rectangle")]
-    [InlineData("Text")]
-    public void SetActiveTool_SetsCorrectTool(string tool)
+    [InlineData(ToolKind.Select)]
+    [InlineData(ToolKind.Line)]
+    [InlineData(ToolKind.Rectangle)]
+    [InlineData(ToolKind.Text)]
+    public void SetActiveTool_SetsCorrectTool(ToolKind tool)
     {
         var vm = CreateViewModel();
         vm.SetActiveToolCommand.Execute(tool);
-        Assert.Equal(tool, vm.ToolManager.ActiveTool);
+        Assert.Equal(tool, vm.ToolManager.ActiveToolKind);
+    }
+
+    [Fact]
+    public void SetActiveTool_LegacyStringParameter_StillSwitches()
+    {
+        var vm = CreateViewModel();
+
+        vm.SetActiveToolCommand.Execute("Line");
+
+        Assert.Equal(ToolKind.Line, vm.ToolManager.ActiveToolKind);
+    }
+
+    [Fact]
+    public void SetActiveTool_UnknownParameter_DoesNotSwitch()
+    {
+        var vm = CreateViewModel();
+
+        vm.SetActiveToolCommand.Execute(42);
+
+        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
     }
 
     // === Undo/Redo ===
@@ -1438,7 +1459,7 @@ public class EditorViewModelTests
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
         vm.ToolManager.ActiveTool = "Line";
 
-        vm.SetActiveToolCommand.Execute("Select");
+        vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
         Assert.Null(vm.PreviewLine);
     }
@@ -1450,7 +1471,7 @@ public class EditorViewModelTests
         vm.PreviewRectangle = new Rectangle(0, 0, 10000, 10000);
         vm.ToolManager.ActiveTool = "Rectangle";
 
-        vm.SetActiveToolCommand.Execute("Select");
+        vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
         Assert.Null(vm.PreviewRectangle);
     }
@@ -1462,7 +1483,7 @@ public class EditorViewModelTests
         vm.PreviewText = new Text(0, 0, "Test", 2500);
         vm.ToolManager.ActiveTool = "Text";
 
-        vm.SetActiveToolCommand.Execute("Select");
+        vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
         Assert.Null(vm.PreviewText);
     }
@@ -1474,7 +1495,7 @@ public class EditorViewModelTests
         vm.ToolManager.ActiveTool = "Line";
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
 
-        vm.SetActiveToolCommand.Execute("Line");
+        vm.SetActiveToolCommand.Execute(ToolKind.Line);
 
         Assert.NotNull(vm.PreviewLine);
     }

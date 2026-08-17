@@ -2,6 +2,7 @@
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;
 using Moq;
 using DotElectric.TemplateEditor.Helpers;
@@ -242,28 +243,28 @@ public sealed class ShortcutRegistryTests
     public void GetToolForShortcut_V_ReturnsSelect()
     {
         var tool = ShortcutRegistry.GetToolForShortcut(Key.V);
-        Assert.Equal("Select", tool);
+        Assert.Equal(ToolKind.Select, tool);
     }
 
     [Fact]
     public void GetToolForShortcut_L_ReturnsLine()
     {
         var tool = ShortcutRegistry.GetToolForShortcut(Key.L);
-        Assert.Equal("Line", tool);
+        Assert.Equal(ToolKind.Line, tool);
     }
 
     [Fact]
     public void GetToolForShortcut_R_ReturnsRectangle()
     {
         var tool = ShortcutRegistry.GetToolForShortcut(Key.R);
-        Assert.Equal("Rectangle", tool);
+        Assert.Equal(ToolKind.Rectangle, tool);
     }
 
     [Fact]
     public void GetToolForShortcut_T_ReturnsText()
     {
         var tool = ShortcutRegistry.GetToolForShortcut(Key.T);
-        Assert.Equal("Text", tool);
+        Assert.Equal(ToolKind.Text, tool);
     }
 
     [Fact]
