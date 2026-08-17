@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2646, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2619, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 89.98% line-rate (CI gate 80%)
-**Последнее обновление:** 17.08.2026 — Рефакторинг инструментов «ToolRegistry» (#53–#57): идентичность инструментов — enum ToolKind, ToolManager → глубокий ToolRegistry, строковые карты и ITool.Name удалены, поведение байт-в-байт, coverage 89.98%
+**Покрытие:** 89.91% line-rate (CI gate 80%)
+**Последнее обновление:** 17.08.2026 — Рефакторинг настроек приложения «типизированный интерфейс» (#65–#66): ISettingsService = только Load()/Save(AppSettings), строковый Get/Set и switch-диспетчеры удалены, AppSettings в Models, поведение байт-в-байт, coverage 89.91%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2646 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2619 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,9 +245,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2646 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 89.98% line-rate (CI gate 80%)
+- ✅ **2619 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 89.91% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#65–#66:** Настройки приложения — только типизированный интерфейс: ISettingsService = Load()/Save(AppSettings), строковый Get/Set удалён, AppSettings в Models
 - ✅ **#53–#57:** ToolRegistry — типизированная идентичность инструментов ToolKind, строковые карты и ITool.Name удалены
 - ✅ **#45–#48:** Глубокая база панелей свойств ObjectPropertiesViewModel<TObject> + миграция Line/Rectangle/Text sub-VM
 - ✅ **Sprint 56-57:** Colors (V-005), Half-formats, Settings UI, MultiLine, Library
@@ -407,7 +408,7 @@ src/
 
 ---
 
-**Последнее обновление:** 17.08.2026 — Рефакторинг инструментов «ToolRegistry» (#53–#57, expand→migrate→contract): идентичность инструментов — enum ToolKind; ToolManager переименован в глубокий ToolRegistry (фабрики/кэш/active/стек/SwitchTo); строковые карты (4 шт.) и мёртвый ITool.Name удалены; IEditorContext без WPF ICommand; XAML — x:Static + OneWay; поведение байт-в-байт; coverage 89.98% (2646 тестов)
+**Последнее обновление:** 17.08.2026 — Рефакторинг настроек приложения «типизированный интерфейс» (#65–#66, атомарный flip): ISettingsService сужен до Load()/Save(AppSettings); строковые Get/Set и оба switch-диспетчера (12+12) удалены целиком; 19 вызовов в 5 классах мигрированы; AppSettings перенесён Services → Models; CustomSettings удалён; одна запись файла на создание вкладки; схема settings.json байт-совместима; coverage 89.91% (2619 тестов)
 
 
 
