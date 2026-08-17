@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.TemplateEditor.Models;
 
 /// <summary>
 /// Настройки приложения (текущая сессция).
@@ -65,9 +65,4 @@ public sealed class AppSettings
     /// Последняя используемая орентация листа.
     /// </summary>
     public string LastUsedSheetOrientation { get; set; } = "Landscape";
-
-    /// <summary>
-    /// Дополнительные настройки (ключ-значение).
-    /// </summary>
-    public Dictionary<string, string> CustomSettings { get; set; } = new();
 }

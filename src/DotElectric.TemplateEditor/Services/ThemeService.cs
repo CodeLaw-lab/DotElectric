@@ -21,7 +21,7 @@ public sealed class ThemeService : IThemeService
         _settingsService = settingsService;
         _dictionaryManager = dictionaryManager;
         _logger = logger;
-        CurrentTheme = _settingsService.Get("Theme", "Light");
+        CurrentTheme = _settingsService.Load().Theme;
     }
 
     public string CurrentTheme { get; private set; }
@@ -44,7 +44,9 @@ public sealed class ThemeService : IThemeService
             _dictionaryManager.SetThemeDictionary(themePath);
 
             CurrentTheme = theme;
-            _settingsService.Set("Theme", theme);
+            var settings = _settingsService.Load();
+            settings.Theme = theme;
+            _settingsService.Save(settings);
 
             ThemeChanged?.Invoke(theme);
 

@@ -57,18 +57,18 @@ public partial class SettingsViewModel : ObservableObject
     {
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
 
-        Theme = _settingsService.Get("Theme", "Light");
-        ShowGrid = _settingsService.Get("ShowGrid", true);
-        SnapToGrid = _settingsService.Get("SnapToGrid", true);
-        GridStepMm = _settingsService.Get("GridStepMm", 5.0);
-        GridMaxNodes = _settingsService.Get("GridMaxNodes", 250000);
-        var nodeColor = _settingsService.Get<string?>("GridNodeColor", null);
-        GridNodeColorAuto = nodeColor == null;
-        GridNodeColor = nodeColor ?? "#C0C0C0";
-        GridNodeSize = _settingsService.Get("GridNodeSize", 2.0);
-        AutosaveIntervalMinutes = _settingsService.Get("AutosaveIntervalMinutes", 5);
-        DefaultSheetFormat = _settingsService.Get("DefaultSheetFormat", "A3");
-        DefaultZoom = _settingsService.Get("DefaultZoom", 1.0);
+        var settings = _settingsService.Load();
+        Theme = settings.Theme;
+        ShowGrid = settings.ShowGrid;
+        SnapToGrid = settings.SnapToGrid;
+        GridStepMm = settings.GridStepMm;
+        GridMaxNodes = settings.GridMaxNodes;
+        GridNodeColorAuto = settings.GridNodeColor == null;
+        GridNodeColor = settings.GridNodeColor ?? "#C0C0C0";
+        GridNodeSize = settings.GridNodeSize;
+        AutosaveIntervalMinutes = settings.AutosaveIntervalMinutes;
+        DefaultSheetFormat = settings.DefaultSheetFormat;
+        DefaultZoom = settings.DefaultZoom;
     }
 
     public event Action? ConfirmRequested;

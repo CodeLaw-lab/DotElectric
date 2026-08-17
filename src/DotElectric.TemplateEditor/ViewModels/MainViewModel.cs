@@ -138,8 +138,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void NewTab(string? format = null)
     {
-        var rawFormat = format ?? _settingsService.Get("LastUsedSheetFormat", "A3");
-        var lastOrient = _settingsService.Get("LastUsedSheetOrientation", "Landscape");
+        var settings = _settingsService.Load();
+        var rawFormat = format ?? settings.LastUsedSheetFormat;
+        var lastOrient = settings.LastUsedSheetOrientation;
         var editor = _tabOperations.CreateNewTab(rawFormat, null, lastOrient);
         OpenedTabs.Add(editor);
         SelectedTab = editor;
@@ -151,8 +152,9 @@ public partial class MainViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private void NewTabWithLastFormat()
     {
-        var fmt = _settingsService.Get("LastUsedSheetFormat", "A3");
-        var orient = _settingsService.Get("LastUsedSheetOrientation", "Landscape");
+        var settings = _settingsService.Load();
+        var fmt = settings.LastUsedSheetFormat;
+        var orient = settings.LastUsedSheetOrientation;
         var editor = _tabOperations.CreateNewTab(null, fmt, orient);
         OpenedTabs.Add(editor);
         SelectedTab = editor;

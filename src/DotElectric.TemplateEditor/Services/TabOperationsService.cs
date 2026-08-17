@@ -52,8 +52,10 @@ public sealed class TabOperationsService : ITabOperationsService
                 : Sheet.GetDefaultOrientation(fmt);
         }
 
-        _settingsService.Set("LastUsedSheetFormat", fmt);
-        _settingsService.Set("LastUsedSheetOrientation", orientation.Value.ToString());
+        var settings = _settingsService.Load();
+        settings.LastUsedSheetFormat = fmt;
+        settings.LastUsedSheetOrientation = orientation.Value.ToString();
+        _settingsService.Save(settings);
 
         var template = _templateService.CreateNew(fmt, orientation.Value);
         return _editorViewModelFactory.Create(template, printService: _printService);

@@ -29,8 +29,6 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations = new Mock<ITabOperationsService>();
 
         _mockSettingsService = new Mock<ISettingsService>();
-        _mockSettingsService.Setup(s => s.Get("LastUsedSheetFormat", "A3")).Returns("A3");
-        _mockSettingsService.Setup(s => s.Get("LastUsedSheetOrientation", "Landscape")).Returns("Landscape");
         _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings());
 
         _mockThemeService = new Mock<IThemeService>();
@@ -152,7 +150,7 @@ public class MainViewModelTests : IDisposable
         _viewModel.NewTabCommand.Execute(null);
 
         Assert.Single(_viewModel.OpenedTabs);
-        _mockSettingsService.Verify(s => s.Get("LastUsedSheetFormat", "A3"), Times.AtLeastOnce);
+        _mockSettingsService.Verify(s => s.Load(), Times.AtLeastOnce);
     }
 
     [Fact]
@@ -191,7 +189,7 @@ public class MainViewModelTests : IDisposable
     {
         _viewModel.NewTabWithLastFormatCommand.Execute(null);
 
-        _mockSettingsService.Verify(s => s.Get("LastUsedSheetFormat", "A3"), Times.Once);
+        _mockSettingsService.Verify(s => s.Load(), Times.AtLeastOnce);
         _mockTabOperations.Verify(t => t.CreateNewTab(null, "A3", "Landscape"), Times.Once);
         Assert.Single(_viewModel.OpenedTabs);
     }

@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels;
 using Moq;
@@ -24,16 +25,6 @@ public class SettingsViewModelTests
 
         _settingsMock = new Mock<ISettingsService>();
         _settingsMock.Setup(s => s.Load()).Returns(_defaultSettings);
-        _settingsMock.Setup(s => s.Get("Theme", "Light")).Returns("Light");
-        _settingsMock.Setup(s => s.Get("ShowGrid", true)).Returns(true);
-        _settingsMock.Setup(s => s.Get("SnapToGrid", true)).Returns(true);
-        _settingsMock.Setup(s => s.Get("GridStepMm", 5.0)).Returns(5.0);
-        _settingsMock.Setup(s => s.Get("GridMaxNodes", 250000)).Returns(250000);
-        _settingsMock.Setup(s => s.Get<string?>("GridNodeColor", null)).Returns((string?)null);
-        _settingsMock.Setup(s => s.Get("GridNodeSize", 2.0)).Returns(2.0);
-        _settingsMock.Setup(s => s.Get("AutosaveIntervalMinutes", 5)).Returns(5);
-        _settingsMock.Setup(s => s.Get("DefaultSheetFormat", "A3")).Returns("A3");
-        _settingsMock.Setup(s => s.Get("DefaultZoom", 1.0)).Returns(1.0);
     }
 
     [Fact]
@@ -122,7 +113,7 @@ public class SettingsViewModelTests
     [Fact]
     public void Constructor_ExplicitNodeColor_SetsAutoFalse()
     {
-        _settingsMock.Setup(s => s.Get<string?>("GridNodeColor", null)).Returns("#FF0000");
+        _defaultSettings.GridNodeColor = "#FF0000";
 
         var vm = new SettingsViewModel(_settingsMock.Object);
 
@@ -185,10 +176,8 @@ public class SettingsViewModelTests
         var latest = new AppSettings
         {
             LastUsedSheetFormat = "A2",
-            LastUsedSheetOrientation = "Portrait",
-            CustomSettings = new Dictionary<string, string> { ["k"] = "v" }
+            LastUsedSheetOrientation = "Portrait"
         };
-        // Конструктор использует Get(), а не Load() — Load() вызывается ровно один раз, в Confirm().
         _settingsMock.Setup(s => s.Load()).Returns(latest);
 
         var vm = new SettingsViewModel(_settingsMock.Object);
@@ -197,7 +186,6 @@ public class SettingsViewModelTests
         // Поля, которых нет в SettingsViewModel, берутся из актуального Load() и не теряются
         _settingsMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
             a.LastUsedSheetFormat == "A2" &&
-            a.LastUsedSheetOrientation == "Portrait" &&
-            a.CustomSettings["k"] == "v")), Times.Once);
+            a.LastUsedSheetOrientation == "Portrait")), Times.Once);
     }
 }

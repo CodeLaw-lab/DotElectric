@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Windows;
 using System.Windows.Threading;
+using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tests.Helpers;
 using DotElectric.TemplateEditor.ViewModels;
@@ -19,6 +20,7 @@ public class WpfDialogHostServiceTests
     public void ResolveWindowDescriptor_SettingsViewModel_ReturnsSettingsView()
     {
         var settingsServiceMock = new Mock<ISettingsService>();
+        settingsServiceMock.Setup(s => s.Load()).Returns(new AppSettings());
         var viewModel = new SettingsViewModel(settingsServiceMock.Object);
 
         var (windowType, dataContext) = WpfDialogHostService.ResolveWindowDescriptor(viewModel);
@@ -125,6 +127,7 @@ public class WpfDialogHostServiceTests
         WpfContext.Execute(() =>
         {
             var settingsServiceMock = new Mock<ISettingsService>();
+            settingsServiceMock.Setup(s => s.Load()).Returns(new AppSettings());
             var vm = new SettingsViewModel(settingsServiceMock.Object);
             var host = new WpfDialogHostService();
 
