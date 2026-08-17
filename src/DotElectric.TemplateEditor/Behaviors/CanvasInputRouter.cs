@@ -187,7 +187,7 @@ public static class CanvasInputRouter
             totalModelDelta.X - state.PanAppliedModelDelta.X,
             totalModelDelta.Y - state.PanAppliedModelDelta.Y);
 
-        state.Editor.PanCanvas(incrementalDelta.X, incrementalDelta.Y);
+        state.Editor.ZoomPanManager.PanCanvas(incrementalDelta.X, incrementalDelta.Y);
         state.PanAppliedModelDelta = totalModelDelta;
     }
 
