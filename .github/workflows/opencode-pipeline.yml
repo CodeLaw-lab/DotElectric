@@ -3,6 +3,8 @@ name: OpenCode Pipeline
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review]
+permissions:
+  contents: read
 env:
   DOTNET_VERSION: '10.0.x'
 
