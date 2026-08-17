@@ -91,7 +91,7 @@ public sealed class TextTool : ITool
         // Двойной клик — отменить текущий preview и переключиться на Select
         _startPoint = null;
         _context.PreviewText = null;
-        _context.SetActiveToolCommand.Execute("Select");
+        _context.ActivateTool(ToolKind.Select);
     }
 
     public bool OnMouseWheel(int delta, PointMicrons modelPoint) => false;
@@ -118,7 +118,7 @@ public sealed class TextTool : ITool
         if (key == ToolKey.Escape)
         {
             Reset();
-            _context.SetActiveToolCommand.Execute("Select");
+            _context.ActivateTool(ToolKind.Select);
             return true;
         }
         return false;

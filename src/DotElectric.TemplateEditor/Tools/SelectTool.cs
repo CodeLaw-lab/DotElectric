@@ -82,7 +82,7 @@ public sealed class SelectTool : ITool
             {
                 _context.ActiveResizeHandle = handle;
                 _context.HoveredHandle = handle;
-                _context.PushTool("Resize");
+                _context.PushTool(ToolKind.Resize);
                 // Делегируем ResizeTool
                 var resizeTool = _context.GetOrCreateTool<ResizeTool>();
                 resizeTool.OnMouseDown(modelPoint, button, modifiers);

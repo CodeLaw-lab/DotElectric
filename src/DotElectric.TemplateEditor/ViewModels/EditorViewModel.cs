@@ -1,6 +1,5 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -146,8 +145,9 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         set => _statusBarManager.StatusMessage = value;
     }
     public void PanCanvas(double deltaXMm, double deltaYMm) => _zoomPanManager.PanCanvas(deltaXMm, deltaYMm);
-    public void PushTool(string tool) => _toolManager.PushTool(tool);
+    public void PushTool(ToolKind kind) => _toolManager.PushTool(kind);
     public void PopTool() => _toolManager.PopTool();
+    public void ActivateTool(ToolKind kind) => SetActiveTool(kind);
 
     /// <summary>
     /// Объект, на который наведён курсор (для hover-эффектов).
@@ -242,26 +242,17 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     // === Команда смены инструмента (делегировано ToolManager) ===
 
     /// <summary>
-    /// Команда установки активного инструмента. Принимает идентичность ToolKind;
-    /// строковые параметры — миграционный шим до перевода инструментов на ActivateTool (#56).
+    /// Команда установки активного инструмента по идентичности.
     /// </summary>
     [RelayCommand]
-    private void SetActiveTool(object parameter)
+    private void SetActiveTool(ToolKind kind)
     {
-        var kind = ResolveToolKind(parameter);
-        if (kind is null || _toolManager.ActiveToolKind == kind.Value)
+        if (_toolManager.ActiveToolKind == kind)
             return;
 
-        _toolManager.SwitchTo(kind.Value);
+        _toolManager.SwitchTo(kind);
         _previewManager.ClearAll();
     }
-
-    private static ToolKind? ResolveToolKind(object? parameter) => parameter switch
-    {
-        ToolKind k => k,
-        string s => ToolManager.TryParseKind(s, out var parsed) ? parsed : null,
-        _ => null
-    };
 
     // === Команды клавиатуры ===
 
@@ -807,9 +798,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// Ограничить координату Y так, чтобы опорная точка не выходила за границы листа.
     /// </summary>
     public long ClampY(long y) => Math.Clamp(y, 0, Template.Sheet.HeightMicrons);
-
-    // === IEditorContext explicit implementation ===
-    ICommand IEditorContext.SetActiveToolCommand => SetActiveToolCommand;
 
     private static string GetObjectWord(int count) => count switch
     {

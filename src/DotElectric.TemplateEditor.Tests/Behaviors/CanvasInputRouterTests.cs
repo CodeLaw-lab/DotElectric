@@ -63,15 +63,15 @@ public class CanvasInputRouterTests
     // ===== GetCurrentTool (pure) =====
 
     [Theory]
-    [InlineData("Select", typeof(SelectTool))]
-    [InlineData("Line", typeof(DrawingLineTool))]
-    [InlineData("Rectangle", typeof(DrawingRectangleTool))]
-    [InlineData("Text", typeof(TextTool))]
-    [InlineData("Resize", typeof(ResizeTool))]
-    public void GetCurrentTool_ReturnsToolForActiveToolName(string activeTool, Type expectedType)
+    [InlineData(ToolKind.Select, typeof(SelectTool))]
+    [InlineData(ToolKind.Line, typeof(DrawingLineTool))]
+    [InlineData(ToolKind.Rectangle, typeof(DrawingRectangleTool))]
+    [InlineData(ToolKind.Text, typeof(TextTool))]
+    [InlineData(ToolKind.Resize, typeof(ResizeTool))]
+    public void GetCurrentTool_ReturnsToolForActiveKind(ToolKind activeKind, Type expectedType)
     {
         var editor = CreateEditor();
-        editor.ToolManager.ActiveTool = activeTool;
+        editor.ToolManager.ActiveToolKind = activeKind;
 
         var tool = CanvasInputRouter.GetCurrentTool(editor);
 
@@ -79,26 +79,16 @@ public class CanvasInputRouterTests
     }
 
     [Fact]
-    public void GetCurrentTool_UnknownActiveTool_FallsBackToSelectTool()
-    {
-        var editor = CreateEditor();
-        editor.ToolManager.ActiveTool = "Bogus";
-
-        var tool = CanvasInputRouter.GetCurrentTool(editor);
-
-        Assert.IsType<SelectTool>(tool);
-    }
-
-    [Fact]
     public void GetCurrentTool_ReturnsCachedInstance()
     {
         var editor = CreateEditor();
-        editor.ToolManager.ActiveTool = "Line";
+        editor.ToolManager.ActiveToolKind = ToolKind.Line;
 
         var first = CanvasInputRouter.GetCurrentTool(editor);
         var second = CanvasInputRouter.GetCurrentTool(editor);
 
         Assert.Same(first, second);
+        Assert.Same(editor.ToolManager.ActiveToolInstance, first);
         Assert.Same(editor.GetOrCreateTool<DrawingLineTool>(), first);
     }
 // ===== ToWpfCursor (pure) =====
