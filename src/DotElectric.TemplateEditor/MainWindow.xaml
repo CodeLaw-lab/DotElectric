@@ -363,28 +363,28 @@
 
                 <!-- Инструменты рисования -->
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Select}"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter={x:Static tools:ToolKind.Select}}"
                              Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Select}"
                              GroupName="DrawingTools"
                              ToolTip="Выделение (V)">
                     <materialDesign:PackIcon Kind="CursorDefaultClickOutline" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Line}"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter={x:Static tools:ToolKind.Line}}"
                              Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Line}"
                              GroupName="DrawingTools"
                              ToolTip="Линия (L)">
                     <materialDesign:PackIcon Kind="Minus" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Rectangle}"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter={x:Static tools:ToolKind.Rectangle}}"
                              Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Rectangle}"
                              GroupName="DrawingTools"
                              ToolTip="Прямоугольник (R)">
                     <materialDesign:PackIcon Kind="SquareOutline" Width="20" Height="20"/>
                 </RadioButton>
                 <RadioButton Style="{DynamicResource ToolBarRadioButtonStyle}"
-                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter=Text}"
+                             IsChecked="{Binding SelectedTab.ToolManager.ActiveToolKind, Mode=OneWay, Converter={StaticResource EqualToBoolConverter}, ConverterParameter={x:Static tools:ToolKind.Text}}"
                              Command="{Binding SelectedTab.SetActiveToolCommand}" CommandParameter="{x:Static tools:ToolKind.Text}"
                              GroupName="DrawingTools"
                              ToolTip="Текст (T)">
