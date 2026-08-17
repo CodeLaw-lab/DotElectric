@@ -1406,6 +1406,149 @@ public class SelectToolDragTests
         // IsDirty установлен
         Assert.True(vm.DirtyStateManager.IsDirty);
     }
+
+    // ============= Bug #82: текст сразу после размещения выделяется и перетаскивается =============
+
+    [Fact]
+    public void Bug82_NewlyPlacedDefaultText_DragFromBodyNearCorner_Moves_NotResizes()
+    {
+        var vm = CreateViewModel();
+
+        // Пользователь размещает текст инструментом TextTool (дефолт: 14мм, "Текст")
+        vm.ToolRegistry.SwitchTo(ToolKind.Text);
+        var textTool = vm.ToolRegistry.ActiveToolInstance;
+        var placePoint = new PointMicrons(100_000, 100_000);
+        textTool.OnMouseDown(placePoint, ToolMouseButton.Left, ToolModifiers.None);
+        textTool.OnMouseUp(placePoint, ToolMouseButton.Left, ToolModifiers.None);
+
+        var textObj = Assert.IsType<Text>(Assert.Single(vm.Template.Objects));
+        Assert.Same(textObj, vm.SingleSelectedObject); // выделен сразу после размещения
+
+        // Пользователь нажимает V (Select), кликает по видимому телу текста —
+        // в 5мм от верхнего левого угла (глиф «Т»; до маркера 7.07мм < старого
+        // tolerance 8мм — до фикса клик уходил в resize) — и тащит на 10мм вправо.
+        vm.ToolRegistry.SwitchTo(ToolKind.Select);
+        var clickPoint = new PointMicrons(
+            textObj.MicronsX + 5_000,
+            textObj.MicronsY + textObj.HeightMicrons - 5_000);
+
+        // События идут через активный инструмент реестра — как в CanvasInputRouter
+        vm.ToolRegistry.ActiveToolInstance.OnMouseDown(clickPoint, ToolMouseButton.Left, ToolModifiers.None);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind); // клик по телу не должен уходить в Resize
+
+        var dragEnd = new PointMicrons(clickPoint.MicronsX + 10_000, clickPoint.MicronsY);
+        vm.ToolRegistry.ActiveToolInstance.OnMouseMove(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+        vm.ToolRegistry.ActiveToolInstance.OnMouseUp(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+
+        // Текст перемещён на 10мм, размер не изменён
+        Assert.Equal(placePoint.MicronsX + 10_000, textObj.MicronsX);
+        Assert.Equal(placePoint.MicronsY, textObj.MicronsY);
+        Assert.Equal(EditorSettings.DefaultFontSizeMicrons, textObj.FontSizeMicrons);
+    }
+
+    [Fact]
+    public void Bug82_SmallText_CenterClick_Moves_NotResizes()
+    {
+        var vm = CreateViewModel();
+
+        // Маленький текст (шрифт 2.5мм — типичный для чертежей): бокс ~6x2.5мм,
+        // весь внутри 8мм tolerance угловых маркеров
+        var text = new Text(100_000, 100_000, "Текст", 2_500, "ГОСТ А");
+        vm.Template.Objects.Add(text);
+        vm.SelectSingle(text);
+
+        var selectTool = new SelectTool(vm);
+        var center = new PointMicrons(
+            text.MicronsX + text.WidthMicrons / 2,
+            text.MicronsY + text.HeightMicrons / 2);
+
+        selectTool.OnMouseDown(center, ToolMouseButton.Left, ToolModifiers.None);
+
+        // Клик в центр тела — это drag, а не resize
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
+        Assert.Null(vm.ActiveResizeHandle);
+
+        var dragEnd = new PointMicrons(center.MicronsX + 10_000, center.MicronsY);
+        selectTool.OnMouseMove(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+        selectTool.OnMouseUp(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Equal(100_000 + 10_000, text.MicronsX);
+        Assert.Equal(2_500, text.FontSizeMicrons);
+    }
+
+    [Fact]
+    public void Bug82_DefaultText_ClickExactlyOnCornerMarker_StillStartsResize()
+    {
+        var vm = CreateViewModel();
+
+        var text = new Text(100_000, 100_000, "Текст", EditorSettings.DefaultFontSizeMicrons, "ГОСТ А");
+        vm.Template.Objects.Add(text);
+        vm.SelectSingle(text);
+
+        var selectTool = new SelectTool(vm);
+        // Клик точно в угловой маркер (низ-лево бокса в модельных координатах)
+        var corner = new PointMicrons(text.MicronsX, text.MicronsY);
+
+        selectTool.OnMouseDown(corner, ToolMouseButton.Left, ToolModifiers.None);
+
+        // Resize доступен через маркер — поведение сохранено
+        Assert.Equal(ToolKind.Resize, vm.ToolRegistry.ActiveToolKind);
+    }
+
+    [Fact]
+    public void Bug82_ShortLine_MidpointClick_Moves_NotResizes()
+    {
+        var vm = CreateViewModel();
+
+        // Короткая линия 10мм: середина в 5мм от обоих концов —
+        // до фикса вся линия была внутри 8мм tolerance концевых маркеров
+        var line = new Line(100_000, 100_000, 110_000, 100_000);
+        vm.Template.Objects.Add(line);
+        vm.SelectSingle(line);
+
+        var selectTool = new SelectTool(vm);
+        var midpoint = new PointMicrons(105_000, 100_000);
+
+        selectTool.OnMouseDown(midpoint, ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
+        Assert.Null(vm.ActiveResizeHandle);
+
+        var dragEnd = new PointMicrons(midpoint.MicronsX + 10_000, midpoint.MicronsY);
+        selectTool.OnMouseMove(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+        selectTool.OnMouseUp(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Equal(110_000, line.StartMicronsX);
+        Assert.Equal(120_000, line.EndMicronsX);
+    }
+
+    [Fact]
+    public void Bug82_SmallRectangle_CenterClick_Moves_NotResizes()
+    {
+        var vm = CreateViewModel();
+
+        // Маленький прямоугольник 5x5мм: центр в 3.5мм от угловых маркеров —
+        // до фикса клик в центр уходил в resize
+        var rect = new Rectangle(100_000, 100_000, 5_000, 5_000);
+        vm.Template.Objects.Add(rect);
+        vm.SelectSingle(rect);
+
+        var selectTool = new SelectTool(vm);
+        var center = new PointMicrons(102_500, 102_500);
+
+        selectTool.OnMouseDown(center, ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
+        Assert.Null(vm.ActiveResizeHandle);
+
+        var dragEnd = new PointMicrons(center.MicronsX + 10_000, center.MicronsY);
+        selectTool.OnMouseMove(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+        selectTool.OnMouseUp(dragEnd, ToolMouseButton.Left, ToolModifiers.None);
+
+        Assert.Equal(110_000, rect.MicronsX);
+        Assert.Equal(5_000, rect.WidthMicrons);
+        Assert.Equal(5_000, rect.HeightMicrons);
+    }
 }
 
 public class DrawingTextToolTests
