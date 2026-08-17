@@ -15,6 +15,7 @@ public class TabOperationsServiceTests
     private readonly Mock<IFileService> _fileServiceMock;
     private readonly Mock<IDialogService> _dialogServiceMock;
     private readonly Mock<ISettingsService> _settingsServiceMock;
+    private readonly AppSettings _appSettings;
     private readonly Mock<IPrintService> _printServiceMock;
     private readonly Mock<IEditorViewModelFactory> _factoryMock;
     private readonly Mock<ILogger<TabOperationsService>> _loggerMock;
@@ -27,6 +28,8 @@ public class TabOperationsServiceTests
         _fileServiceMock = new Mock<IFileService>();
         _dialogServiceMock = new Mock<IDialogService>();
         _settingsServiceMock = new Mock<ISettingsService>();
+        _appSettings = new AppSettings();
+        _settingsServiceMock.Setup(s => s.Load()).Returns(_appSettings);
         _printServiceMock = new Mock<IPrintService>();
         _factoryMock = new Mock<IEditorViewModelFactory>();
         _loggerMock = new Mock<ILogger<TabOperationsService>>();
@@ -136,8 +139,9 @@ public class TabOperationsServiceTests
 
         Assert.Same(editor, result);
         _templateServiceMock.Verify(s => s.CreateNew("A4", SheetOrientation.Landscape), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetFormat", "A4"), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetOrientation", "Landscape"), Times.Once);
+        _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.LastUsedSheetFormat == "A4" &&
+            a.LastUsedSheetOrientation == "Landscape")), Times.Once);
         _factoryMock.Verify(f => f.Create(template, null, _printServiceMock.Object, null, null), Times.Once);
     }
 
@@ -147,8 +151,9 @@ public class TabOperationsServiceTests
         _service.CreateNewTab("A3P", "A4L", "Landscape");
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Portrait), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetFormat", "A3"), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetOrientation", "Portrait"), Times.Once);
+        _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.LastUsedSheetFormat == "A3" &&
+            a.LastUsedSheetOrientation == "Portrait")), Times.Once);
     }
 
     [Fact]
@@ -183,8 +188,9 @@ public class TabOperationsServiceTests
         _service.CreateNewTab(null, null, null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Landscape), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetFormat", "A3"), Times.Once);
-        _settingsServiceMock.Verify(s => s.Set("LastUsedSheetOrientation", "Landscape"), Times.Once);
+        _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.LastUsedSheetFormat == "A3" &&
+            a.LastUsedSheetOrientation == "Landscape")), Times.Once);
     }
 
     // === OpenFileAsync ===

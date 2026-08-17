@@ -28,7 +28,7 @@ public class AutosaveServiceTests : IDisposable
         _mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()));
 
         _mockSettingsService = new Mock<ISettingsService>();
-        _mockSettingsService.Setup(s => s.Get("AutosaveIntervalMinutes", 5)).Returns(5);
+        _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { AutosaveIntervalMinutes = 5 });
 
         _mockLogger = new Mock<ILogger<AutosaveService>>();
         _mockDateTimeProvider = new Mock<IDateTimeProvider>();
@@ -85,10 +85,10 @@ public class AutosaveServiceTests : IDisposable
     }
 
     [Fact]
-    public void Start_CallsSettingsGetForInterval()
+    public void Start_CallsSettingsLoadForInterval()
     {
         _service.Start();
-        _mockSettingsService.Verify(s => s.Get("AutosaveIntervalMinutes", 5), Times.Once);
+        _mockSettingsService.Verify(s => s.Load(), Times.Once);
     }
 
     [Fact]

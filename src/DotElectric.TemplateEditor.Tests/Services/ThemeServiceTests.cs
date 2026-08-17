@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using Moq;
 
@@ -10,6 +11,7 @@ public class ThemeServiceTests : IDisposable
 {
     private readonly Mock<IThemeDictionaryManager> _mockDictionaryManager;
     private readonly Mock<ISettingsService> _mockSettingsService;
+    private readonly AppSettings _settings;
     private ThemeService _service;
 
     private const string LightThemePath = "Resources/Styles/LightTheme.xaml";
@@ -19,7 +21,8 @@ public class ThemeServiceTests : IDisposable
     {
         _mockDictionaryManager = new Mock<IThemeDictionaryManager>();
         _mockSettingsService = new Mock<ISettingsService>();
-        _mockSettingsService.Setup(s => s.Get("Theme", "Light")).Returns("Light");
+        _settings = new AppSettings();
+        _mockSettingsService.Setup(s => s.Load()).Returns(_settings);
 
         _service = new ThemeService(_mockSettingsService.Object, _mockDictionaryManager.Object);
     }
@@ -34,7 +37,7 @@ public class ThemeServiceTests : IDisposable
     [Fact]
     public void Constructor_LoadsThemeFromSettings()
     {
-        _mockSettingsService.Setup(s => s.Get("Theme", "Light")).Returns("Dark");
+        _settings.Theme = "Dark";
 
         var service = new ThemeService(_mockSettingsService.Object, _mockDictionaryManager.Object);
 
@@ -44,7 +47,7 @@ public class ThemeServiceTests : IDisposable
     [Fact]
     public void Constructor_UsesLightDefault_WhenSettingsHasNoTheme()
     {
-        _mockSettingsService.Setup(s => s.Get("Theme", "Light")).Returns("Light");
+        _settings.Theme = "Light";
 
         var service = new ThemeService(_mockSettingsService.Object, _mockDictionaryManager.Object);
 
@@ -91,7 +94,7 @@ public class ThemeServiceTests : IDisposable
     {
         _service.SetTheme("Light");
 
-        _mockSettingsService.Verify(s => s.Set("Theme", "Light"), Times.Once);
+        _mockSettingsService.Verify(s => s.Save(It.Is<AppSettings>(a => a.Theme == "Light")), Times.Once);
     }
 
     [Fact]
@@ -99,7 +102,7 @@ public class ThemeServiceTests : IDisposable
     {
         _service.SetTheme("Dark");
 
-        _mockSettingsService.Verify(s => s.Set("Theme", "Dark"), Times.Once);
+        _mockSettingsService.Verify(s => s.Save(It.Is<AppSettings>(a => a.Theme == "Dark")), Times.Once);
     }
 
     [Fact]
@@ -109,7 +112,7 @@ public class ThemeServiceTests : IDisposable
 
         _mockDictionaryManager.Verify(m => m.SetThemeDictionary(LightThemePath), Times.Once);
         Assert.Equal("Light", _service.CurrentTheme);
-        _mockSettingsService.Verify(s => s.Set("Theme", "Light"), Times.Once);
+        _mockSettingsService.Verify(s => s.Save(It.Is<AppSettings>(a => a.Theme == "Light")), Times.Once);
     }
 
     [Fact]
@@ -168,7 +171,7 @@ public class ThemeServiceTests : IDisposable
 
         _service.SetTheme("Dark");
 
-        _mockSettingsService.Verify(s => s.Set("Theme", It.IsAny<string>()), Times.Never);
+        _mockSettingsService.Verify(s => s.Save(It.IsAny<AppSettings>()), Times.Never);
     }
 
     [Fact]
@@ -234,7 +237,7 @@ public class ThemeServiceTests : IDisposable
     {
         _service.ToggleTheme();
 
-        _mockSettingsService.Verify(s => s.Set("Theme", "Dark"), Times.Once);
+        _mockSettingsService.Verify(s => s.Save(It.Is<AppSettings>(a => a.Theme == "Dark")), Times.Once);
     }
 
     [Fact]
@@ -259,8 +262,8 @@ public class ThemeServiceTests : IDisposable
         _service.SetTheme("Light");
         _service.SetTheme("Dark");
 
-        _mockSettingsService.Verify(s => s.Set("Theme", "Light"), Times.Once);
-        _mockSettingsService.Verify(s => s.Set("Theme", "Dark"), Times.Once);
+        _mockSettingsService.Verify(s => s.Save(It.IsAny<AppSettings>()), Times.Exactly(2));
+        Assert.Equal("Dark", _settings.Theme);
     }
 
     [Fact]
@@ -270,7 +273,7 @@ public class ThemeServiceTests : IDisposable
         _service.SetTheme("Dark");
 
         _mockDictionaryManager.Verify(m => m.SetThemeDictionary(DarkThemePath), Times.Exactly(2));
-        _mockSettingsService.Verify(s => s.Set("Theme", "Dark"), Times.Exactly(2));
+        _mockSettingsService.Verify(s => s.Save(It.Is<AppSettings>(a => a.Theme == "Dark")), Times.Exactly(2));
     }
 
     [Fact]

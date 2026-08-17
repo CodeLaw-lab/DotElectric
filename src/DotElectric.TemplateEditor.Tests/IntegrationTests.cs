@@ -781,51 +781,39 @@ public sealed class IntegrationTests
     [Fact]
     public void SettingsService_LoadSave_PersistsSettings()
     {
-        var service = new SettingsService();
-
-        var settings = new AppSettings
+        var settingsFile = Path.Combine(Path.GetTempPath(), $"settings_it_{Guid.NewGuid():N}.json");
+        try
         {
-            AutosaveIntervalMinutes = 10,
-            Theme = "Dark",
-            ShowGrid = false,
-            SnapToGrid = false,
-            GridStepMm = 10.0,
-            DefaultZoom = 2.0,
-            DefaultSheetFormat = "A4"
-        };
+            var service = new SettingsService(settingsFilePath: settingsFile);
 
-        service.Save(settings);
+            var settings = new AppSettings
+            {
+                AutosaveIntervalMinutes = 10,
+                Theme = "Dark",
+                ShowGrid = false,
+                SnapToGrid = false,
+                GridStepMm = 10.0,
+                DefaultZoom = 2.0,
+                DefaultSheetFormat = "A4"
+            };
 
-        var loaded = service.Load();
+            service.Save(settings);
 
-        Assert.Equal(10, loaded.AutosaveIntervalMinutes);
-        Assert.Equal("Dark", loaded.Theme);
-        Assert.False(loaded.ShowGrid);
-        Assert.False(loaded.SnapToGrid);
-        Assert.Equal(10.0, loaded.GridStepMm);
-        Assert.Equal(2.0, loaded.DefaultZoom);
-        Assert.Equal("A4", loaded.DefaultSheetFormat);
-    }
+            var loaded = service.Load();
 
-    [Fact]
-    public void SettingsService_GetSet_KnownKeys()
-    {
-        var service = new SettingsService();
-
-        service.Set("Theme", "Dark");
-        Assert.Equal("Dark", service.Get("Theme", "Light"));
-
-        service.Set("ShowGrid", false);
-        Assert.False(service.Get("ShowGrid", true));
-
-        service.Set("SnapToGrid", false);
-        Assert.False(service.Get("SnapToGrid", true));
-
-        service.Set("GridStepMm", 10.0);
-        Assert.Equal(10.0, service.Get("GridStepMm", 5.0));
-
-        service.Set("DefaultSheetFormat", "A4");
-        Assert.Equal("A4", service.Get("DefaultSheetFormat", "A3"));
+            Assert.Equal(10, loaded.AutosaveIntervalMinutes);
+            Assert.Equal("Dark", loaded.Theme);
+            Assert.False(loaded.ShowGrid);
+            Assert.False(loaded.SnapToGrid);
+            Assert.Equal(10.0, loaded.GridStepMm);
+            Assert.Equal(2.0, loaded.DefaultZoom);
+            Assert.Equal("A4", loaded.DefaultSheetFormat);
+        }
+        finally
+        {
+            if (File.Exists(settingsFile))
+                File.Delete(settingsFile);
+        }
     }
 
     // =========================================================================

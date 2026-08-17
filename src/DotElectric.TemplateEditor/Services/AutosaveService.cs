@@ -110,7 +110,7 @@ public sealed class AutosaveService : IDisposable
     {
         ObjectDisposedException.ThrowIf(_isDisposed, this);
 
-        var intervalMinutes = _settingsService.Get("AutosaveIntervalMinutes", 5);
+        var intervalMinutes = _settingsService.Load().AutosaveIntervalMinutes;
         intervalMinutes = Math.Clamp(intervalMinutes, 1, 60);
 
         _timer = new Timer(

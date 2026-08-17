@@ -37,8 +37,6 @@ public class MainViewModelAsyncFlowTests : IDisposable
             .ReturnsAsync(true);
 
         _mockSettingsService = new Mock<ISettingsService>();
-        _mockSettingsService.Setup(s => s.Get("LastUsedSheetFormat", "A3")).Returns("A3");
-        _mockSettingsService.Setup(s => s.Get("LastUsedSheetOrientation", "Landscape")).Returns("Landscape");
         _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings());
 
         _mockThemeService = new Mock<IThemeService>();
