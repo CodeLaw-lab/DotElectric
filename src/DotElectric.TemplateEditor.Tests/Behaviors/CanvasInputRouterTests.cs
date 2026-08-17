@@ -125,13 +125,26 @@ public class CanvasInputRouterTests
             var editor = CreateEditor();
             var state = CreateState(editor);
             var canvas = new Canvas();
+            // CaptureMouse требует подключённый PresentationSource — окно показываем
+            var window = new Window { Content = canvas };
             var windowPoint = new Point(100, 50);
 
-            CanvasInputRouter.RoutePanDown(canvas, state, windowPoint);
+            try
+            {
+                window.Show();
+                window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-            Assert.True(state.IsPanning);
-            Assert.Equal(windowPoint, state.PanStartWpfPoint);
-            Assert.Equal(new Point(0, 0), state.PanAppliedModelDelta);
+                CanvasInputRouter.RoutePanDown(canvas, state, windowPoint);
+
+                Assert.True(state.IsPanning);
+                Assert.True(canvas.IsMouseCaptured, "Старт пана должен захватывать мышь");
+                Assert.Equal(windowPoint, state.PanStartWpfPoint);
+                Assert.Equal(new Point(0, 0), state.PanAppliedModelDelta);
+            }
+            finally
+            {
+                window.Close();
+            }
         });
     }
 
@@ -162,15 +175,17 @@ public class CanvasInputRouterTests
     [InlineData(MouseButton.Left, true, true, true, true)]      // комбинации
     [InlineData(MouseButton.Left, false, false, false, false)]  // Left без модификаторов — не пан
     [InlineData(MouseButton.Right, true, true, true, false)]    // правая кнопка — не пан
-    public void IsPanGesture_CanonicalGestureSet(MouseButton button, bool space, bool leftAlt, bool rightAlt, bool expected)
+    public void IsPanGesture_CanonicalGestureSet_ReturnsExpected(MouseButton button, bool space, bool leftAlt, bool rightAlt, bool expected)
     {
         Assert.Equal(expected, CanvasInputRouter.IsPanGesture(button, space, leftAlt, rightAlt));
     }
 
     // ===== Пан-жест: полный цикл Left-пути (STA) =====
+    // Триггер через RouteMouseDown с зажатым модификатором unit-тестом не покрывается
+    // (Keyboard.IsKeyDown не фейчится) — детекция закрыта теорией IsPanGesture выше.
 
     [Fact]
-    public void PanGesture_LeftPath_FullCycle_SingleSourceOfTruth()
+    public void RoutePanDown_LeftGestureFullCycle_StopsCleanlyAndRefreshesGrid()
     {
         WpfContext.Execute(() =>
         {
@@ -179,6 +194,9 @@ public class CanvasInputRouterTests
             editor.GridManager.GridInvalidated = () => refreshCount++;
             var state = CreateState(editor);
             var canvas = new Canvas();
+            // Окно НЕ показываем: с PresentationSource GetPosition возвращает реальную
+            // позицию курсора, и дельта становится недетерминированной; без него — (0,0).
+            // Захват мыши проверяется в RoutePanDown_WithWindowPoint (показанное окно).
             var window = new Window { Content = canvas };
 
             // Жест Left+Space/Alt: старт → движение → завершение; единственный источник истины — state
