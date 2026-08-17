@@ -101,13 +101,25 @@ public class ZoomPanManagerTests
     public void FitToScreen_CalculatesCorrectZoom()
     {
         var sut = CreateSut();
-        var canvasWidth = 800.0;
-        var canvasHeight = 600.0;
 
-        sut.FitToScreen(canvasWidth, canvasHeight);
+        sut.SetViewportSize(800, 600);
+        sut.FitToScreen();
 
         Assert.True(sut.Zoom > 0);
         Assert.True(sut.Zoom <= 10.0);
+    }
+
+    [Fact]
+    public void FitToScreen_ZeroViewport_NoOp()
+    {
+        var sut = CreateSut(zoom: 1.5);
+
+        // Viewport не установлен (0x0) — команда вызвана до первого layout
+        sut.FitToScreen();
+
+        Assert.Equal(1.5, sut.Zoom);
+        Assert.Equal(0.0, sut.PanOffsetX);
+        Assert.Equal(0.0, sut.PanOffsetY);
     }
 
     [Fact]

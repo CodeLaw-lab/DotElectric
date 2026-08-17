@@ -634,27 +634,12 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
 
     /// <summary>
     /// Команда «Вписать в экран» (Fit to Screen).
-    /// Принимает параметр в формате "ширина,высота" в пикселях (размер viewport).
+    /// Использует живой viewport менеджера зума/панорамирования.
     /// </summary>
     [RelayCommand]
-    private void FitToScreen(string? parameter)
+    private void FitToScreen()
     {
-        double viewportWidth = 800;
-        double viewportHeight = 600;
-
-        if (!string.IsNullOrEmpty(parameter))
-        {
-            var parts = parameter.Split(',');
-            if (parts.Length == 2 &&
-                double.TryParse(parts[0], out var w) &&
-                double.TryParse(parts[1], out var h))
-            {
-                viewportWidth = w;
-                viewportHeight = h;
-            }
-        }
-
-        _zoomPanManager.FitToScreen(viewportWidth, viewportHeight);
+        _zoomPanManager.FitToScreen();
         _statusBarManager.StatusMessage = "Вписано в экран";
     }
 

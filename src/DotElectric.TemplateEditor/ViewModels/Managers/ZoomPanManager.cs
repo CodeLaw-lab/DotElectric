@@ -197,13 +197,19 @@ public sealed partial class ZoomPanManager : ObservableObject
         PanOffsetY -= deltaYMm * Zoom;
     }
 
-    public void FitToScreen(double canvasWidth, double canvasHeight)
+    /// <summary>
+    /// Вписать лист в живой viewport. No-op, если viewport ещё не измерен.
+    /// </summary>
+    public void FitToScreen()
     {
+        if (_viewportWidthPx <= 0 || _viewportHeightPx <= 0)
+            return;
+
         var sheetWidthMm = _template.Sheet.WidthMm;
         var sheetHeightMm = _template.Sheet.HeightMm;
 
-        var zoomW = (canvasWidth * EditorSettings.FitToScreenPadding) / sheetWidthMm;
-        var zoomH = (canvasHeight * EditorSettings.FitToScreenPadding) / sheetHeightMm;
+        var zoomW = (_viewportWidthPx * EditorSettings.FitToScreenPadding) / sheetWidthMm;
+        var zoomH = (_viewportHeightPx * EditorSettings.FitToScreenPadding) / sheetHeightMm;
         Zoom = Math.Min(Math.Min(zoomW, zoomH), EditorSettings.ZoomMax);
 
         CenterCanvas();
