@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2649, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2646, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 89.99% line-rate (CI gate 80%)
-**Последнее обновление:** 17.08.2026 — Рефакторинг панелей свойств «Глубокая база» (#45–#48): ObjectPropertiesViewModel<TObject> + миграция Line/Rectangle/Text sub-VM, дублирование инфраструктуры устранено, coverage 89.99%
+**Покрытие:** 89.98% line-rate (CI gate 80%)
+**Последнее обновление:** 17.08.2026 — Рефакторинг инструментов «ToolRegistry» (#53–#57): идентичность инструментов — enum ToolKind, ToolManager → глубокий ToolRegistry, строковые карты и ITool.Name удалены, поведение байт-в-байт, coverage 89.98%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2649 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2646 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,9 +245,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2649 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 89.99% line-rate (CI gate 80%)
+- ✅ **2646 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 89.98% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#53–#57:** ToolRegistry — типизированная идентичность инструментов ToolKind, строковые карты и ITool.Name удалены
 - ✅ **#45–#48:** Глубокая база панелей свойств ObjectPropertiesViewModel<TObject> + миграция Line/Rectangle/Text sub-VM
 - ✅ **Sprint 56-57:** Colors (V-005), Half-formats, Settings UI, MultiLine, Library
 - ✅ **Sprint 52-55:** Free rotation, IDateTimeProvider, DialogService, 1599+ тестов
@@ -406,7 +407,7 @@ src/
 
 ---
 
-**Последнее обновление:** 17.08.2026 — Рефакторинг панелей свойств «Глубокая база» (#45–#48): ObjectPropertiesViewModel<TObject> (конструктор-тройка, декларативная nameof-карта PropertyMap, UpdateObject/notify-all, Dispose, SetProperty<T>, ChangeFromMmString, ParseLineType) + миграция Line (7 пар)/Rectangle (8 пар)/Text (13 пар) sub-VM; дублирование инфраструктуры устранено полностью; coverage 89.99% (2649 тестов)
+**Последнее обновление:** 17.08.2026 — Рефакторинг инструментов «ToolRegistry» (#53–#57, expand→migrate→contract): идентичность инструментов — enum ToolKind; ToolManager переименован в глубокий ToolRegistry (фабрики/кэш/active/стек/SwitchTo); строковые карты (4 шт.) и мёртвый ITool.Name удалены; IEditorContext без WPF ICommand; XAML — x:Static + OneWay; поведение байт-в-байт; coverage 89.98% (2646 тестов)
 
 
 
