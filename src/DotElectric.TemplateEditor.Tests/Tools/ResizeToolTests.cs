@@ -33,15 +33,6 @@ public class ResizeToolTests
     // === Constructor ===
 
     [Fact]
-    public void Constructor_SetsName()
-    {
-        var editor = CreateEditorWithObject(new Rectangle(0, 0, 10000, 10000));
-        var tool = new ResizeTool(editor);
-
-        Assert.Equal("Изменение размера", tool.Name);
-    }
-
-    [Fact]
     public void Constructor_ThrowsOnNullEditor()
     {
         Assert.Throws<ArgumentNullException>(() => new ResizeTool(null!));

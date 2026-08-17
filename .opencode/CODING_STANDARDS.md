@@ -246,7 +246,7 @@ All agents MUST read this file before any code operation.
 | ZoomPanManager | Zoom, PanOffset, FitToScreen | Zoom, PanOffsetX/Y |
 | SelectionManager | SelectedObjects, SelectionBox | ShowSelectionMarkers |
 | ClipboardManager | Copy, Paste, Cut | GetClipboardContents() |
-| ToolManager | ActiveTool, Push/Pop, GetOrCreateTool | ActiveTool |
+| ToolRegistry | Идентичность (ToolKind), создание/кэш, active, стек, SwitchTo | ActiveToolKind, ActiveToolInstance |
 | PreviewManager | PreviewLine/Rectangle/Text | — |
 | InlineEditManager | Active inline editing state | — |
 | StatusBarManager | Status message, grid/snap state | StatusMessage |
@@ -375,7 +375,7 @@ public void MethodName_Scenario_ExpectedResult()
 | Abstract class (not I-prefix) | `TemplateObjectBase` (not `ITemplateObject`) |
 | Interface prefix I | `ITool`, `IEditorContext`, `IUndoCommand` |
 | Sealed by default | `sealed class MicronsToPixelConverter` |
-| Manager suffix | `ZoomPanManager`, `SelectionManager` |
+| Manager suffix | `ZoomPanManager`, `SelectionManager` (санкционированное исключение: `ToolRegistry` — реестр идентичности/фабрик, а не владелец UI-состояния) |
 | Tool suffix | `SelectTool`, `ResizeTool` |
 | View suffix | `MainWindow`, `SettingsView` |
 | ViewModel suffix | `MainViewModel`, `EditorViewModel` |

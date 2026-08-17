@@ -221,7 +221,7 @@ public class EditorCanvasBehaviorTests
         {
             var canvas = new Canvas();
             var editor = CreateEditor();
-            editor.ToolManager.ActiveTool = "Line"; // LineTool.GetCursor() = Cross
+            editor.ToolRegistry.ActiveToolKind = ToolKind.Line; // LineTool.GetCursor() = Cross
             EditorCanvasBehavior.SetEditor(canvas, editor);
 
             var args = new MouseEventArgs(Mouse.PrimaryDevice, 0)

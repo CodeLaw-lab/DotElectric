@@ -54,8 +54,6 @@ public sealed class SelectTool : ITool
     /// </summary>
     private PointMicrons _selectionBoxStart;
 
-    public string Name => "Выделение";
-
     public SelectTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

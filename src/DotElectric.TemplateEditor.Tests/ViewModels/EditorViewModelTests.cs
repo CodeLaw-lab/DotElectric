@@ -42,7 +42,7 @@ public class EditorViewModelTests
         Assert.Null(vm.DirtyStateManager.FilePath);
         Assert.Equal(1.0, vm.Zoom);
         Assert.Equal(100, vm.ZoomPanManager.ZoomPercent);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
         Assert.NotNull(vm.CommandHistory);
         Assert.NotNull(vm.GridSettings);
         Assert.NotNull(vm.PropertiesVm);
@@ -311,7 +311,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.SetActiveToolCommand.Execute(tool);
-        Assert.Equal(tool, vm.ToolManager.ActiveToolKind);
+        Assert.Equal(tool, vm.ToolRegistry.ActiveToolKind);
     }
 
     // === Undo/Redo ===
@@ -1379,11 +1379,11 @@ public class EditorViewModelTests
     public void PushTool_PushesCurrentToolToStack()
     {
         var vm = CreateViewModel();
-        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
 
         vm.PushTool(ToolKind.Resize);
 
-        Assert.Equal(ToolKind.Resize, vm.ToolManager.ActiveToolKind);
+        Assert.Equal(ToolKind.Resize, vm.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -1394,7 +1394,7 @@ public class EditorViewModelTests
 
         vm.PopTool();
 
-        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -1402,11 +1402,11 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
-        vm.ToolManager.ActiveToolKind = ToolKind.Line;
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
 
         vm.ActivateTool(ToolKind.Select);
 
-        Assert.Equal(ToolKind.Select, vm.ToolManager.ActiveToolKind);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
         Assert.Null(vm.PreviewLine);
     }
 
@@ -1414,7 +1414,7 @@ public class EditorViewModelTests
     public void ActivateTool_SameKind_DoesNotClearPreview()
     {
         var vm = CreateViewModel();
-        vm.ToolManager.ActiveToolKind = ToolKind.Line;
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
 
         vm.ActivateTool(ToolKind.Line);
@@ -1462,7 +1462,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
-        vm.ToolManager.ActiveTool = "Line";
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
@@ -1474,7 +1474,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.PreviewRectangle = new Rectangle(0, 0, 10000, 10000);
-        vm.ToolManager.ActiveTool = "Rectangle";
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Rectangle;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
@@ -1486,7 +1486,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.PreviewText = new Text(0, 0, "Test", 2500);
-        vm.ToolManager.ActiveTool = "Text";
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Text;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
@@ -1497,7 +1497,7 @@ public class EditorViewModelTests
     public void SetActiveTool_SameTool_DoesNotClearPreview()
     {
         var vm = CreateViewModel();
-        vm.ToolManager.ActiveTool = "Line";
+        vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
         vm.PreviewLine = new Line(0, 0, 10000, 10000);
 
         vm.SetActiveToolCommand.Execute(ToolKind.Line);

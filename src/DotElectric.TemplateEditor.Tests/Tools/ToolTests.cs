@@ -25,14 +25,6 @@ public class SelectToolTests
     }
 
     [Fact]
-    public void Name_ReturnsCorrectValue()
-    {
-        var vm = CreateViewModel();
-        var tool = new SelectTool(vm);
-        Assert.Equal("Выделение", tool.Name);
-    }
-
-    [Fact]
     public void GetCursor_ReturnsArrow()
     {
         var vm = CreateViewModel();
@@ -464,14 +456,6 @@ public class DrawingLineToolTests
     }
 
     [Fact]
-    public void Name_ReturnsCorrectValue()
-    {
-        var vm = CreateViewModel();
-        var tool = new DrawingLineTool(vm);
-        Assert.Equal("Линия", tool.Name);
-    }
-
-    [Fact]
     public void GetCursor_ReturnsCross()
     {
         var vm = CreateViewModel();
@@ -690,7 +674,7 @@ public class DrawingLineToolTests
 
         Assert.True(result);
         Assert.Null(vm.PreviewLine);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -728,14 +712,6 @@ public class DrawingRectangleToolTests
         var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
-    }
-
-    [Fact]
-    public void Name_ReturnsCorrectValue()
-    {
-        var vm = CreateViewModel();
-        var tool = new DrawingRectangleTool(vm);
-        Assert.Equal("Прямоугольник", tool.Name);
     }
 
     [Fact]
@@ -964,7 +940,7 @@ public class DrawingRectangleToolTests
 
         Assert.True(result);
         Assert.Null(vm.PreviewRectangle);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -1002,14 +978,6 @@ public class TextToolTests
         var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
-    }
-
-    [Fact]
-    public void Name_ReturnsCorrectValue()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        Assert.Equal("Текст", tool.Name);
     }
 
     [Fact]
@@ -1159,7 +1127,7 @@ public class TextToolTests
 
         Assert.True(result);
         Assert.Null(vm.PreviewText);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -1186,7 +1154,7 @@ public class TextToolTests
         tool.OnDoubleClick(new PointMicrons(5000, 6000));
 
         Assert.Null(vm.PreviewText);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     // ============= OnMouseWheel =============
@@ -1272,7 +1240,7 @@ public class TextToolTests
         var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
 
         Assert.True(result);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
         Assert.Null(vm.PreviewText);
     }
 

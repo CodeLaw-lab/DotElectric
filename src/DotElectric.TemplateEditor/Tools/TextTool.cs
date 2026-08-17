@@ -20,8 +20,6 @@ public sealed class TextTool : ITool
     private string _content;
     private PointMicrons? _startPoint;
 
-    public string Name => "Текст";
-
     public TextTool(IEditorContext context, ITextToolSettings? settings = null)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

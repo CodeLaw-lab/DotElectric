@@ -4,8 +4,8 @@ using System.Windows.Data;
 namespace DotElectric.TemplateEditor.Converters;
 
 /// <summary>
-/// String equality → Bool. Сравнивает значение с ConverterParameter.
-/// Используется для ToggleButton + ActiveTool.
+/// String equality → Bool. Сравнивает значение (через ToString) с ConverterParameter.
+/// Используется для RadioButton + ActiveToolKind.
 /// </summary>
 public sealed class EqualToBoolConverter : IValueConverter
 {

@@ -18,8 +18,6 @@ public sealed class DrawingRectangleTool : ITool
     private Rectangle? _previewRect;
     private LineType _lineType = LineType.Solid;
 
-    public string Name => "Прямоугольник";
-
     public DrawingRectangleTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

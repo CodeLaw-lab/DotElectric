@@ -49,8 +49,6 @@ public sealed class ResizeTool : ITool
     private ResizeState? _initialState;
     private bool _isResizing;
 
-    public string Name => "Изменение размера";
-
     public ResizeTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

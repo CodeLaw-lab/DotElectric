@@ -71,7 +71,7 @@ public class CanvasInputRouterTests
     public void GetCurrentTool_ReturnsToolForActiveKind(ToolKind activeKind, Type expectedType)
     {
         var editor = CreateEditor();
-        editor.ToolManager.ActiveToolKind = activeKind;
+        editor.ToolRegistry.ActiveToolKind = activeKind;
 
         var tool = CanvasInputRouter.GetCurrentTool(editor);
 
@@ -82,13 +82,13 @@ public class CanvasInputRouterTests
     public void GetCurrentTool_ReturnsCachedInstance()
     {
         var editor = CreateEditor();
-        editor.ToolManager.ActiveToolKind = ToolKind.Line;
+        editor.ToolRegistry.ActiveToolKind = ToolKind.Line;
 
         var first = CanvasInputRouter.GetCurrentTool(editor);
         var second = CanvasInputRouter.GetCurrentTool(editor);
 
         Assert.Same(first, second);
-        Assert.Same(editor.ToolManager.ActiveToolInstance, first);
+        Assert.Same(editor.ToolRegistry.ActiveToolInstance, first);
         Assert.Same(editor.GetOrCreateTool<DrawingLineTool>(), first);
     }
 // ===== ToWpfCursor (pure) =====
@@ -159,7 +159,7 @@ public class CanvasInputRouterTests
         WpfContext.Execute(() =>
         {
             var editor = CreateEditor();
-            editor.ToolManager.ActiveTool = "Line";
+            editor.ToolRegistry.ActiveToolKind = ToolKind.Line;
             var state = CreateState(editor);
             var canvas = new Canvas();
             var args = CreateMouseButtonArgs(MouseButton.Left);
@@ -282,7 +282,7 @@ public class CanvasInputRouterTests
         WpfContext.Execute(() =>
         {
             var editor = CreateEditor();
-            editor.ToolManager.ActiveTool = "Line";
+            editor.ToolRegistry.ActiveToolKind = ToolKind.Line;
             var state = CreateState(editor);
             var canvas = new Canvas();
             var args = CreateMouseButtonArgs(MouseButton.Left);
@@ -489,7 +489,7 @@ public class CanvasInputRouterTests
 
     // NOTE: ветка «tool.OnMouseWheel == true → zoom не применять» (CanvasInputRouter.cs:112)
     // недостижима через публичный API: все 6 реализаций ITool sealed и возвращают false.
-    // Инъекция фейка в ToolManager._toolCache невозможна — GetOrCreateTool<T>() делает (T)cached cast.
+    // Инъекция фейка в ToolRegistry._toolCache невозможна — GetOrCreateTool<T>() делает (T)cached cast.
     // Строки RouteMouseWheel полностью покрыты тестами RouteMouseWheel_Positive/NegativeDelta.
 
     // ===== RoutePreviewKeyDown / RouteKeyDown (STA) =====
@@ -611,7 +611,7 @@ public class CanvasInputRouterTests
         WpfContext.Execute(() =>
         {
             var editor = CreateEditor();
-            editor.ToolManager.ActiveTool = "Line";
+            editor.ToolRegistry.ActiveToolKind = ToolKind.Line;
             var state = CreateState(editor);
             var canvas = new Canvas();
             var args = CreateKeyEventArgs(Key.Escape);
@@ -619,7 +619,7 @@ public class CanvasInputRouterTests
             CanvasInputRouter.RouteKeyDown(canvas, args, state);
 
             Assert.True(args.Handled);
-            Assert.Equal("Select", editor.ToolManager.ActiveTool);
+            Assert.Equal(ToolKind.Select, editor.ToolRegistry.ActiveToolKind);
         });
     }
 

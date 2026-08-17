@@ -16,8 +16,6 @@ public sealed class PanTool : ITool
     private Point _lastMousePosition;
     private bool _isPanning;
 
-    public string Name => "Панорамирование";
-
     public PanTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));

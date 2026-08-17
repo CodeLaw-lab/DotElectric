@@ -45,11 +45,6 @@ public enum ToolKey
 public interface ITool
 {
     /// <summary>
-    /// Отображаемое имя инструмента.
-    /// </summary>
-    string Name { get; }
-
-    /// <summary>
     /// Обработка нажатия кнопки мыши.
     /// </summary>
     void OnMouseDown(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers);
