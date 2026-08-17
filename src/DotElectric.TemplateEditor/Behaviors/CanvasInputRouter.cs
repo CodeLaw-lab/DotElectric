@@ -27,19 +27,10 @@ public static class CanvasInputRouter
             return;
         }
 
-        if (e.ChangedButton == MouseButton.Middle)
+        if (IsPanGesture(e.ChangedButton, Keyboard.IsKeyDown(Key.Space), Keyboard.IsKeyDown(Key.LeftAlt), Keyboard.IsKeyDown(Key.RightAlt)))
         {
             var window = Window.GetWindow(canvas);
-            RoutePanDown(canvas, state, window != null ? e.GetPosition(window) : null, e.GetPosition(canvas), ToolMouseButton.Middle);
-            e.Handled = true;
-            return;
-        }
-
-        if (e.ChangedButton == MouseButton.Left &&
-            (Keyboard.IsKeyDown(Key.Space) || Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)))
-        {
-            var window = Window.GetWindow(canvas);
-            RoutePanDown(canvas, state, window != null ? e.GetPosition(window) : null, e.GetPosition(canvas), ToolMouseButton.Left);
+            RoutePanDown(canvas, state, window != null ? e.GetPosition(window) : null);
             e.Handled = true;
             return;
         }
@@ -86,8 +77,6 @@ public static class CanvasInputRouter
 
         if (state.IsPanning && (e.ChangedButton == MouseButton.Middle || e.ChangedButton == MouseButton.Left))
         {
-            var panTool = state.Editor.GetOrCreateTool<PanTool>();
-            panTool.OnMouseUp(default, ToToolMouseButton(e.ChangedButton), ToToolModifiers(Keyboard.Modifiers));
             state.IsPanning = false;
             state.PanAppliedModelDelta = default;
             canvas.ReleaseMouseCapture();
@@ -160,17 +149,27 @@ public static class CanvasInputRouter
     }
 
     /// <summary>
-    /// Общая логика начала панорамирования (средняя кнопка или Space/Alt+Left).
+    /// Пан — жест роутера, а не инструмент (docs/adr/0001-pan-gesture-not-tool.md):
+    /// средняя кнопка либо Left с Space или Alt.
     /// </summary>
-    internal static void RoutePanDown(Canvas canvas, EditorCanvasState state, Point? windowPoint, Point canvasPoint, ToolMouseButton button)
+    internal static bool IsPanGesture(MouseButton button, bool spaceDown, bool leftAltDown, bool rightAltDown)
+    {
+        if (button == MouseButton.Middle)
+            return true;
+
+        return button == MouseButton.Left && (spaceDown || leftAltDown || rightAltDown);
+    }
+
+    /// <summary>
+    /// Начало панорамирования: фиксация стартовой точки в Window-координатах
+    /// (стабильная система отсчёта — см. ADR-0001) и захват мыши.
+    /// </summary>
+    internal static void RoutePanDown(Canvas canvas, EditorCanvasState state, Point? windowPoint)
     {
         if (windowPoint.HasValue)
             state.PanStartWpfPoint = windowPoint.Value;
         state.PanAppliedModelDelta = default;
 
-        var modelPoint = ToModelPoint(canvas, state, canvasPoint);
-        var panTool = state.Editor.GetOrCreateTool<PanTool>();
-        panTool.OnMouseDown(modelPoint, button, ToToolModifiers(Keyboard.Modifiers));
         state.IsPanning = true;
         canvas.CaptureMouse();
     }

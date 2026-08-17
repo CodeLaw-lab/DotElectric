@@ -125,13 +125,26 @@ public class CanvasInputRouterTests
             var editor = CreateEditor();
             var state = CreateState(editor);
             var canvas = new Canvas();
+            // CaptureMouse требует подключённый PresentationSource — окно показываем
+            var window = new Window { Content = canvas };
             var windowPoint = new Point(100, 50);
 
-            CanvasInputRouter.RoutePanDown(canvas, state, windowPoint, new Point(0, 0), ToolMouseButton.Middle);
+            try
+            {
+                window.Show();
+                window.Dispatcher.Invoke(() => { }, DispatcherPriority.ApplicationIdle);
 
-            Assert.True(state.IsPanning);
-            Assert.Equal(windowPoint, state.PanStartWpfPoint);
-            Assert.Equal(new Point(0, 0), state.PanAppliedModelDelta);
+                CanvasInputRouter.RoutePanDown(canvas, state, windowPoint);
+
+                Assert.True(state.IsPanning);
+                Assert.True(canvas.IsMouseCaptured, "Старт пана должен захватывать мышь");
+                Assert.Equal(windowPoint, state.PanStartWpfPoint);
+                Assert.Equal(new Point(0, 0), state.PanAppliedModelDelta);
+            }
+            finally
+            {
+                window.Close();
+            }
         });
     }
 
@@ -144,10 +157,63 @@ public class CanvasInputRouterTests
             var state = CreateState(editor);
             var canvas = new Canvas();
 
-            CanvasInputRouter.RoutePanDown(canvas, state, null, new Point(0, 0), ToolMouseButton.Left);
+            CanvasInputRouter.RoutePanDown(canvas, state, null);
 
             Assert.True(state.IsPanning);
             Assert.Equal(new Point(0, 0), state.PanStartWpfPoint);
+        });
+    }
+
+    // ===== IsPanGesture (pure) =====
+
+    [Theory]
+    [InlineData(MouseButton.Middle, false, false, false, true)] // средняя кнопка — всегда пан
+    [InlineData(MouseButton.Middle, true, false, false, true)]  // модификаторы при средней не важны
+    [InlineData(MouseButton.Left, true, false, false, true)]    // Left + Space
+    [InlineData(MouseButton.Left, false, true, false, true)]    // Left + LeftAlt
+    [InlineData(MouseButton.Left, false, false, true, true)]    // Left + RightAlt
+    [InlineData(MouseButton.Left, true, true, true, true)]      // комбинации
+    [InlineData(MouseButton.Left, false, false, false, false)]  // Left без модификаторов — не пан
+    [InlineData(MouseButton.Right, true, true, true, false)]    // правая кнопка — не пан
+    public void IsPanGesture_CanonicalGestureSet_ReturnsExpected(MouseButton button, bool space, bool leftAlt, bool rightAlt, bool expected)
+    {
+        Assert.Equal(expected, CanvasInputRouter.IsPanGesture(button, space, leftAlt, rightAlt));
+    }
+
+    // ===== Пан-жест: полный цикл Left-пути (STA) =====
+    // Триггер через RouteMouseDown с зажатым модификатором unit-тестом не покрывается
+    // (Keyboard.IsKeyDown не фейчится) — детекция закрыта теорией IsPanGesture выше.
+
+    [Fact]
+    public void RoutePanDown_LeftGestureFullCycle_StopsCleanlyAndRefreshesGrid()
+    {
+        WpfContext.Execute(() =>
+        {
+            var editor = CreateEditor();
+            var refreshCount = 0;
+            editor.GridManager.GridInvalidated = () => refreshCount++;
+            var state = CreateState(editor);
+            var canvas = new Canvas();
+            // Окно НЕ показываем: с PresentationSource GetPosition возвращает реальную
+            // позицию курсора, и дельта становится недетерминированной; без него — (0,0).
+            // Захват мыши проверяется в RoutePanDown_WithWindowPoint (показанное окно).
+            var window = new Window { Content = canvas };
+
+            // Жест Left+Space/Alt: старт → движение → завершение; единственный источник истины — state
+            CanvasInputRouter.RoutePanDown(canvas, state, new Point(100, 100));
+            Assert.True(state.IsPanning);
+
+            CanvasInputRouter.RouteMouseMove(canvas, CreateMouseButtonArgs(MouseButton.Left), state);
+
+            // GetPosition(window) = (0,0) без PresentationSource → дельта (-100,-100) при zoom 1.0
+            Assert.Equal(-100.0, editor.ZoomPanManager.PanOffsetX, 6);
+            Assert.Equal(-100.0, editor.ZoomPanManager.PanOffsetY, 6);
+
+            CanvasInputRouter.RouteMouseUp(canvas, CreateMouseButtonArgs(MouseButton.Left), state);
+
+            Assert.False(state.IsPanning);
+            Assert.Equal(new Point(0, 0), state.PanAppliedModelDelta);
+            Assert.True(refreshCount > 0, "GridManager.RefreshGridNodes должен быть вызван после пана");
         });
     }
 

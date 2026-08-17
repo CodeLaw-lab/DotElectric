@@ -2,7 +2,7 @@ namespace DotElectric.TemplateEditor.Tools;
 
 /// <summary>
 /// Идентичность переключаемого инструмента редактора.
-/// Пан не входит: он вспомогательный и type-адресуется через GetOrCreateTool&lt;PanTool&gt;().
+/// Пан не входит: это жест роутера, а не инструмент (docs/adr/0001-pan-gesture-not-tool.md).
 /// </summary>
 public enum ToolKind
 {

@@ -46,7 +46,6 @@ public class ToolRegistryTests
     [InlineData(typeof(DrawingLineTool), ToolKind.Line)]
     [InlineData(typeof(DrawingRectangleTool), ToolKind.Rectangle)]
     [InlineData(typeof(TextTool), ToolKind.Text)]
-    [InlineData(typeof(PanTool), null)]
     [InlineData(typeof(ResizeTool), ToolKind.Resize)]
     public void GetOrCreateTool_CreatesTool(Type expectedType, ToolKind? _)
     {
