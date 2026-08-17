@@ -109,27 +109,47 @@ public static class HitTestHelper
     /// <returns>ResizeHandle если попали в маркер, null если нет.</returns>
     public static ResizeHandle? GetHitHandle(PointMicrons point, TemplateObjectBase obj)
     {
+        var tolerance = GetHandleTolerance(obj);
         return obj switch
         {
-            Line line => GetLineHandle(line, point),
-            Rectangle rect => GetRectangleHandle(rect, point),
-            Text text => GetTextHandle(text, point),
+            Line line => GetLineHandle(line, point, tolerance),
+            Rectangle rect => GetRectangleHandle(rect, point, tolerance),
+            Text text => GetTextHandle(text, point, tolerance),
             _ => null
         };
     }
 
     /// <summary>
+    /// Эффективный tolerance маркеров изменения размера: HandleHitToleranceMicrons,
+    /// ограниченный третью минимального габарита объекта. Без ограничения зоны маркеров
+    /// на маленьких объектах (текст сразу после размещения, короткие линии) поглощают
+    /// тело целиком, и клик по телу уходит в resize вместо перетаскивания (#82).
+    /// </summary>
+    internal static long GetHandleTolerance(TemplateObjectBase obj)
+    {
+        long minDim = obj switch
+        {
+            Line line => new PointMicrons(line.StartMicronsX, line.StartMicronsY)
+                .DistanceTo(new PointMicrons(line.EndMicronsX, line.EndMicronsY)),
+            Rectangle rect => Math.Min(rect.WidthMicrons, rect.HeightMicrons),
+            Text text => Math.Min(text.WidthMicrons, text.HeightMicrons),
+            _ => 0
+        };
+        return Math.Min(PhysicalConstants.HandleHitToleranceMicrons, minDim / 3);
+    }
+
+    /// <summary>
     /// Hit-test маркеров линии — начало (TopLeft) и конец (BottomRight).
     /// </summary>
-    private static ResizeHandle? GetLineHandle(Line line, PointMicrons point)
+    private static ResizeHandle? GetLineHandle(Line line, PointMicrons point, long tolerance)
     {
         var start = new PointMicrons(line.StartMicronsX, line.StartMicronsY);
         var end = new PointMicrons(line.EndMicronsX, line.EndMicronsY);
 
         // Проверяем конец первым (он наверху в Z-order)
-        if (point.DistanceTo(end) <= PhysicalConstants.HandleHitToleranceMicrons)
+        if (point.DistanceTo(end) <= tolerance)
             return ResizeHandle.BottomRight;
-        if (point.DistanceTo(start) <= PhysicalConstants.HandleHitToleranceMicrons)
+        if (point.DistanceTo(start) <= tolerance)
             return ResizeHandle.TopLeft;
 
         return null;
@@ -138,7 +158,7 @@ public static class HitTestHelper
     /// <summary>
     /// Hit-test маркеров прямоугольника — 8 маркеров.
     /// </summary>
-    private static ResizeHandle? GetRectangleHandle(Rectangle rect, PointMicrons point)
+    private static ResizeHandle? GetRectangleHandle(Rectangle rect, PointMicrons point, long tolerance)
     {
         var handles = new[]
         {
@@ -154,7 +174,7 @@ public static class HitTestHelper
 
         foreach (var (handle, hx, hy) in handles)
         {
-            if (point.DistanceTo(new PointMicrons(hx, hy)) <= PhysicalConstants.HandleHitToleranceMicrons)
+            if (point.DistanceTo(new PointMicrons(hx, hy)) <= tolerance)
                 return handle;
         }
 
@@ -164,7 +184,7 @@ public static class HitTestHelper
     /// <summary>
     /// Hit-test маркеров текста — 4 угловых маркера на повёрнутых углах.
     /// </summary>
-    private static ResizeHandle? GetTextHandle(Text text, PointMicrons point)
+    private static ResizeHandle? GetTextHandle(Text text, PointMicrons point, long tolerance)
     {
         // Используем RotatedCorner0-3 из модели — они включают LayoutTransform offset,
         // что гарантирует консистентность позиций маркеров (XAML) и hit-test хэндлов.
@@ -178,7 +198,7 @@ public static class HitTestHelper
 
         foreach (var (handle, hx, hy) in handles)
         {
-            if (point.DistanceTo(new PointMicrons(hx, hy)) <= PhysicalConstants.HandleHitToleranceMicrons)
+            if (point.DistanceTo(new PointMicrons(hx, hy)) <= tolerance)
                 return handle;
         }
 

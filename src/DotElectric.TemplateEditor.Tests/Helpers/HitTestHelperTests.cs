@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
@@ -482,6 +483,42 @@ public class HitTestHelperTests : IDisposable
         var handle = HitTestHelper.GetHitHandle(point, unknownObj);
 
         Assert.Null(handle);
+    }
+
+    // ===== GetHandleTolerance Tests (#82) =====
+
+    [Fact]
+    public void GetHandleTolerance_LargeObject_ReturnsFullConstant()
+    {
+        var rect = new Rectangle(0, 0, 50000, 50000); // minDim/3 = 16.7мм > 8мм
+
+        Assert.Equal(PhysicalConstants.HandleHitToleranceMicrons, HitTestHelper.GetHandleTolerance(rect));
+    }
+
+    [Fact]
+    public void GetHandleTolerance_SmallText_CappedByThirdOfMinDimension()
+    {
+        var text = new Text(0, 0, "Текст", 2500, "ГОСТ А");
+        var expected = Math.Min(text.WidthMicrons, text.HeightMicrons) / 3;
+
+        Assert.True(expected < PhysicalConstants.HandleHitToleranceMicrons);
+        Assert.Equal(expected, HitTestHelper.GetHandleTolerance(text));
+    }
+
+    [Fact]
+    public void GetHandleTolerance_ShortLine_CappedByThirdOfLength()
+    {
+        var line = new Line(0, 0, 9000, 0); // длина 9мм → 3мм < 8мм
+
+        Assert.Equal(3000, HitTestHelper.GetHandleTolerance(line));
+    }
+
+    [Fact]
+    public void GetHandleTolerance_SmallRectangle_CappedByThirdOfMinSide()
+    {
+        var rect = new Rectangle(0, 0, 6000, 15000); // min-сторона 6мм → 2мм
+
+        Assert.Equal(2000, HitTestHelper.GetHandleTolerance(rect));
     }
 
     // ===== Extended: HitTest (main method) =====
