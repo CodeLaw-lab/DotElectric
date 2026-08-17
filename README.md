@@ -3,8 +3,8 @@
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
 **Тестов:** 2622, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 89.86% line-rate (CI gate 80%)
-**Последнее обновление:** 17.08.2026 — Кандидат 7 обзора №3 — deletion-пара (#70–#71, PR #73): «Вписать в экран» на живом viewport ZoomPanManager (строковый параметр и fallback 800×600 удалены), рамка выделения через полиморфный GetBoundingBox, поведение байт-в-байт, coverage 89.86%
+**Покрытие:** 89.85% line-rate (CI gate 80%)
+**Последнее обновление:** 17.08.2026 — Кандидат 1 обзора №3, срез 1 (#75–#76, PR #78): рамка выделения через узкий шов — 7 свойств IEditorContext → методы SetSelectionBox/ClearSelectionBox (интерфейс 35→30), поведение байт-в-байт, coverage 89.85%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -246,8 +246,9 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 ### Тестирование
 
 - ✅ **2622 теста**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 89.86% line-rate (CI gate 80%)
+- ✅ **Покрытие:** 89.85% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#75–#76:** Кандидат 1, срез 1 — рамка выделения через узкий шов: 7 свойств IEditorContext → методы SetSelectionBox/ClearSelectionBox (интерфейс 35→30 членов), поведение байт-в-байт
 - ✅ **#70–#71:** Кандидат 7 — deletion-пара: «Вписать в экран» на живом viewport (fallback 800×600 удалён), рамка выделения через полиморфный GetBoundingBox
 - ✅ **#65–#66:** Настройки приложения — только типизированный интерфейс: ISettingsService = Load()/Save(AppSettings), строковый Get/Set удалён, AppSettings в Models
 - ✅ **#53–#57:** ToolRegistry — типизированная идентичность инструментов ToolKind, строковые карты и ITool.Name удалены
@@ -409,7 +410,7 @@ src/
 
 ---
 
-**Последнее обновление:** 17.08.2026 — Кандидат 7 обзора №3 — deletion-пара (#70–#71, PR #73): «Вписать в экран» переведён на живой viewport ZoomPanManager — строковый параметр и fallback 800×600 удалены целиком (дефект «все входы считали для 800×600» устранён); рамка выделения переведена на полиморфный GetBoundingBox — три частных копии границ и мёртвый default-кейс удалены; поведение байт-в-байт; coverage 89.86% (2622 теста)
+**Последнее обновление:** 17.08.2026 — Кандидат 1 обзора №3, срез 1 (#75–#76, PR #78): рамка выделения переведена на узкий шов — 7 свойств IEditorContext заменены методами SetSelectionBox/ClearSelectionBox (интерфейс 35→30 членов, включая удаление 2 мёртвых read-only), 7 forwarding-свойств EditorViewModel удалены, глубокие методы PreviewManager получили первого production-потребителя; поведение байт-в-байт; coverage 89.85% (2622 теста)
 
 
 
