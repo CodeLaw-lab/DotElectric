@@ -25,13 +25,8 @@ public interface IEditorContext
     Line? PreviewLine { get; set; }
     Models.Objects.Rectangle? PreviewRectangle { get; set; }
     Text? PreviewText { get; set; }
-    long SelectionBoxLeft { get; set; }
-    long SelectionBoxBottom { get; set; }
-    long SelectionBoxTop { get; }
-    long SelectionBoxWidth { get; set; }
-    long SelectionBoxHeight { get; set; }
-    long SelectionBoxRight { get; }
-    Models.SelectionDirection SelectionDirection { get; set; }
+    void SetSelectionBox(long left, long bottom, long width, long height, Models.SelectionDirection direction);
+    void ClearSelectionBox();
 
     // Inline editing
     void StartInlineEditing(Text textObj);

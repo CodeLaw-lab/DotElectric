@@ -1469,7 +1469,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
 
-        Assert.Equal(SelectionDirection.LeftToRight, vm.SelectionDirection);
+        Assert.Equal(SelectionDirection.LeftToRight, vm.PreviewManager.SelectionBoxDirection);
     }
 
     [Fact]
@@ -1477,9 +1477,9 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
 
-        vm.SelectionDirection = SelectionDirection.RightToLeft;
+        vm.PreviewManager.SelectionBoxDirection = SelectionDirection.RightToLeft;
 
-        Assert.Equal(SelectionDirection.RightToLeft, vm.SelectionDirection);
+        Assert.Equal(SelectionDirection.RightToLeft, vm.PreviewManager.SelectionBoxDirection);
     }
 
     // === Reset Tool Tests ===
@@ -1603,30 +1603,6 @@ public class EditorViewModelTests
         vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.PreviewText)) raised = true; };
 
         vm.PreviewText = new Text(0, 0, "Test", 3500);
-
-        Assert.True(raised);
-    }
-
-    [Fact]
-    public void SelectionBoxLeft_RaisesPropertyChanged()
-    {
-        var vm = CreateViewModel();
-        var raised = false;
-        vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.SelectionBoxLeft)) raised = true; };
-
-        vm.SelectionBoxLeft = 5000;
-
-        Assert.True(raised);
-    }
-
-    [Fact]
-    public void SelectionBoxWidth_RaisesPropertyChanged()
-    {
-        var vm = CreateViewModel();
-        var raised = false;
-        vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.SelectionBoxWidth)) raised = true; };
-
-        vm.SelectionBoxWidth = 10000;
 
         Assert.True(raised);
     }

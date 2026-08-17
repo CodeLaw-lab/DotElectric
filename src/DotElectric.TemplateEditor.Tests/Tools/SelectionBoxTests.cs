@@ -38,7 +38,7 @@ public class SelectionBoxTests
         tool.OnMouseDown(startPoint, ToolMouseButton.Left, ToolModifiers.None);
 
         Assert.Empty(editor.SelectedObjects);
-        Assert.Equal(0, editor.SelectionBoxWidth); // Preview ещё не обновлён
+        Assert.Equal(0, editor.PreviewManager.SelectionBoxWidth); // Preview ещё не обновлён
     }
 
     [Fact]
@@ -52,9 +52,9 @@ public class SelectionBoxTests
         tool.OnMouseDown(start, ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(end, ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(20000, editor.SelectionBoxWidth);
-        Assert.Equal(20000, editor.SelectionBoxHeight);
-        Assert.Equal(SelectionDirection.LeftToRight, editor.SelectionDirection);
+        Assert.Equal(20000, editor.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(20000, editor.PreviewManager.SelectionBoxHeight);
+        Assert.Equal(SelectionDirection.LeftToRight, editor.PreviewManager.SelectionBoxDirection);
     }
 
     [Fact]
@@ -68,7 +68,7 @@ public class SelectionBoxTests
         tool.OnMouseDown(start, ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(end, ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(0, editor.SelectionBoxWidth);
+        Assert.Equal(0, editor.PreviewManager.SelectionBoxWidth);
     }
 
     [Fact]
@@ -125,9 +125,9 @@ public class SelectionBoxTests
         tool.OnMouseMove(end, ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseUp(end, ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.Equal(0, editor.SelectionBoxWidth);
-        Assert.Equal(0, editor.SelectionBoxHeight);
-        Assert.Equal(SelectionDirection.LeftToRight, editor.SelectionDirection);
+        Assert.Equal(0, editor.PreviewManager.SelectionBoxWidth);
+        Assert.Equal(0, editor.PreviewManager.SelectionBoxHeight);
+        Assert.Equal(SelectionDirection.LeftToRight, editor.PreviewManager.SelectionBoxDirection);
     }
 
     // === SelectionBoxHelper Tests ===

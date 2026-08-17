@@ -132,11 +132,7 @@ public sealed class SelectTool : ITool
             _selectionBoxStart = modelPoint;
 
             // Сбросить preview рамки
-            _context.SelectionBoxLeft = 0;
-            _context.SelectionBoxBottom = 0;
-            _context.SelectionBoxWidth = 0;
-            _context.SelectionBoxHeight = 0;
-            _context.SelectionDirection = SelectionDirection.LeftToRight;
+            _context.ClearSelectionBox();
         }
     }
 
@@ -162,12 +158,9 @@ public sealed class SelectTool : ITool
                 var bottom = Math.Min(_selectionBoxStart.MicronsY, modelPoint.MicronsY);
                 var width = Math.Abs(dx);
                 var height = Math.Abs(dy);
+                var direction = SelectionBoxHelper.GetDirection(_selectionBoxStart, modelPoint);
 
-                _context.SelectionBoxLeft = left;
-                _context.SelectionBoxBottom = bottom;
-                _context.SelectionBoxWidth = width;
-                _context.SelectionBoxHeight = height;
-                _context.SelectionDirection = _selectionBoxStart.MicronsX <= modelPoint.MicronsX ? SelectionDirection.LeftToRight : SelectionDirection.RightToLeft;
+                _context.SetSelectionBox(left, bottom, width, height, direction);
             }
             return;
         }
@@ -245,11 +238,7 @@ public sealed class SelectTool : ITool
             }
 
             // Скрыть preview рамки
-            _context.SelectionBoxLeft = 0;
-            _context.SelectionBoxBottom = 0;
-            _context.SelectionBoxWidth = 0;
-            _context.SelectionBoxHeight = 0;
-            _context.SelectionDirection = SelectionDirection.LeftToRight;
+            _context.ClearSelectionBox();
             return;
         }
 
@@ -352,11 +341,7 @@ public sealed class SelectTool : ITool
         _wasDragged = false;
         _isDrawingSelectionBox = false;
         _initialPositions.Clear();
-        _context.SelectionBoxLeft = 0;
-        _context.SelectionBoxBottom = 0;
-        _context.SelectionBoxWidth = 0;
-        _context.SelectionBoxHeight = 0;
-        _context.SelectionDirection = SelectionDirection.LeftToRight;
+        _context.ClearSelectionBox();
     }
 
     public bool OnKeyDown(ToolKey key, ToolModifiers modifiers)

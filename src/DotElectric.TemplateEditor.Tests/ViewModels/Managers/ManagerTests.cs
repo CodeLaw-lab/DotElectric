@@ -487,6 +487,28 @@ public class PreviewManagerTests
         Assert.Equal(0, _manager.SelectionBoxHeight);
         Assert.Equal(SelectionDirection.LeftToRight, _manager.SelectionBoxDirection);
     }
+
+    [Fact]
+    public void SelectionBoxLeft_RaisesPropertyChanged()
+    {
+        var raised = false;
+        _manager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.SelectionBoxLeft)) raised = true; };
+
+        _manager.SelectionBoxLeft = 5000;
+
+        Assert.True(raised);
+    }
+
+    [Fact]
+    public void SelectionBoxWidth_RaisesPropertyChanged()
+    {
+        var raised = false;
+        _manager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.SelectionBoxWidth)) raised = true; };
+
+        _manager.SelectionBoxWidth = 10000;
+
+        Assert.True(raised);
+    }
 }
 
 // ==================== InlineEditManager ====================
