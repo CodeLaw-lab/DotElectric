@@ -1450,6 +1450,18 @@ public class EditorViewModelTests
         Assert.Equal(1.5993, vm.Zoom, 3);
     }
 
+    [Fact]
+    public void FitToScreen_ZeroViewport_ThroughCommand_NoOpButStatusSet()
+    {
+        var vm = CreateViewModel(); // viewport не установлен (0x0)
+        vm.SetZoom(1.5);
+
+        vm.FitToScreenCommand.Execute(null);
+
+        Assert.Equal(1.5, vm.Zoom);
+        Assert.Equal("Вписано в экран", vm.StatusMessage);
+    }
+
     // === SelectionDirection ===
 
     [Fact]
