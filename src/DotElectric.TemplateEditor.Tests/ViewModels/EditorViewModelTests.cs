@@ -99,8 +99,8 @@ public class EditorViewModelTests
         // Установим viewport (имитация SizeChanged из View)
         vm.ZoomPanManager.SetViewportSize(800, 600);
 
-        // FitToScreen с viewport 800x600
-        vm.FitToScreenCommand.Execute("800,600");
+        // FitToScreen использует живой viewport
+        vm.FitToScreenCommand.Execute(null);
 
         // Zoom должен быть < 1.0 (A4 = 210x297 мм, viewport = 800x600)
         // 800*0.95/210 = 3.62, 600*0.95/297 = 1.92 → Zoom = 1.92 (ограничен 10.0)
@@ -192,7 +192,8 @@ public class EditorViewModelTests
     public void FitToScreen_CalculatesCorrectZoom()
     {
         var vm = CreateViewModel(); // A3: 420x297mm
-        vm.FitToScreenCommand.Execute("840,594"); // 2x размера листа
+        vm.ZoomPanManager.SetViewportSize(840, 594); // 2x размера листа
+        vm.FitToScreenCommand.Execute(null);
         Assert.True(vm.Zoom > 1.8 && vm.Zoom <= 2.0);
     }
 
@@ -1430,9 +1431,23 @@ public class EditorViewModelTests
         var vm = CreateViewModel();
         vm.SetZoom(0.5);
 
-        vm.FitToScreenCommand.Execute("800,600");
+        vm.ZoomPanManager.SetViewportSize(800, 600);
+        vm.FitToScreenCommand.Execute(null);
 
         Assert.True(vm.Zoom > 0);
+    }
+
+    [Fact]
+    public void FitToScreen_UsesLiveViewport_NotDefaultFallback()
+    {
+        var vm = CreateViewModel(); // A3: 420x297 мм
+        vm.ZoomPanManager.SetViewportSize(1000, 500);
+
+        vm.FitToScreenCommand.Execute(null);
+
+        // min(1000*0.95/420, 500*0.95/297) = min(2.2619, 1.5993) = 1.5993;
+        // запасное значение 800x600 дало бы min(1.8095, 1.9192) = 1.8095
+        Assert.Equal(1.5993, vm.Zoom, 3);
     }
 
     // === SelectionDirection ===
@@ -1642,7 +1657,8 @@ public class EditorViewModelZoomTests
     public void FitToScreen_LargeCanvas_ReturnsSmallZoom()
     {
         var vm = CreateViewModel();
-        vm.FitToScreenCommand.Execute("100,100");
+        vm.ZoomPanManager.SetViewportSize(100, 100);
+        vm.FitToScreenCommand.Execute(null);
         Assert.True(vm.Zoom < 1.0);
     }
 
@@ -1650,7 +1666,8 @@ public class EditorViewModelZoomTests
     public void FitToScreen_SmallSheet_ReturnsLargeZoom()
     {
         var vm = CreateViewModel();
-        vm.FitToScreenCommand.Execute("2970,2100");
+        vm.ZoomPanManager.SetViewportSize(2970, 2100);
+        vm.FitToScreenCommand.Execute(null);
         Assert.True(vm.Zoom > 5.0);
     }
 
@@ -1658,7 +1675,8 @@ public class EditorViewModelZoomTests
     public void FitToScreen_ConsidersPadding()
     {
         var vm = CreateViewModel();
-        vm.FitToScreenCommand.Execute("420,297");
+        vm.ZoomPanManager.SetViewportSize(420, 297);
+        vm.FitToScreenCommand.Execute(null);
         Assert.True(vm.Zoom < 1.0);
         Assert.True(vm.Zoom > 0.8);
     }

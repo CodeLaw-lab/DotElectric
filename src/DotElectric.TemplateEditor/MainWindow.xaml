@@ -43,7 +43,7 @@
         <KeyBinding Key="F7" Command="{Binding SelectedTab.ToggleGridCommand}"/>
         <KeyBinding Key="F8" Command="{Binding SelectedTab.ToggleSnapCommand}"/>
         <KeyBinding Key="F9" Command="{Binding ToggleThemeCommand}"/>
-        <KeyBinding Key="D0" Modifiers="Control" Command="{Binding SelectedTab.FitToScreenCommand}" CommandParameter="800,600"/>
+        <KeyBinding Key="D0" Modifiers="Control" Command="{Binding SelectedTab.FitToScreenCommand}"/>
         <KeyBinding Key="OemPlus" Modifiers="Control" Command="{Binding SelectedTab.ZoomInCommand}"/>
         <KeyBinding Key="OemMinus" Modifiers="Control" Command="{Binding SelectedTab.ZoomOutCommand}"/>
         
