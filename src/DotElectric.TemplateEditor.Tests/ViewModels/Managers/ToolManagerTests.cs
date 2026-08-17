@@ -26,6 +26,52 @@ public class ToolManagerTests
         Assert.Equal("Select", sut.ActiveTool);
     }
 
+    [Fact]
+    public void Constructor_ActiveToolKind_IsSelect()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void ActiveToolKind_Set_UpdatesActiveToolString_AndRaisesBothNotifications()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+        var changed = new List<string?>();
+        sut.PropertyChanged += (_, e) => changed.Add(e.PropertyName);
+
+        sut.ActiveToolKind = ToolKind.Line;
+
+        Assert.Equal("Line", sut.ActiveTool);
+        Assert.Contains(nameof(ToolManager.ActiveToolKind), changed);
+        Assert.Contains(nameof(ToolManager.ActiveTool), changed);
+    }
+
+    [Fact]
+    public void ActiveTool_SetString_ParsesToKind()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.ActiveTool = "Rectangle";
+
+        Assert.Equal(ToolKind.Rectangle, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void ActiveTool_SetUnknownString_KeepsCurrentKind()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.ActiveTool = "Bogus";
+
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
     [Theory]
     [InlineData(typeof(SelectTool), "Select")]
     [InlineData(typeof(DrawingLineTool), "Line")]
@@ -182,5 +228,129 @@ public class ToolManagerTests
 
         var ex = Record.Exception(() => sut.ResetTool("Line"));
         Assert.Null(ex);
+    }
+
+    [Fact]
+    public void SwitchTo_ResetsPreviousTool()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+        var tool = sut.GetOrCreateTool<DrawingLineTool>();
+        sut.ActiveToolKind = ToolKind.Line;
+        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewLine);
+
+        sut.SwitchTo(ToolKind.Select);
+
+        Assert.Null(vm.PreviewLine);
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void SwitchTo_SameKind_DoesNotReset()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+        var tool = sut.GetOrCreateTool<DrawingLineTool>();
+        sut.ActiveToolKind = ToolKind.Line;
+        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
+        Assert.NotNull(vm.PreviewLine);
+
+        sut.SwitchTo(ToolKind.Line);
+
+        Assert.NotNull(vm.PreviewLine);
+        Assert.Equal(ToolKind.Line, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void SwitchTo_UncachedTool_DoesNotThrow()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        var ex = Record.Exception(() => sut.SwitchTo(ToolKind.Resize));
+        Assert.Null(ex);
+        Assert.Equal(ToolKind.Resize, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void ActiveToolInstance_ReturnsInstanceOfActiveKind()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+        sut.ActiveToolKind = ToolKind.Line;
+
+        Assert.IsType<DrawingLineTool>(sut.ActiveToolInstance);
+    }
+
+    [Fact]
+    public void ActiveToolInstance_ReturnsCachedInstance()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        Assert.Same(sut.GetOrCreateTool<SelectTool>(), sut.ActiveToolInstance);
+    }
+
+    [Fact]
+    public void ActiveToolKind_Change_RaisesActiveToolInstanceChanged()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+        var changed = false;
+        sut.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(ToolManager.ActiveToolInstance))
+                changed = true;
+        };
+
+        sut.ActiveToolKind = ToolKind.Text;
+
+        Assert.True(changed);
+    }
+
+    [Fact]
+    public void PushTool_Kind_PopRestoresPrevious()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.PushTool(ToolKind.Resize);
+        Assert.Equal(ToolKind.Resize, sut.ActiveToolKind);
+
+        sut.PopTool();
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
+    [Fact]
+    public void PushTool_StringAndKind_Interoperate()
+    {
+        var vm = CreateVm();
+        var sut = new ToolManager(vm);
+
+        sut.PushTool("Line");
+        sut.PushTool(ToolKind.Resize);
+
+        sut.PopTool();
+        Assert.Equal(ToolKind.Line, sut.ActiveToolKind);
+
+        sut.PopTool();
+        Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
+    }
+
+    [Theory]
+    [InlineData(System.Windows.Input.Key.V, ToolKind.Select)]
+    [InlineData(System.Windows.Input.Key.L, ToolKind.Line)]
+    [InlineData(System.Windows.Input.Key.R, ToolKind.Rectangle)]
+    [InlineData(System.Windows.Input.Key.T, ToolKind.Text)]
+    public void ShortcutMap_MapsKeysToKinds(System.Windows.Input.Key key, ToolKind expected)
+    {
+        Assert.Equal(expected, ToolManager.ShortcutMap[key]);
+    }
+
+    [Fact]
+    public void ShortcutMap_ContainsOnlyToolSwitchingKeys()
+    {
+        Assert.Equal(4, ToolManager.ShortcutMap.Count);
     }
 }
