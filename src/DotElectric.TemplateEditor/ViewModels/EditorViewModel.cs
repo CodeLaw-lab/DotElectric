@@ -242,19 +242,26 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     // === Команда смены инструмента (делегировано ToolManager) ===
 
     /// <summary>
-    /// Команда установки активного инструмента. Делегировано ToolManager.
+    /// Команда установки активного инструмента. Принимает идентичность ToolKind;
+    /// строковые параметры — миграционный шим до перевода инструментов на ActivateTool (#56).
     /// </summary>
     [RelayCommand]
-    private void SetActiveTool(string tool)
+    private void SetActiveTool(object parameter)
     {
-        var prevTool = _toolManager.ActiveTool;
-        if (prevTool != tool)
-        {
-            _toolManager.ResetTool(prevTool);
-            _previewManager.ClearAll();
-            _toolManager.ActiveTool = tool;
-        }
+        var kind = ResolveToolKind(parameter);
+        if (kind is null || _toolManager.ActiveToolKind == kind.Value)
+            return;
+
+        _toolManager.SwitchTo(kind.Value);
+        _previewManager.ClearAll();
     }
+
+    private static ToolKind? ResolveToolKind(object? parameter) => parameter switch
+    {
+        ToolKind k => k,
+        string s => ToolManager.TryParseKind(s, out var parsed) ? parsed : null,
+        _ => null
+    };
 
     // === Команды клавиатуры ===
 

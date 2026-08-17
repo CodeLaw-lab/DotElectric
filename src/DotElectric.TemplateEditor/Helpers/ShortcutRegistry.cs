@@ -1,16 +1,17 @@
 using System.Windows.Input;
+using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Helpers;
 
 public static class ShortcutRegistry
 {
-    private static readonly Dictionary<Key, string> ToolMap = new()
+    private static readonly Dictionary<Key, ToolKind> ToolMap = new()
     {
-        [Key.V] = "Select",
-        [Key.L] = "Line",
-        [Key.R] = "Rectangle",
-        [Key.T] = "Text",
+        [Key.V] = ToolKind.Select,
+        [Key.L] = ToolKind.Line,
+        [Key.R] = ToolKind.Rectangle,
+        [Key.T] = ToolKind.Text,
     };
 
     public static bool TryHandle(Key key, ModifierKeys modifiers, EditorViewModel editor)
@@ -18,10 +19,10 @@ public static class ShortcutRegistry
         if (editor.InlineEditManager.IsEditing)
             return false;
 
-        var tool = GetToolForShortcut(key);
-        if (tool != null && modifiers == ModifierKeys.None)
+        var kind = GetToolForShortcut(key);
+        if (kind.HasValue && modifiers == ModifierKeys.None)
         {
-            editor.SetActiveToolCommand.Execute(tool);
+            editor.SetActiveToolCommand.Execute(kind.Value);
             return true;
         }
 
@@ -40,8 +41,8 @@ public static class ShortcutRegistry
         return false;
     }
 
-    public static string? GetToolForShortcut(Key key) =>
-        ToolMap.TryGetValue(key, out var tool) ? tool : null;
+    public static ToolKind? GetToolForShortcut(Key key) =>
+        ToolMap.TryGetValue(key, out var kind) ? kind : null;
 
     public static bool IsRotate(Key key, ModifierKeys modifiers) =>
         key == Key.E && modifiers == ModifierKeys.None;
