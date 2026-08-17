@@ -144,7 +144,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         get => _statusBarManager.StatusMessage;
         set => _statusBarManager.StatusMessage = value;
     }
-    public void PanCanvas(double deltaXMm, double deltaYMm) => _zoomPanManager.PanCanvas(deltaXMm, deltaYMm);
     public void PushTool(ToolKind kind) => _toolRegistry.PushTool(kind);
     public void PopTool() => _toolRegistry.PopTool();
     public void ActivateTool(ToolKind kind) => SetActiveTool(kind);
