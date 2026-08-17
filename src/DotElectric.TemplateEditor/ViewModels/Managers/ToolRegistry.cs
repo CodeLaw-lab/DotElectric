@@ -4,14 +4,12 @@ using DotElectric.TemplateEditor.Tools;
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
 
 /// <summary>
-/// Управляет активным инструментом и стеком инструментов.
-/// Каноническое состояние — типизированная идентичность <see cref="ToolKind"/>;
-/// строковая поверхность (<see cref="ActiveTool"/>, <see cref="PushTool(string)"/>) — шим совместимости.
+/// Реестр инструментов: идентичность, создание, кэш, активный инструмент,
+/// стек инструментов и семантика переключения.
 /// </summary>
-public sealed partial class ToolManager : ObservableObject
+public sealed partial class ToolRegistry : ObservableObject
 {
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ActiveTool))]
     [NotifyPropertyChangedFor(nameof(ActiveToolInstance))]
     private ToolKind _activeToolKind = ToolKind.Select;
 
@@ -27,16 +25,6 @@ public sealed partial class ToolManager : ObservableObject
         [typeof(ResizeTool)] = ctx => new ResizeTool(ctx),
     };
 
-    private static readonly Dictionary<string, Type> ToolNameMap = new()
-    {
-        ["Select"] = typeof(SelectTool),
-        ["Line"] = typeof(DrawingLineTool),
-        ["Rectangle"] = typeof(DrawingRectangleTool),
-        ["Text"] = typeof(TextTool),
-        ["Pan"] = typeof(PanTool),
-        ["Resize"] = typeof(ResizeTool),
-    };
-
     private static readonly Dictionary<ToolKind, Type> KindToToolType = new()
     {
         [ToolKind.Select] = typeof(SelectTool),
@@ -49,23 +37,9 @@ public sealed partial class ToolManager : ObservableObject
     private readonly Dictionary<Type, ITool> _toolCache = new();
     private readonly IEditorContext _editorCtx;
 
-    public ToolManager(IEditorContext editorCtx)
+    public ToolRegistry(IEditorContext editorCtx)
     {
         _editorCtx = editorCtx;
-    }
-
-    /// <summary>
-    /// Имя активного инструмента. Шим совместимости: производно от идентичности,
-    /// при записи парсит строку в идентичность (неизвестные значения игнорируются).
-    /// </summary>
-    public string ActiveTool
-    {
-        get => ActiveToolKind.ToString();
-        set
-        {
-            if (TryParseKind(value, out var kind))
-                ActiveToolKind = kind;
-        }
     }
 
     /// <summary>
@@ -107,25 +81,11 @@ public sealed partial class ToolManager : ObservableObject
         ActiveToolKind = kind;
     }
 
-    public void PushTool(string tool)
-    {
-        if (TryParseKind(tool, out var kind))
-            PushTool(kind);
-    }
-
     public void PopTool()
     {
         if (_toolStack.Count > 0)
         {
             ActiveToolKind = _toolStack.Pop();
-        }
-    }
-
-    public void ResetTool(string toolName)
-    {
-        if (ToolNameMap.TryGetValue(toolName, out var type))
-        {
-            ResetCachedTool(type);
         }
     }
 
@@ -135,22 +95,5 @@ public sealed partial class ToolManager : ObservableObject
         {
             tool.Reset();
         }
-    }
-
-    /// <summary>
-    /// Парсит имя в идентичность. Числовые строки и неизвестные значения отбрасываются.
-    /// </summary>
-    private static bool TryParseKind(string? value, out ToolKind kind)
-    {
-        if (value != null &&
-            Enum.TryParse<ToolKind>(value, out var parsed) &&
-            string.Equals(parsed.ToString(), value, StringComparison.OrdinalIgnoreCase))
-        {
-            kind = parsed;
-            return true;
-        }
-
-        kind = default;
-        return false;
     }
 }

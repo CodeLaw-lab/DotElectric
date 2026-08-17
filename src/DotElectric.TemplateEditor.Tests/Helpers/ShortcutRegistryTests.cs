@@ -109,7 +109,7 @@ public sealed class ShortcutRegistryTests
         var result = ShortcutRegistry.TryHandle(Key.V, ModifierKeys.None, vm);
 
         Assert.True(result);
-        Assert.Equal("Select", vm.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
     // ==================== TryHandle — Tool switching ====================
@@ -118,12 +118,12 @@ public sealed class ShortcutRegistryTests
     public void TryHandle_V_None_ReturnsTrue()
     {
         var editor = CreateViewModel();
-        editor.ToolManager.ActiveTool = "Line"; // ensure different from target
+        editor.ToolRegistry.ActiveToolKind = ToolKind.Line; // ensure different from target
 
         var result = ShortcutRegistry.TryHandle(Key.V, ModifierKeys.None, editor);
 
         Assert.True(result);
-        Assert.Equal("Select", editor.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Select, editor.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -134,7 +134,7 @@ public sealed class ShortcutRegistryTests
         var result = ShortcutRegistry.TryHandle(Key.L, ModifierKeys.None, editor);
 
         Assert.True(result);
-        Assert.Equal("Line", editor.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Line, editor.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -145,7 +145,7 @@ public sealed class ShortcutRegistryTests
         var result = ShortcutRegistry.TryHandle(Key.R, ModifierKeys.None, editor);
 
         Assert.True(result);
-        Assert.Equal("Rectangle", editor.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Rectangle, editor.ToolRegistry.ActiveToolKind);
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public sealed class ShortcutRegistryTests
         var result = ShortcutRegistry.TryHandle(Key.T, ModifierKeys.None, editor);
 
         Assert.True(result);
-        Assert.Equal("Text", editor.ToolManager.ActiveTool);
+        Assert.Equal(ToolKind.Text, editor.ToolRegistry.ActiveToolKind);
     }
 
     // ==================== TryHandle — Rotate ====================
@@ -217,13 +217,13 @@ public sealed class ShortcutRegistryTests
     public void TryHandle_KeyWithModifier_DoesNotTriggerToolSwitch()
     {
         var editor = CreateViewModel();
-        editor.ToolManager.ActiveTool = "Select";
+        editor.ToolRegistry.ActiveToolKind = ToolKind.Select;
 
         // V with Ctrl should not switch to Select (it should be handled as Paste elsewhere)
         var result = ShortcutRegistry.TryHandle(Key.V, ModifierKeys.Control, editor);
 
         Assert.False(result);
-        Assert.Equal("Select", editor.ToolManager.ActiveTool); // unchanged
+        Assert.Equal(ToolKind.Select, editor.ToolRegistry.ActiveToolKind); // unchanged
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public sealed class ShortcutRegistryTests
         var result = ShortcutRegistry.TryHandle(Key.L, ModifierKeys.Control, editor);
 
         Assert.False(result);
-        Assert.Equal("Select", editor.ToolManager.ActiveTool); // default, unchanged
+        Assert.Equal(ToolKind.Select, editor.ToolRegistry.ActiveToolKind); // default, unchanged
     }
 
     // ==================== GetToolForShortcut — public static ====================

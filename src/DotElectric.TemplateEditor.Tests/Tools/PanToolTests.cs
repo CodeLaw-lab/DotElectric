@@ -22,15 +22,6 @@ public class PanToolTests
     // === Constructor ===
 
     [Fact]
-    public void Constructor_SetsName()
-    {
-        var editor = CreateEditorViewModel();
-        var tool = new PanTool(editor);
-
-        Assert.Equal("Панорамирование", tool.Name);
-    }
-
-    [Fact]
     public void Constructor_ThrowsOnNullEditor()
     {
         Assert.Throws<ArgumentNullException>(() => new PanTool(null!));

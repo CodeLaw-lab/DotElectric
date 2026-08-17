@@ -32,7 +32,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     private readonly ZoomPanManager _zoomPanManager;
     private readonly SelectionManager _selectionManager;
     private readonly ClipboardManager _clipboardManager;
-    private readonly ToolManager _toolManager;
+    private readonly ToolRegistry _toolRegistry;
     private readonly PreviewManager _previewManager;
     private readonly InlineEditManager _inlineEditManager;
     private readonly StatusBarManager _statusBarManager;
@@ -108,7 +108,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     // === Прямой доступ к менеджерам (для XAML-биндингов R3) ===
 
     public ZoomPanManager ZoomPanManager => _zoomPanManager;
-    public ToolManager ToolManager => _toolManager;
+    public ToolRegistry ToolRegistry => _toolRegistry;
     public SelectionManager SelectionManager => _selectionManager;
     public PreviewManager PreviewManager => _previewManager;
     public InlineEditManager InlineEditManager => _inlineEditManager;
@@ -145,8 +145,8 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         set => _statusBarManager.StatusMessage = value;
     }
     public void PanCanvas(double deltaXMm, double deltaYMm) => _zoomPanManager.PanCanvas(deltaXMm, deltaYMm);
-    public void PushTool(ToolKind kind) => _toolManager.PushTool(kind);
-    public void PopTool() => _toolManager.PopTool();
+    public void PushTool(ToolKind kind) => _toolRegistry.PushTool(kind);
+    public void PopTool() => _toolRegistry.PopTool();
     public void ActivateTool(ToolKind kind) => SetActiveTool(kind);
 
     /// <summary>
@@ -232,14 +232,14 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     [RelayCommand]
     private void CancelInlineEditing() => _inlineEditManager.Cancel();
 
-    // === Кэшированные инструменты (делегировано ToolManager) ===
+    // === Кэшированные инструменты (делегировано ToolRegistry) ===
 
     /// <summary>
-    /// Получить или создать кэшированный инструмент. Делегировано ToolManager.
+    /// Получить или создать кэшированный инструмент. Делегировано ToolRegistry.
     /// </summary>
-    public T GetOrCreateTool<T>() where T : class, ITool => _toolManager.GetOrCreateTool<T>();
+    public T GetOrCreateTool<T>() where T : class, ITool => _toolRegistry.GetOrCreateTool<T>();
 
-    // === Команда смены инструмента (делегировано ToolManager) ===
+    // === Команда смены инструмента (делегировано ToolRegistry) ===
 
     /// <summary>
     /// Команда установки активного инструмента по идентичности.
@@ -247,10 +247,10 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     [RelayCommand]
     private void SetActiveTool(ToolKind kind)
     {
-        if (_toolManager.ActiveToolKind == kind)
+        if (_toolRegistry.ActiveToolKind == kind)
             return;
 
-        _toolManager.SwitchTo(kind);
+        _toolRegistry.SwitchTo(kind);
         _previewManager.ClearAll();
     }
 
@@ -525,7 +525,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         _gridManager = new GridManager(Template, GridSettings, _zoomPanManager, _gridNodeGenerator);
         _zoomPanManager.SetGridRefreshCallback(_gridManager.RefreshGridNodes);
         _clipboardManager = new ClipboardManager();
-        _toolManager = new ToolManager(this);
+        _toolRegistry = new ToolRegistry(this);
         _previewManager = new PreviewManager();
         _statusBarManager = new StatusBarManager(
             Template,

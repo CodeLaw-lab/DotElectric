@@ -22,7 +22,7 @@ public static class ShortcutRegistry
         var kind = GetToolForShortcut(key);
         if (kind.HasValue && modifiers == ModifierKeys.None)
         {
-            editor.SetActiveToolCommand.Execute(kind.Value);
+            editor.ActivateTool(kind.Value);
             return true;
         }
 

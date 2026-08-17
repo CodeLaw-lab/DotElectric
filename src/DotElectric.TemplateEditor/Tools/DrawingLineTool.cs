@@ -17,8 +17,6 @@ public sealed class DrawingLineTool : ITool
     private Line? _previewLine;
     private LineType _lineType = LineType.Solid;
 
-    public string Name => "Линия";
-
     public DrawingLineTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
