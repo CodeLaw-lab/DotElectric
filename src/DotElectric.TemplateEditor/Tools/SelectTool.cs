@@ -1,11 +1,9 @@
 using System;
-using System.Windows;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
-using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tools;
 
