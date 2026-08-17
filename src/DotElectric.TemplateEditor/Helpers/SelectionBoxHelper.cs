@@ -131,45 +131,7 @@ public static class SelectionBoxHelper
     }
 
     /// <summary>
-    /// Получить bounding box объекта в микронах.
+    /// Получить bounding box объекта в микронах (полиморфный, из модели).
     /// </summary>
-    private static RectMicrons GetObjectBounds(TemplateObjectBase obj)
-    {
-        return obj switch
-        {
-            Line line => GetLineBounds(line),
-            Rectangle rect => GetRectangleBounds(rect),
-            Text text => GetTextBounds(text),
-            _ => new RectMicrons(obj.MicronsX, obj.MicronsY, obj.MicronsX, obj.MicronsY)
-        };
-    }
-
-    /// <summary>
-    /// Bounding box линии: охватывающий прямоугольник от Start до End.
-    /// </summary>
-    private static RectMicrons GetLineBounds(Line line)
-    {
-        return new RectMicrons(
-            Math.Min(line.StartMicronsX, line.EndMicronsX),
-            Math.Min(line.StartMicronsY, line.EndMicronsY),
-            Math.Max(line.StartMicronsX, line.EndMicronsX),
-            Math.Max(line.StartMicronsY, line.EndMicronsY));
-    }
-
-    /// <summary>
-    /// Bounding box прямоугольника: его собственные координаты.
-    /// </summary>
-    private static RectMicrons GetRectangleBounds(Rectangle rect)
-    {
-        return new RectMicrons(
-            rect.MicronsX,
-            rect.MicronsY,
-            rect.MicronsX + rect.WidthMicrons,
-            rect.MicronsY + rect.HeightMicrons);
-    }
-
-    /// <summary>
-    /// Bounding box текста (делегирует модели).
-    /// </summary>
-    private static RectMicrons GetTextBounds(Text text) => text.GetBoundingBox();
+    private static RectMicrons GetObjectBounds(TemplateObjectBase obj) => obj.GetBoundingBox();
 }
