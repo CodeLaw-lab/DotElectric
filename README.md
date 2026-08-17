@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2622, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2619, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 89.85% line-rate (CI gate 80%)
-**Последнее обновление:** 17.08.2026 — Кандидат 1 обзора №3, срез 1 (#75–#76, PR #78): рамка выделения через узкий шов — 7 свойств IEditorContext → методы SetSelectionBox/ClearSelectionBox (интерфейс 35→30), поведение байт-в-байт, coverage 89.85%
+**Покрытие:** 89.89% line-rate (CI gate 80%)
+**Последнее обновление:** 18.08.2026 — Кандидат 7 обзора №4 (#84, PR #85): пан — жест роутера — PanTool удалён целиком, панорамирование живёт в CanvasInputRouter (IsPanGesture/RoutePanDown/ApplyPan) с применением через ZoomPanManager.PanCanvas, IEditorContext 30→29, первый ADR проекта, поведение байт-в-байт, coverage 89.89%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2622 теста, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2619 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,9 +245,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2622 теста**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 89.85% line-rate (CI gate 80%)
+- ✅ **2619 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 89.89% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#84–#85:** Кандидат 7 обзора №4 — пан — жест роутера: PanTool удалён целиком, IEditorContext 30→29, первый ADR проекта, live-рассинхронизация состояний устранена структурно, поведение байт-в-байт
 - ✅ **#75–#76:** Кандидат 1, срез 1 — рамка выделения через узкий шов: 7 свойств IEditorContext → методы SetSelectionBox/ClearSelectionBox (интерфейс 35→30 членов), поведение байт-в-байт
 - ✅ **#70–#71:** Кандидат 7 — deletion-пара: «Вписать в экран» на живом viewport (fallback 800×600 удалён), рамка выделения через полиморфный GetBoundingBox
 - ✅ **#65–#66:** Настройки приложения — только типизированный интерфейс: ISettingsService = Load()/Save(AppSettings), строковый Get/Set удалён, AppSettings в Models
@@ -410,7 +411,7 @@ src/
 
 ---
 
-**Последнее обновление:** 17.08.2026 — Кандидат 1 обзора №3, срез 1 (#75–#76, PR #78): рамка выделения переведена на узкий шов — 7 свойств IEditorContext заменены методами SetSelectionBox/ClearSelectionBox (интерфейс 35→30 членов, включая удаление 2 мёртвых read-only), 7 forwarding-свойств EditorViewModel удалены, глубокие методы PreviewManager получили первого production-потребителя; поведение байт-в-байт; coverage 89.85% (2622 теста)
+**Последнее обновление:** 18.08.2026 — Кандидат 7 обзора №4 (#84, PR #85): пан — жест роутера — `PanTool` удалён целиком (класс, фабрика ToolRegistry, 20 тестов): панорамирование стало жестом `CanvasInputRouter` с применением через `ZoomPanManager.PanCanvas`; live-рассинхронизация двух источников истины (Space+Left без Alt) устранена структурно; член `PanCanvas` удалён из `IEditorContext` (30→29 членов); «Пан» в CONTEXT.md — жест, не инструмент; первый ADR проекта `docs/adr/0001-pan-gesture-not-tool.md`; поведение байт-в-байт; coverage 89.89% (2619 тестов)
 
 
 
