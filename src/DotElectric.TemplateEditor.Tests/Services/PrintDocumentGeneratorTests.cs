@@ -332,6 +332,116 @@ public class PrintDocumentGeneratorTests
         });
     }
 
+    // ===== Anchor'ы печати (фиксация единых правил рендеринга, спека #88) =====
+
+    [Fact]
+    public void Generate_Text_TopPosition_AccountsTextHeight()
+    {
+        // Regression: печать обязана ставить верх текста там же, где канвас —
+        // по MicronsY + HeightMicrons (а не по MicronsY без высоты).
+        WpfContext.Execute(() =>
+        {
+            var template = CreateEmptyTemplate("A4", SheetOrientation.Portrait);
+            var sheetH = template.Sheet.HeightMm;
+            var text = new Text(10_000, 20_000, "Anchor", 5_000, fontName: "ГОСТ А");
+            template.Objects.Add(text);
+
+            var doc = _generator.Generate(template);
+            var page = (FixedPage)GetPageContent(doc).Child;
+            var tb = page.Children.OfType<System.Windows.Controls.TextBlock>().First();
+
+            var factor = 96.0 / 25.4;
+            var expectedTop = (sheetH - Coordinate.ToMm(text.BottomMicronsY)) * factor;
+            Assert.Equal(expectedTop, FixedPage.GetTop(tb), 4);
+        });
+    }
+
+    [Fact]
+    public void Generate_MultilineText_TopPosition_AccountsFullHeight()
+    {
+        WpfContext.Execute(() =>
+        {
+            var template = CreateEmptyTemplate("A4", SheetOrientation.Portrait);
+            var sheetH = template.Sheet.HeightMm;
+            var text = new Text(0, 50_000, "A\nB\nC", 5_000, fontName: "ГОСТ Б");
+            template.Objects.Add(text);
+
+            var doc = _generator.Generate(template);
+            var page = (FixedPage)GetPageContent(doc).Child;
+            var tb = page.Children.OfType<System.Windows.Controls.TextBlock>().First();
+
+            var factor = 96.0 / 25.4;
+            var expectedTop = (sheetH - Coordinate.ToMm(text.BottomMicronsY)) * factor;
+            Assert.Equal(expectedTop, FixedPage.GetTop(tb), 4);
+        });
+    }
+
+    [Fact]
+    public void Generate_RotatedText_SlotAnchor_SameAsUnrotated()
+    {
+        // Поворот не меняет слот-anchor (смещение LayoutTransform применяет WPF
+        // при раскладке — та же семантика, что канвас).
+        WpfContext.Execute(() =>
+        {
+            var templatePlain = CreateEmptyTemplate("A4", SheetOrientation.Portrait);
+            var templateRotated = CreateEmptyTemplate("A4", SheetOrientation.Portrait);
+            var plain = new Text(10_000, 20_000, "Rot", 5_000, rotationAngle: 0);
+            var rotated = new Text(10_000, 20_000, "Rot", 5_000, rotationAngle: 45);
+            templatePlain.Objects.Add(plain);
+            templateRotated.Objects.Add(rotated);
+
+            var pagePlain = (FixedPage)GetPageContent(_generator.Generate(templatePlain)).Child;
+            var pageRotated = (FixedPage)GetPageContent(_generator.Generate(templateRotated)).Child;
+            var tbPlain = pagePlain.Children.OfType<System.Windows.Controls.TextBlock>().First();
+            var tbRotated = pageRotated.Children.OfType<System.Windows.Controls.TextBlock>().First();
+
+            Assert.Equal(FixedPage.GetTop(tbPlain), FixedPage.GetTop(tbRotated), 4);
+            Assert.Equal(FixedPage.GetLeft(tbPlain), FixedPage.GetLeft(tbRotated), 4);
+            Assert.IsType<RotateTransform>(tbRotated.LayoutTransform);
+        });
+    }
+
+    [Fact]
+    public void Generate_Rectangle_TopPosition_MatchesModelBottom()
+    {
+        // Паритет с канвасом: верх прямоугольника — по MicronsY + HeightMicrons.
+        WpfContext.Execute(() =>
+        {
+            var template = CreateEmptyTemplate("A4", SheetOrientation.Portrait);
+            var sheetH = template.Sheet.HeightMm;
+            var rect = new ModelRect(10_000, 20_000, 50_000, 30_000);
+            template.Objects.Add(rect);
+
+            var doc = _generator.Generate(template);
+            var page = (FixedPage)GetPageContent(doc).Child;
+            var wpfRect = page.Children.OfType<WpfRectangle>().Skip(1).First();
+
+            var factor = 96.0 / 25.4;
+            var expectedTop = (sheetH - Coordinate.ToMm(rect.MicronsY + rect.HeightMicrons)) * factor;
+            Assert.Equal(expectedTop, FixedPage.GetTop(wpfRect), 4);
+            Assert.Equal(Coordinate.ToMm(rect.MicronsX) * factor, FixedPage.GetLeft(wpfRect), 4);
+        });
+    }
+
+    [Theory]
+    [InlineData(LineType.Dashed, new double[] { 10, 5 })]
+    [InlineData(LineType.DashDot, new double[] { 10, 5, 2, 5 })]
+    [InlineData(LineType.DashDotDot, new double[] { 10, 5, 2, 5, 2, 5 })]
+    public void Generate_LineDashValues_MatchRenderRules(LineType lineType, double[] expected)
+    {
+        // Печать берёт dash-значения из единых правил (ранее тесты фиксировали только Count).
+        WpfContext.Execute(() =>
+        {
+            var template = CreateEmptyTemplate();
+            template.Objects.Add(new ModelLine(0, 0, 100_000, 0, lineType));
+            var doc = _generator.Generate(template);
+            var page = (FixedPage)GetPageContent(doc).Child;
+            var wpfLine = page.Children.OfType<System.Windows.Shapes.Line>().First();
+            Assert.NotNull(wpfLine.StrokeDashArray);
+            Assert.Equal(expected, wpfLine.StrokeDashArray);
+        });
+    }
+
     // ===== Helpers =====
 
     private static Template CreateEmptyTemplate(string format = "A4", SheetOrientation orientation = SheetOrientation.Portrait)

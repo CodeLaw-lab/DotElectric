@@ -1,14 +1,15 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 
 namespace DotElectric.TemplateEditor.Converters;
 
 /// <summary>
-/// Вычисляет X левого края из конкретных свойств (для MultiBinding).
+/// Тонкий адаптер XAML к anchor-политике RenderRules: X левого края слота объекта.
 /// Принимает: startMicronsX (Line), endMicronsX (Line), micronsX (Rectangle/Text), zoom.
-/// Возвращает пиксели (мм * zoom).
+/// Возвращает пиксели (мм * zoom); по X нет flip — только масштаб.
 /// </summary>
 public sealed class LeftEdgeMicronsMultiConverter : IMultiValueConverter
 {
@@ -24,7 +25,7 @@ public sealed class LeftEdgeMicronsMultiConverter : IMultiValueConverter
         {
             var startX = (long)values[0];
             var endX = values[1] as long? ?? startX;
-            leftMicrons = Math.Min(startX, endX);
+            leftMicrons = RenderRules.LineLeftMicrons(startX, endX);
         }
         else
         {

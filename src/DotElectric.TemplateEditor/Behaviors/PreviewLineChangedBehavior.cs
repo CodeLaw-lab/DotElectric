@@ -2,10 +2,9 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using DotElectric.TemplateEditor.Converters;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 using DotElectric.TemplateEditor.ViewModels.Managers;
 
@@ -111,7 +110,7 @@ public static class PreviewLineChangedBehavior
 
         rect.Visibility = Visibility.Visible;
         Canvas.SetLeft(rect, (double)_convX.Convert(new object[] { preview.MicronsX, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
-        Canvas.SetTop(rect, (double)_convY.Convert(new object[] { preview.MicronsY + preview.HeightMicrons, sheetHeightMm, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
+        Canvas.SetTop(rect, (double)_convY.Convert(new object[] { RenderRules.AnchorTopMicrons(preview), sheetHeightMm, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
         rect.Width = (double)_convPx.Convert(new object[] { preview.WidthMicrons, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!;
         rect.Height = (double)_convPx.Convert(new object[] { preview.HeightMicrons, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!;
     }
@@ -132,13 +131,8 @@ public static class PreviewLineChangedBehavior
         tb.Text = preview.Content;
         var fontPixels = Coordinate.ToMm(preview.FontSizeMicrons) * zoom;
         tb.FontSize = fontPixels;
-        tb.FontFamily = preview.FontName switch
-        {
-            "ГОСТ А" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type AU"),
-            "ГОСТ Б" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type BU"),
-            _ => new FontFamily("Segoe UI")
-        };
-        Canvas.SetLeft(tb, (double)_convX.Convert(new object[] { preview.MicronsX, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
-        Canvas.SetTop(tb, (double)_convY.Convert(new object[] { preview.MicronsY + preview.FontSizeMicrons, sheetHeightMm, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
+        tb.FontFamily = RenderRules.FontFamilyFor(preview.FontName);
+        Canvas.SetLeft(tb, (double)_convX.Convert(new object[] { RenderRules.AnchorLeftMicrons(preview), zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
+        Canvas.SetTop(tb, (double)_convY.Convert(new object[] { RenderRules.AnchorTopMicrons(preview), sheetHeightMm, zoom }, typeof(double), null, System.Globalization.CultureInfo.CurrentCulture)!);
     }
 }

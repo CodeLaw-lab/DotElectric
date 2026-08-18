@@ -2,6 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Media;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
 using WpfLine = System.Windows.Shapes.Line;
@@ -63,9 +64,9 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
     private static UIElement CreateLineElement(Models.Objects.Line line, double sheetHeightMm)
     {
         var x1 = Coordinate.ToMm(line.StartMicronsX) * WpfUnitsPerMm;
-        var y1 = (sheetHeightMm - Coordinate.ToMm(line.StartMicronsY)) * WpfUnitsPerMm;
+        var y1 = RenderRules.ModelYToTop(line.StartMicronsY, sheetHeightMm, WpfUnitsPerMm);
         var x2 = Coordinate.ToMm(line.EndMicronsX) * WpfUnitsPerMm;
-        var y2 = (sheetHeightMm - Coordinate.ToMm(line.EndMicronsY)) * WpfUnitsPerMm;
+        var y2 = RenderRules.ModelYToTop(line.EndMicronsY, sheetHeightMm, WpfUnitsPerMm);
         var thickness = Coordinate.ToMm(line.StrokeThicknessMicrons) * WpfUnitsPerMm;
 
         return new WpfLine
@@ -74,22 +75,21 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
             Y1 = y1,
             X2 = x2,
             Y2 = y2,
-            Stroke = HexToBrush(line.StrokeColor),
+            Stroke = RenderRules.BrushFromHex(line.StrokeColor),
             StrokeThickness = Math.Max(thickness, 0.5),
-            StrokeDashArray = LineTypeToDashArray(line.LineType)
+            StrokeDashArray = RenderRules.DashArrayFor(line.LineType)
         };
     }
 
     private static UIElement CreateRectangleElement(Models.Objects.Rectangle rect, double sheetHeightMm)
     {
         var mmX = Coordinate.ToMm(rect.MicronsX);
-        var mmY = Coordinate.ToMm(rect.MicronsY);
         var mmW = Coordinate.ToMm(rect.WidthMicrons);
         var mmH = Coordinate.ToMm(rect.HeightMicrons);
         var thickness = Coordinate.ToMm(rect.StrokeThicknessMicrons) * WpfUnitsPerMm;
 
         var wpfX = mmX * WpfUnitsPerMm;
-        var wpfY = (sheetHeightMm - mmY - mmH) * WpfUnitsPerMm;
+        var wpfY = RenderRules.ModelYToTop(RenderRules.AnchorTopMicrons(rect), sheetHeightMm, WpfUnitsPerMm);
         var wpfW = mmW * WpfUnitsPerMm;
         var wpfH = mmH * WpfUnitsPerMm;
 
@@ -97,10 +97,10 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
         {
             Width = wpfW,
             Height = wpfH,
-            Stroke = HexToBrush(rect.StrokeColor),
+            Stroke = RenderRules.BrushFromHex(rect.StrokeColor),
             StrokeThickness = Math.Max(thickness, 0.5),
-            StrokeDashArray = LineTypeToDashArray(rect.LineType),
-            Fill = HexToBrush(rect.FillColor)
+            StrokeDashArray = RenderRules.DashArrayFor(rect.LineType),
+            Fill = RenderRules.BrushFromHex(rect.FillColor)
         };
 
         FixedPage.SetLeft(wpfRect, wpfX);
@@ -111,19 +111,20 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
     private static UIElement CreateTextElement(Models.Objects.Text text, double sheetHeightMm)
     {
         var mmX = Coordinate.ToMm(text.MicronsX);
-        var mmY = Coordinate.ToMm(text.MicronsY);
         var fontSizeMm = Coordinate.ToMm(text.FontSizeMicrons);
 
         var wpfX = mmX * WpfUnitsPerMm;
-        var wpfY = (sheetHeightMm - mmY) * WpfUnitsPerMm;
+        // Anchor — канвас-семантика: верх нетрансформированного бокса (MicronsY + HeightMicrons).
+        // Смещение повёрнутого элемента применяет WPF при раскладке LayoutTransform.
+        var wpfY = RenderRules.ModelYToTop(RenderRules.AnchorTopMicrons(text), sheetHeightMm, WpfUnitsPerMm);
         var wpfFontSize = fontSizeMm * WpfUnitsPerMm;
 
         var textBlock = new TextBlock
         {
             Text = text.Content,
-            FontFamily = FontNameToFamily(text.FontName),
+            FontFamily = RenderRules.FontFamilyFor(text.FontName),
             FontSize = Math.Max(wpfFontSize, 1.0),
-            Foreground = HexToBrush(text.Foreground),
+            Foreground = RenderRules.BrushFromHex(text.Foreground),
             TextWrapping = text.TextWrapping ? System.Windows.TextWrapping.Wrap : System.Windows.TextWrapping.NoWrap,
             TextAlignment = TextAlignmentFromString(text.TextAlignment)
         };
@@ -144,40 +145,5 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
             "Center" => System.Windows.TextAlignment.Center,
             "Right" => System.Windows.TextAlignment.Right,
             _ => System.Windows.TextAlignment.Left
-        };
-
-    private static Brush HexToBrush(string? hex)
-    {
-        if (string.IsNullOrWhiteSpace(hex))
-            return new SolidColorBrush(Colors.Black);
-        if (hex.Equals("Transparent", StringComparison.OrdinalIgnoreCase))
-            return new SolidColorBrush(Colors.Transparent);
-        try
-        {
-            return new BrushConverter().ConvertFromString(hex) as Brush
-                   ?? new SolidColorBrush(Colors.Black);
-        }
-        catch
-        {
-            return new SolidColorBrush(Colors.Black);
-        }
-    }
-
-    private static DoubleCollection? LineTypeToDashArray(LineType lineType)
-        => lineType switch
-        {
-            LineType.Solid => null,
-            LineType.Dashed => new DoubleCollection { 10, 5 },
-            LineType.DashDot => new DoubleCollection { 10, 5, 2, 5 },
-            LineType.DashDotDot => new DoubleCollection { 10, 5, 2, 5, 2, 5 },
-            _ => null
-        };
-
-    private static FontFamily FontNameToFamily(string? fontName)
-        => fontName switch
-        {
-            "ГОСТ А" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type AU"),
-            "ГОСТ Б" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type BU"),
-            _ => new FontFamily("Segoe UI")
         };
 }

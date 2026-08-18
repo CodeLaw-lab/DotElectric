@@ -112,7 +112,7 @@ public sealed class GridNodesLayer : FrameworkElement
         foreach (var node in _nodes)
         {
             var xPx = node.XMicrons * invMicronsPerMm * zoom;
-            var yPx = (heightMm - node.YMicrons * invMicronsPerMm) * zoom;
+            var yPx = RenderRules.ModelYToTop(node.YMicrons, heightMm, zoom);
             dc.DrawEllipse(brush, null, new Point(xPx, yPx), radius, radius);
         }
     }
