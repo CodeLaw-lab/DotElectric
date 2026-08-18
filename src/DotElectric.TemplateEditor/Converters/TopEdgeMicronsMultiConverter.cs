@@ -1,17 +1,15 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
-using DotElectric.TemplateEditor.Models;
+using DotElectric.TemplateEditor.Helpers;
 
 namespace DotElectric.TemplateEditor.Converters;
 
 /// <summary>
-/// Вычисляет Y верхнего края из конкретных свойств (для MultiBinding).
-/// Line: startY, endY → max(startY, endY).
-/// Rectangle: micronsY, heightMicrons → micronsY + heightMicrons (BottomMicronsY).
-/// Text: micronsY, heightMicrons → micronsY + heightMicrons (BottomMicronsY).
+/// Тонкий адаптер XAML к anchor-политике RenderRules: Y верхнего края слота объекта.
+/// Разбор параметров MultiBinding остаётся здесь (линия/текст/прямоугольник различаются
+/// позициями значений в массиве); формулы anchor'ов и Y-flip — в RenderRules.
 /// Принимает 8 параметров: lineStartY, lineEndY, rectY, rectH, textY, textHeight, sheetHeightMm, zoom.
-/// Возвращает пиксели: (sheetHeightMm - ToMm(topMicrons)) * zoom.
 /// </summary>
 public sealed class TopEdgeMicronsMultiConverter : IMultiValueConverter
 {
@@ -29,22 +27,22 @@ public sealed class TopEdgeMicronsMultiConverter : IMultiValueConverter
         {
             var startY = (long)values[0];
             var endY = values[1] as long? ?? startY;
-            topMicrons = Math.Max(startY, endY);
+            topMicrons = RenderRules.LineTopMicrons(startY, endY);
         }
         else if (isText)
         {
             var micronsY = (long)values[4];
             var textHeight = values[5] as long? ?? 0L;
-            topMicrons = micronsY + textHeight;
+            topMicrons = RenderRules.BoxTopMicrons(micronsY, textHeight);
         }
         else
         {
             var rectY = values[2] as long? ?? 0L;
             var rectH = values[3] as long? ?? 0L;
-            topMicrons = rectY + rectH;
+            topMicrons = RenderRules.BoxTopMicrons(rectY, rectH);
         }
 
-        return (sheetHeightMm - Coordinate.ToMm(topMicrons)) * zoom;
+        return RenderRules.ModelYToTop(topMicrons, sheetHeightMm, zoom);
     }
 
     public object[] ConvertBack(object value, Type[] targetTypes, object? parameter, CultureInfo culture)

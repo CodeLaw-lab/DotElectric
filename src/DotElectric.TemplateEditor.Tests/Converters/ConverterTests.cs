@@ -463,6 +463,13 @@ public class LineTypeToDashArrayConverterTests
         var arr = Assert.IsType<System.Windows.Media.DoubleCollection>(result);
         Assert.Equal(new[] { 10.0, 5.0, 2.0, 5.0, 2.0, 5.0 }, arr.ToArray());
     }
+
+    [Fact]
+    public void Convert_NonLineTypeValue_ReturnsNull()
+    {
+        var result = _converter.Convert("не LineType", typeof(object), null, CultureInfo.InvariantCulture);
+        Assert.Null(result);
+    }
 }
 
 public class NotConverterTests

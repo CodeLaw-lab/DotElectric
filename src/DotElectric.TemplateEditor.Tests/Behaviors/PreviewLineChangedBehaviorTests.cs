@@ -217,6 +217,117 @@ public class PreviewLineChangedBehaviorTests
         });
     }
 
+    // ===== Anchor'ы preview (фиксация единых правил рендеринга, спека #88) =====
+
+    [Fact]
+    public void UpdatePreviewText_TopAnchor_MatchesCanvasBottomMicronsY()
+    {
+        // Regression: preview обязан ставить верх текста там же, где канвас после коммита —
+        // по MicronsY + HeightMicrons (а не FontSizeMicrons).
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            double zoom = 1.0;
+            double sheetHeightMm = 297.0;
+
+            var preview = new Text(micronsX: 1000, micronsY: 2000,
+                content: "Anchor", fontSizeMicrons: 5000, fontName: "ГОСТ А");
+            editor.PreviewText = preview;
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+
+            PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
+
+            var expectedTop = (sheetHeightMm - Coordinate.ToMm(preview.BottomMicronsY)) * zoom;
+            Assert.Equal(expectedTop, Canvas.GetTop(elements.TextElement), 4);
+        });
+    }
+
+    [Fact]
+    public void UpdatePreviewText_TopAnchor_MultilinePreview_UsesFullHeight()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            double zoom = 2.0;
+            double sheetHeightMm = 297.0;
+
+            var preview = new Text(micronsX: 0, micronsY: 10_000,
+                content: "A\nB", fontSizeMicrons: 5000, fontName: "ГОСТ Б");
+            editor.PreviewText = preview;
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+
+            PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
+
+            var expectedTop = (sheetHeightMm - Coordinate.ToMm(preview.BottomMicronsY)) * zoom;
+            Assert.Equal(expectedTop, Canvas.GetTop(elements.TextElement), 4);
+        });
+    }
+
+    [Fact]
+    public void UpdatePreviewText_LeftAnchor_UsesMicronsX()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            double zoom = 1.5;
+            double sheetHeightMm = 297.0;
+
+            editor.PreviewText = new Text(micronsX: 4_000, micronsY: 2000,
+                content: "Left", fontSizeMicrons: 5000);
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+
+            PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
+
+            Assert.Equal(4.0 * 1.5, Canvas.GetLeft(elements.TextElement), 4);
+        });
+    }
+
+    [Fact]
+    public void UpdatePreviewText_FontFamily_FollowsRenderRules()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            editor.PreviewText = new Text(micronsX: 0, micronsY: 0,
+                content: "Font", fontSizeMicrons: 5000, fontName: "ГОСТ А");
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+
+            PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, 1.0, 297.0);
+
+            Assert.Equal("pack://application:,,,/Resources/Fonts/#GOST Type AU",
+                elements.TextElement.FontFamily.Source);
+        });
+    }
+
+    [Fact]
+    public void UpdatePreviewRectangle_TopAnchor_MatchesCanvasSemantics()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            double zoom = 1.0;
+            double sheetHeightMm = 297.0;
+
+            var preview = new Rectangle(micronsX: 5_000, micronsY: 10_000,
+                widthMicrons: 20_000, heightMicrons: 8_000, strokeThicknessMicrons: 500);
+            editor.PreviewRectangle = preview;
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+
+            PreviewLineChangedBehavior.UpdatePreviewRectangle(canvas, editor, zoom, sheetHeightMm);
+
+            var expectedTop = (sheetHeightMm - Coordinate.ToMm(preview.MicronsY + preview.HeightMicrons)) * zoom;
+            var expectedLeft = Coordinate.ToMm(preview.MicronsX) * zoom;
+            Assert.Equal(expectedTop, Canvas.GetTop(elements.RectangleElement), 4);
+            Assert.Equal(expectedLeft, Canvas.GetLeft(elements.RectangleElement), 4);
+        });
+    }
+
     // ===== PropertyChanged flow (needs STA) =====
 
     [Fact]

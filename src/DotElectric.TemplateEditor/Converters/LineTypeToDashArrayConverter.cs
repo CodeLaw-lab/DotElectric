@@ -1,29 +1,17 @@
 using System.Globalization;
 using System.Windows.Data;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Converters;
 
 /// <summary>
-/// Конвертер LineType → StrokeDashArray для WPF.
+/// Тонкий адаптер XAML к dash-карте RenderRules (LineType → StrokeDashArray).
 /// </summary>
 public sealed class LineTypeToDashArrayConverter : IValueConverter
 {
-    private static readonly System.Windows.Media.DoubleCollection _dashed = new() { 10, 5 };
-    private static readonly System.Windows.Media.DoubleCollection _dashDot = new() { 10, 5, 2, 5 };
-    private static readonly System.Windows.Media.DoubleCollection _dashDotDot = new() { 10, 5, 2, 5, 2, 5 };
-
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return value switch
-        {
-            LineType.Solid => null,
-            LineType.Dashed => _dashed,
-            LineType.DashDot => _dashDot,
-            LineType.DashDotDot => _dashDotDot,
-            _ => null
-        };
-    }
+        => value is LineType lineType ? RenderRules.DashArrayFor(lineType) : null;
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
         throw new NotSupportedException("This converter is one-way only.");
