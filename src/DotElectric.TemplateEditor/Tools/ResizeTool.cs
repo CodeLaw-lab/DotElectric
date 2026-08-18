@@ -135,8 +135,7 @@ public sealed class ResizeTool : ITool
             _initialState!,
             s => captured.ApplyResize(s),
             finalState,
-            "размер",
-            _context.MarkDirty);
+            "размер");
         _context.CommandHistory.Push(cmd);
 
         _context.ActiveResizeHandle = null;

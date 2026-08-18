@@ -26,7 +26,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartXCommand.Execute(5000);
 
@@ -41,7 +41,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartXCommand.Execute(5000);
         cmdHistory.Undo();
@@ -54,7 +54,7 @@ public class PropertiesViewModelCommandTests
     {
         var collection = CreateCollection();
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartXCommand.Execute(5000);
 
@@ -68,7 +68,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartXCommand.Execute(-100);
 
@@ -85,7 +85,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000, LineType.Solid);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeLineTypeCommand.Execute(LineType.Dashed);
 
@@ -100,7 +100,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000, LineType.Solid);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeLineTypeCommand.Execute(LineType.Dashed);
         cmdHistory.Undo();
@@ -117,7 +117,7 @@ public class PropertiesViewModelCommandTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeWidthCommand.Execute(8000);
 
@@ -132,7 +132,7 @@ public class PropertiesViewModelCommandTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeWidthCommand.Execute(8000);
         cmdHistory.Undo();
@@ -147,7 +147,7 @@ public class PropertiesViewModelCommandTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeWidthCommand.Execute(300);
 
@@ -164,7 +164,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Hello", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute("World");
 
@@ -179,7 +179,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Hello", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute("World");
         cmdHistory.Undo();
@@ -194,7 +194,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Hello", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute("");
 
@@ -211,7 +211,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 0);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeRotationCommand.Execute(90);
 
@@ -226,7 +226,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 0);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeRotationCommand.Execute(90);
         cmdHistory.Undo();
@@ -241,7 +241,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 0);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeRotationCommand.Execute(45);
 
@@ -259,7 +259,7 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Test", 3500, textType: TextType.Text);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeTextTypeCommand.Execute(TextType.Dimension);
 
@@ -274,29 +274,12 @@ public class PropertiesViewModelCommandTests
         var text = new Text(1000, 2000, "Test", 3500, textType: TextType.Text);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeTextTypeCommand.Execute(TextType.Dimension);
         cmdHistory.Undo();
 
         Assert.Equal(TextType.Text, text.TextType);
-    }
-
-    // === MarkDirty callback ===
-
-    [Fact]
-    public void Commands_CallMarkDirtyCallback()
-    {
-        var collection = CreateCollection();
-        var line = new Line(1000, 2000, 3000, 4000);
-        collection.Add(line);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.LineVM.ChangeStartXCommand.Execute(5000);
-
-        Assert.True(dirtyCalled);
     }
 
     // === ValidationError cleared on selection change ===
@@ -308,7 +291,7 @@ public class PropertiesViewModelCommandTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartXCommand.Execute(-100);
         Assert.NotNull(vm.ValidationError);

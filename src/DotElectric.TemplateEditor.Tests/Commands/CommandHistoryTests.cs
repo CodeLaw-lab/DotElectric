@@ -451,6 +451,68 @@ public class CommandHistoryTests
         Assert.True(history.CanUndo);
     }
 
+    [Fact]
+    public void Undo_WithMarkDirty_CallsCallback()
+    {
+        int callCount = 0;
+        var history = new CommandHistory(maxLevels: 50, markDirty: () => callCount++);
+        var cmd = new MockCommand();
+        history.Push(cmd);
+        Assert.Equal(1, callCount);
+
+        history.Undo();
+
+        Assert.Equal(2, callCount);
+    }
+
+    [Fact]
+    public void Redo_WithMarkDirty_CallsCallback()
+    {
+        int callCount = 0;
+        var history = new CommandHistory(maxLevels: 50, markDirty: () => callCount++);
+        var cmd = new MockCommand();
+        history.Push(cmd);
+        history.Undo();
+        Assert.Equal(2, callCount);
+
+        history.Redo();
+
+        Assert.Equal(3, callCount);
+    }
+
+    [Fact]
+    public void Undo_CommandThrows_DoesNotCallMarkDirty()
+    {
+        int callCount = 0;
+        var history = new CommandHistory(maxLevels: 50, markDirty: () => callCount++);
+        var cmd = new MockCommand { UndoThrowsError = true };
+        history.Push(cmd);
+        Assert.Equal(1, callCount);
+
+        Assert.Throws<InvalidOperationException>(() => history.Undo());
+
+        // Отмена не состоялась (rollback) — флаг не помечается
+        Assert.Equal(1, callCount);
+        Assert.True(history.CanUndo);
+    }
+
+    [Fact]
+    public void Redo_CommandThrows_DoesNotCallMarkDirty()
+    {
+        int callCount = 0;
+        var history = new CommandHistory(maxLevels: 50, markDirty: () => callCount++);
+        var cmd = new MockCommand { ExecuteThrowsErrorOnSecondCall = true };
+        history.Push(cmd);
+        history.Undo();
+        Assert.Equal(2, callCount);
+
+        Assert.Throws<InvalidOperationException>(() => history.Redo());
+
+        // Повтор не состоялся (rollback) — флаг не помечается
+        Assert.Equal(2, callCount);
+        Assert.True(history.CanRedo);
+    }
+
     // ===== MockCommand =====
 
     private class MockCommand : IUndoCommand

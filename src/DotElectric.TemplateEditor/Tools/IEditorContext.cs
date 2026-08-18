@@ -45,7 +45,6 @@ public interface IEditorContext
 
     // Commands / Undo
     CommandHistory CommandHistory { get; }
-    void MarkDirty();
     void DeleteSelected();
 
     // Status

@@ -11,7 +11,6 @@ public sealed class DeleteObjectCommand : IUndoCommand
     private readonly ObservableCollection<TemplateObjectBase> _objects;
     private readonly TemplateObjectBase _object;
     private int? _executedIndex;
-    private readonly Action? _markDirty;
 
     /// <summary>
     /// Удалённый объект (доступен для восстановления выделения после Undo).
@@ -26,15 +25,12 @@ public sealed class DeleteObjectCommand : IUndoCommand
     /// </summary>
     /// <param name="objects">Коллекция объектов шаблона.</param>
     /// <param name="obj">Объект для удаления.</param>
-    /// <param name="markDirty">Callback для пометки шаблона как изменённого.</param>
     public DeleteObjectCommand(
         ObservableCollection<TemplateObjectBase> objects,
-        TemplateObjectBase obj,
-        Action? markDirty = null)
+        TemplateObjectBase obj)
     {
         _objects = objects ?? throw new ArgumentNullException(nameof(objects));
         _object = obj ?? throw new ArgumentNullException(nameof(obj));
-        _markDirty = markDirty;
     }
 
     /// <inheritdoc/>
@@ -44,11 +40,9 @@ public sealed class DeleteObjectCommand : IUndoCommand
         if (_executedIndex < 0)
         {
             _executedIndex = null;
-            _markDirty?.Invoke();
             return;
         }
         _objects.Remove(_object);
-        _markDirty?.Invoke();
     }
 
     /// <inheritdoc/>

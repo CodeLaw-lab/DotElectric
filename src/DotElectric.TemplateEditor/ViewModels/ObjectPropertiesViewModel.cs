@@ -20,18 +20,15 @@ public abstract class ObjectPropertiesViewModel<TObject> : ObservableObject, IDi
     where TObject : TemplateObjectBase
 {
     private readonly CommandHistory? _commandHistory;
-    private readonly Action? _markDirty;
     private readonly Action<string?> _setValidationError;
 
     private TObject? _currentObject;
 
     protected ObjectPropertiesViewModel(
         CommandHistory? commandHistory,
-        Action? markDirty,
         Action<string?> setValidationError)
     {
         _commandHistory = commandHistory;
-        _markDirty = markDirty;
         _setValidationError = setValidationError;
     }
 
@@ -87,7 +84,7 @@ public abstract class ObjectPropertiesViewModel<TObject> : ObservableObject, IDi
             var error = validator(value);
             if (error != null) { _setValidationError(error); return; }
         }
-        var cmd = new ChangePropertyCommand<T>(getter, setter, value, commandName, _markDirty);
+        var cmd = new ChangePropertyCommand<T>(getter, setter, value, commandName);
         _commandHistory?.Push(cmd);
         OnPropertyChanged(propertyName);
         afterSet?.Invoke();

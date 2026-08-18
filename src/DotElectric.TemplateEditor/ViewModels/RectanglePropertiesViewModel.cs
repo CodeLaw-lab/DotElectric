@@ -21,9 +21,8 @@ public partial class RectanglePropertiesViewModel : ObjectPropertiesViewModel<Re
 
     public RectanglePropertiesViewModel(
         CommandHistory? commandHistory,
-        Action? markDirty,
         Action<string?> setValidationError)
-        : base(commandHistory, markDirty, setValidationError)
+        : base(commandHistory, setValidationError)
     {
     }
 

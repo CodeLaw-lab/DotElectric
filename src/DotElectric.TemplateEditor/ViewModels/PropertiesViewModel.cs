@@ -42,19 +42,18 @@ public partial class PropertiesViewModel : ObservableObject, IDisposable
 
     public PropertiesViewModel(
         ObservableCollection<TemplateObjectBase> selectedObjects,
-        CommandHistory? commandHistory,
-        Action? markDirty)
+        CommandHistory? commandHistory)
     {
         _selectedObjects = selectedObjects ?? throw new ArgumentNullException(nameof(selectedObjects));
-        LineVM = new(commandHistory, markDirty, v => ValidationError = v);
-        RectVM = new(commandHistory, markDirty, v => ValidationError = v);
-        TextVM = new(commandHistory, markDirty, v => ValidationError = v);
+        LineVM = new(commandHistory, v => ValidationError = v);
+        RectVM = new(commandHistory, v => ValidationError = v);
+        TextVM = new(commandHistory, v => ValidationError = v);
         _selectedObjects.CollectionChanged += OnSelectedObjectsChanged;
         OnSelectedObjectsChanged(null, null);
     }
 
     public PropertiesViewModel(ObservableCollection<TemplateObjectBase> selectedObjects)
-        : this(selectedObjects, null, null)
+        : this(selectedObjects, null)
     {
     }
 

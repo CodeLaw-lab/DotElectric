@@ -42,42 +42,6 @@ public class ResizeObjectCommandTests
     }
 
     [Fact]
-    public void RectangleConstructor_Execute_CallsMarkDirty()
-    {
-        var rect = new Rectangle(0, 0, 1000, 2000);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(rect.MicronsX, rect.MicronsY, rect.WidthMicrons, rect.HeightMicrons),
-            s => rect.ApplyResize(s),
-            new ResizeState(rect.MicronsX, rect.MicronsY, 5000, 3000),
-            "размер",
-            () => dirtyCalled = true);
-
-        cmd.Execute();
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
-    public void RectangleConstructor_Undo_CallsMarkDirty()
-    {
-        var rect = new Rectangle(0, 0, 1000, 2000);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(rect.MicronsX, rect.MicronsY, rect.WidthMicrons, rect.HeightMicrons),
-            s => rect.ApplyResize(s),
-            new ResizeState(rect.MicronsX, rect.MicronsY, 5000, 3000),
-            "размер",
-            () => dirtyCalled = true);
-        cmd.Execute();
-        dirtyCalled = false;
-
-        cmd.Undo();
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
     public void RectangleConstructor_Name_ReturnsCorrectName()
     {
         var rect = new Rectangle(0, 0, 1000, 2000);
@@ -157,21 +121,6 @@ public class ResizeObjectCommandTests
         Assert.Equal(2000, rect.HeightMicrons);
     }
 
-    [Fact]
-    public void RectangleConstructor_NullMarkDirty_DoesNotThrow()
-    {
-        var rect = new Rectangle(0, 0, 1000, 2000);
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(rect.MicronsX, rect.MicronsY, rect.WidthMicrons, rect.HeightMicrons),
-            s => rect.ApplyResize(s),
-            new ResizeState(rect.MicronsX, rect.MicronsY, 5000, 3000),
-            "размер",
-            null);
-
-        var ex = Record.Exception(() => cmd.Execute());
-        Assert.Null(ex);
-    }
-
     // ===== Text tests =====
 
     [Fact]
@@ -207,42 +156,6 @@ public class ResizeObjectCommandTests
         Assert.Equal(1000, text.MicronsX);
         Assert.Equal(2000, text.MicronsY);
         Assert.Equal(2500, text.FontSizeMicrons);
-    }
-
-    [Fact]
-    public void TextConstructor_Execute_CallsMarkDirty()
-    {
-        var text = new Text(0, 0, "Test", 2500);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(text.MicronsX, text.MicronsY, 0, text.FontSizeMicrons),
-            s => text.ApplyResize(s),
-            new ResizeState(5000, 6000, 0, 3500),
-            "размер",
-            () => dirtyCalled = true);
-
-        cmd.Execute();
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
-    public void TextConstructor_Undo_CallsMarkDirty()
-    {
-        var text = new Text(0, 0, "Test", 2500);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(text.MicronsX, text.MicronsY, 0, text.FontSizeMicrons),
-            s => text.ApplyResize(s),
-            new ResizeState(5000, 6000, 0, 3500),
-            "размер",
-            () => dirtyCalled = true);
-        cmd.Execute();
-        dirtyCalled = false;
-
-        cmd.Undo();
-
-        Assert.True(dirtyCalled);
     }
 
     [Fact]
@@ -365,44 +278,6 @@ public class ResizeObjectCommandTests
         Assert.Equal(0, line.StartMicronsY);
         Assert.Equal(1000, line.EndMicronsX);
         Assert.Equal(1000, line.EndMicronsY);
-    }
-
-    [Fact]
-    public void LineConstructor_Execute_CallsMarkDirty()
-    {
-        var line = new Line(0, 0, 1000, 1000);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(line.StartMicronsX, line.StartMicronsY,
-                line.EndMicronsX - line.StartMicronsX, line.EndMicronsY - line.StartMicronsY),
-            s => line.ApplyResize(s),
-            new ResizeState(5000, 6000, 15000 - 5000, 16000 - 6000),
-            "размер",
-            () => dirtyCalled = true);
-
-        cmd.Execute();
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
-    public void LineConstructor_Undo_CallsMarkDirty()
-    {
-        var line = new Line(0, 0, 1000, 1000);
-        bool dirtyCalled = false;
-        var cmd = new ChangePropertyCommand<ResizeState>(
-            new ResizeState(line.StartMicronsX, line.StartMicronsY,
-                line.EndMicronsX - line.StartMicronsX, line.EndMicronsY - line.StartMicronsY),
-            s => line.ApplyResize(s),
-            new ResizeState(5000, 6000, 15000 - 5000, 16000 - 6000),
-            "размер",
-            () => dirtyCalled = true);
-        cmd.Execute();
-        dirtyCalled = false;
-
-        cmd.Undo();
-
-        Assert.True(dirtyCalled);
     }
 
     [Fact]

@@ -26,9 +26,8 @@ public partial class TextPropertiesViewModel : ObjectPropertiesViewModel<Text>
 
     public TextPropertiesViewModel(
         CommandHistory? commandHistory,
-        Action? markDirty,
         Action<string?> setValidationError)
-        : base(commandHistory, markDirty, setValidationError)
+        : base(commandHistory, setValidationError)
     {
     }
 

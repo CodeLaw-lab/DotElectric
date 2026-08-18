@@ -297,7 +297,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeStartXFromStringCommand.Execute("10.5");
 
@@ -311,7 +311,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeStartXFromStringCommand.Execute("invalid");
 
@@ -325,7 +325,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeStartXFromStringCommand.Execute(null);
 
@@ -339,7 +339,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeEndXFromStringCommand.Execute("20.0");
 
@@ -353,7 +353,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeEndYFromStringCommand.Execute("15.5");
 
@@ -367,7 +367,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(0, 0, 10000, 10000);
         collection.Add(rect);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.RectVM.ChangeXFromStringCommand.Execute("5.0");
 
@@ -381,7 +381,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(0, 0, 10000, 10000);
         collection.Add(rect);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.RectVM.ChangeYFromStringCommand.Execute("7.5");
 
@@ -395,7 +395,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(0, 0, 10000, 10000);
         collection.Add(rect);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.RectVM.ChangeWidthFromStringCommand.Execute("25.0");
 
@@ -409,7 +409,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(0, 0, 10000, 10000);
         collection.Add(rect);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.RectVM.ChangeHeightFromStringCommand.Execute("30.0");
 
@@ -423,7 +423,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeXFromStringCommand.Execute("12.0");
 
@@ -437,7 +437,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeYFromStringCommand.Execute("8.5");
 
@@ -451,7 +451,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeFontSizeFromStringCommand.Execute("5.0");
 
@@ -465,7 +465,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeRotationFromStringCommand.Execute("90");
 
@@ -479,7 +479,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeLineTypeFromStringCommand.Execute("Штриховая");
 
@@ -493,7 +493,7 @@ public class PropertiesViewModelTests
         var line = new Line(0, 0, 10000, 10000);
         collection.Add(line);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.LineVM.ChangeLineTypeFromStringCommand.Execute("Invalid");
 
@@ -507,7 +507,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(0, 0, 10000, 10000);
         collection.Add(rect);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.RectVM.ChangeLineTypeFromStringCommand.Execute("Штрихпунктирная");
 
@@ -521,7 +521,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeTextTypeFromStringCommand.Execute("Размер");
 
@@ -535,7 +535,7 @@ public class PropertiesViewModelTests
         var text = new Text(0, 0, "Test", 2500);
         collection.Add(text);
         var history = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, history, null);
+        var vm = new PropertiesViewModel(collection, history);
 
         vm.TextVM.ChangeTextTypeFromStringCommand.Execute("Invalid");
 
@@ -604,7 +604,7 @@ public class PropertiesViewModelTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeEndXCommand.Execute(7000);
 
@@ -619,7 +619,7 @@ public class PropertiesViewModelTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeEndYCommand.Execute(8000);
 
@@ -634,7 +634,7 @@ public class PropertiesViewModelTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeStartYCommand.Execute(5000);
 
@@ -643,57 +643,12 @@ public class PropertiesViewModelTests
     }
 
     [Fact]
-    public void ChangeLineEndXCommand_CallsMarkDirty()
-    {
-        var collection = CreateCollection();
-        var line = new Line(1000, 2000, 3000, 4000);
-        collection.Add(line);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.LineVM.ChangeEndXCommand.Execute(7000);
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
-    public void ChangeRectXCommand_CallsMarkDirty()
-    {
-        var collection = CreateCollection();
-        var rect = new Rectangle(1000, 2000, 5000, 3000);
-        collection.Add(rect);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.RectVM.ChangeXCommand.Execute(2000);
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
-    public void ChangeTextYCommand_CallsMarkDirty()
-    {
-        var collection = CreateCollection();
-        var text = new Text(1000, 2000, "Test", 3500);
-        collection.Add(text);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.TextVM.ChangeYCommand.Execute(3000);
-
-        Assert.True(dirtyCalled);
-    }
-
-    [Fact]
     public void ChangeLineStartXCommand_UpdatesLineStartXProperty()
     {
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(1000, vm.LineVM.StartX);
         vm.LineVM.ChangeStartXCommand.Execute(5000);
@@ -706,7 +661,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(3000, vm.LineVM.EndX);
         vm.LineVM.ChangeEndXCommand.Execute(7000);
@@ -719,7 +674,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(1000, vm.RectVM.X);
         vm.RectVM.ChangeXCommand.Execute(2000);
@@ -732,7 +687,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(2000, vm.RectVM.Y);
         vm.RectVM.ChangeYCommand.Execute(3000);
@@ -746,7 +701,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         Assert.Equal(3000, vm.RectVM.Height);
         vm.RectVM.ChangeHeightCommand.Execute(5000);
@@ -761,7 +716,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeHeightCommand.Execute(5000);
         cmdHistory.Undo();
@@ -776,7 +731,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000, LineType.Solid);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeLineTypeCommand.Execute(LineType.Dashed);
 
@@ -791,7 +746,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(1000, vm.TextVM.X);
         vm.TextVM.ChangeXCommand.Execute(2000);
@@ -804,7 +759,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(2000, vm.TextVM.Y);
         vm.TextVM.ChangeYCommand.Execute(3000);
@@ -818,7 +773,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeFontSizeCommand.Execute(5000);
 
@@ -834,7 +789,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeFontSizeCommand.Execute(5000);
         cmdHistory.Undo();
@@ -849,7 +804,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeFontSizeCommand.Execute(500);
 
@@ -864,7 +819,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000, LineType.Solid);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeLineTypeCommand.Execute(LineType.DashDot);
 
@@ -878,7 +833,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000, LineType.Solid);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeLineTypeCommand.Execute(LineType.DashDot);
         cmdHistory.Undo();
@@ -892,7 +847,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 0);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal(0, vm.TextVM.Rotation);
         vm.TextVM.ChangeRotationCommand.Execute(90);
@@ -906,7 +861,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 0);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeRotationCommand.Execute(180);
 
@@ -920,7 +875,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500, rotationAngle: 90);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeRotationCommand.Execute(180);
         cmdHistory.Undo();
@@ -936,7 +891,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeWidthCommand.Execute(-1000);
 
@@ -952,7 +907,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeHeightCommand.Execute(-500);
 
@@ -968,7 +923,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeXCommand.Execute(-100);
 
@@ -984,7 +939,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeXCommand.Execute(-500);
 
@@ -999,7 +954,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         collection.Add(new Line(1000, 2000, 3000, 4000));
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeXCommand.Execute(5000);
 
@@ -1012,7 +967,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         collection.Add(new Line(1000, 2000, 3000, 4000));
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute("New text");
 
@@ -1025,7 +980,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         collection.Add(new Rectangle(1000, 2000, 5000, 3000));
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeLineTypeCommand.Execute(LineType.Dashed);
 
@@ -1177,7 +1132,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Hello", 3500);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute("World");
 
@@ -1190,26 +1145,11 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 3500);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         Assert.Equal("Hello", vm.TextVM.Content);
         vm.TextVM.ChangeContentCommand.Execute("World");
         Assert.Equal("World", vm.TextVM.Content);
-    }
-
-    [Fact]
-    public void ChangeTextContentCommand_CallsMarkDirty()
-    {
-        var collection = CreateCollection();
-        var text = new Text(1000, 2000, "Hello", 3500);
-        collection.Add(text);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.TextVM.ChangeContentCommand.Execute("World");
-
-        Assert.True(dirtyCalled);
     }
 
     [Fact]
@@ -1219,7 +1159,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500, textType: TextType.Text);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeTextTypeCommand.Execute(TextType.Dimension);
 
@@ -1233,28 +1173,13 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Test", 3500, textType: TextType.Text);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeTextTypeCommand.Execute(TextType.Note);
         cmdHistory.Undo();
 
         Assert.Equal(TextType.Text, text.TextType);
         Assert.Equal(TextType.Text, vm.TextVM.TextTypeValue);
-    }
-
-    [Fact]
-    public void ChangeTextTypeCommand_CallsMarkDirty()
-    {
-        var collection = CreateCollection();
-        var text = new Text(1000, 2000, "Test", 3500);
-        collection.Add(text);
-        var cmdHistory = CreateCommandHistory();
-        bool dirtyCalled = false;
-        var vm = new PropertiesViewModel(collection, cmdHistory, () => dirtyCalled = true);
-
-        vm.TextVM.ChangeTextTypeCommand.Execute(TextType.Label);
-
-        Assert.True(dirtyCalled);
     }
 
     [Fact]
@@ -1310,7 +1235,7 @@ public class PropertiesViewModelTests
         var line = new Line(1000, 2000, 3000, 4000) { LineType = LineType.Solid };
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.LineVM.ChangeLineTypeCommand.Execute(LineType.Dashed);
 
@@ -1334,7 +1259,7 @@ public class PropertiesViewModelTests
         var rect = new Rectangle(1000, 2000, 5000, 3000) { LineType = LineType.Solid };
         collection.Add(rect);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.RectVM.ChangeLineTypeCommand.Execute(LineType.DashDot);
 
@@ -1358,7 +1283,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeFontSizeCommand.Execute(8000);
 
@@ -1386,7 +1311,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         var raised = new List<string?>();
         ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
@@ -1404,7 +1329,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000) { IsEditable = true };
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeIsEditableCommand.Execute(false);
 
@@ -1418,7 +1343,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         var raised = new List<string?>();
         ((INotifyPropertyChanged)vm.TextVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
@@ -1436,7 +1361,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeForegroundCommand.Execute("#FF0000");
 
@@ -1451,7 +1376,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000) { Foreground = "#000000" };
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeForegroundCommand.Execute("not-a-color");
 
@@ -1465,7 +1390,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeTextWrappingCommand.Execute(true);
 
@@ -1479,7 +1404,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeTextAlignmentCommand.Execute("Center");
 
@@ -1493,7 +1418,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeFontNameFromStringCommand.Execute("ГОСТ Б");
 
@@ -1507,7 +1432,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000) { FontName = "ГОСТ А" };
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeFontNameFromStringCommand.Execute("   ");
 
@@ -1526,7 +1451,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.TextVM.ChangeTextTypeFromStringCommand.Execute(input);
 
@@ -1588,7 +1513,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeStrokeColorCommand.Execute("#00FF00");
 
@@ -1603,7 +1528,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000) { StrokeColor = "#000000" };
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeStrokeColorCommand.Execute("bad");
 
@@ -1617,7 +1542,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeFillColorCommand.Execute("#FF0000");
 
@@ -1631,7 +1556,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000) { FillColor = "Transparent" };
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeFillColorCommand.Execute("zzz");
 
@@ -1645,7 +1570,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeStrokeThicknessCommand.Execute(800);
 
@@ -1664,7 +1589,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.RectVM.ChangeLineTypeFromStringCommand.Execute(input);
 
@@ -1718,7 +1643,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.LineVM.ChangeStrokeColorCommand.Execute("#00FF00");
 
@@ -1733,7 +1658,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000) { StrokeColor = "#000000" };
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.LineVM.ChangeStrokeColorCommand.Execute("bad");
 
@@ -1747,7 +1672,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.LineVM.ChangeStrokeThicknessCommand.Execute(700);
 
@@ -1761,7 +1686,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000) { StrokeThicknessMicrons = 500 };
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.LineVM.ChangeStrokeThicknessCommand.Execute(-5);
 
@@ -1780,7 +1705,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         vm.LineVM.ChangeLineTypeFromStringCommand.Execute(input);
 
@@ -1928,7 +1853,7 @@ public class PropertiesViewModelTests
         var line = new Line(1000, 2000, 3000, 4000);
         collection.Add(line);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         var raised = new List<string?>();
         ((INotifyPropertyChanged)vm.LineVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
@@ -1983,7 +1908,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         var raised = new List<string?>();
         ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
@@ -2001,7 +1926,7 @@ public class PropertiesViewModelTests
         var collection = CreateCollection();
         var rect = new Rectangle(1000, 2000, 5000, 3000);
         collection.Add(rect);
-        var vm = new PropertiesViewModel(collection, CreateCommandHistory(), null);
+        var vm = new PropertiesViewModel(collection, CreateCommandHistory());
 
         var raised = new List<string?>();
         ((INotifyPropertyChanged)vm.RectVM).PropertyChanged += (s, e) => raised.Add(e.PropertyName);
@@ -2115,7 +2040,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeDefaultValueCommand.Execute(null);
 
@@ -2131,7 +2056,7 @@ public class PropertiesViewModelTests
         var text = new Text(1000, 2000, "Hello", 5000);
         collection.Add(text);
         var cmdHistory = CreateCommandHistory();
-        var vm = new PropertiesViewModel(collection, cmdHistory, null);
+        var vm = new PropertiesViewModel(collection, cmdHistory);
 
         vm.TextVM.ChangeContentCommand.Execute(null);
 

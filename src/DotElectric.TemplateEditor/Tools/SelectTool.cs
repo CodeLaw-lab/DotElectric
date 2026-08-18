@@ -258,8 +258,7 @@ public sealed class SelectTool : ITool
                     oldPos,
                     v => obj.Move(v.X, v.Y),
                     (obj.MicronsX, obj.MicronsY),
-                    "Переместить объект",
-                    _context.MarkDirty);
+                    "Переместить объект");
                 _context.CommandHistory.Push(cmd);
             }
             else
@@ -272,11 +271,10 @@ public sealed class SelectTool : ITool
                         oldPos,
                         v => obj.Move(v.X, v.Y),
                         (obj.MicronsX, obj.MicronsY),
-                        "Переместить объект",
-                        null);
+                        "Переместить объект");
                     subCommands.Add(cmd);
                 }
-                var batchCmd = new BatchCommand(subCommands, "Переместить объекты", _context.MarkDirty);
+                var batchCmd = new BatchCommand(subCommands, "Переместить объекты");
                 _context.CommandHistory.Push(batchCmd);
             }
         }

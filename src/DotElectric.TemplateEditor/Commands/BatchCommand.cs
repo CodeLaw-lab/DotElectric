@@ -12,7 +12,6 @@ public sealed class BatchCommand : IUndoCommand
 {
     private readonly List<IUndoCommand> _commands;
     private readonly string _name;
-    private readonly Action? _markDirty;
 
     /// <inheritdoc/>
     public string Name => _name;
@@ -29,18 +28,6 @@ public sealed class BatchCommand : IUndoCommand
         if (_commands.Count == 0)
             throw new ArgumentException("Список команд не может быть пустым.", nameof(commands));
         _name = name;
-    }
-
-    /// <summary>
-    /// Создаёт составную команду с callback для markDirty.
-    /// </summary>
-    /// <param name="commands">Список команд для выполнения.</param>
-    /// <param name="name">Имя составной команды (для отображения в UI).</param>
-    /// <param name="markDirty">Callback для пометки шаблона как изменённого.</param>
-    public BatchCommand(IEnumerable<IUndoCommand> commands, string name, Action? markDirty)
-        : this(commands, name)
-    {
-        _markDirty = markDirty;
     }
 
     /// <summary>
@@ -62,7 +49,6 @@ public sealed class BatchCommand : IUndoCommand
     {
         foreach (var command in _commands)
             command.Execute();
-        _markDirty?.Invoke();
     }
 
     /// <inheritdoc/>
@@ -71,6 +57,5 @@ public sealed class BatchCommand : IUndoCommand
         // Undo в обратном (LIFO) порядке
         for (var i = _commands.Count - 1; i >= 0; i--)
             _commands[i].Undo();
-        _markDirty?.Invoke();
     }
 }
