@@ -528,7 +528,7 @@ public class InlineEditManagerTests
     public InlineEditManagerTests()
     {
         _commandHistory = new CommandHistory(50);
-        _manager = new InlineEditManager(_commandHistory, markDirty: null, onStatusChanged: s => _lastStatus = s);
+        _manager = new InlineEditManager(_commandHistory, onStatusChanged: s => _lastStatus = s);
     }
 
     [Fact]

@@ -91,6 +91,7 @@ public sealed class CommandHistory
         }
 
         _redoStack.Add(command);
+        _markDirty?.Invoke();
     }
 
     /// <summary>
@@ -117,6 +118,7 @@ public sealed class CommandHistory
 
         _undoStack.Add(command);
         TrimUndoStack();
+        _markDirty?.Invoke();
     }
 
     /// <summary>

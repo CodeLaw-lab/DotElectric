@@ -339,30 +339,6 @@ public class CommandTests
         Assert.Throws<ArgumentException>(() => new BatchCommand(commands, "Empty"));
     }
 
-    [Fact]
-    public void BatchCommand_WithMarkDirty_CallsMarkDirtyOnExecute()
-    {
-        var markDirtyCalled = false;
-        var commands = new List<IUndoCommand> { new TestMockCommand() };
-        var batch = new BatchCommand(commands, "Test", () => markDirtyCalled = true);
-
-        batch.Execute();
-
-        Assert.True(markDirtyCalled);
-    }
-
-    [Fact]
-    public void BatchCommand_WithMarkDirty_CallsMarkDirtyOnUndo()
-    {
-        var markDirtyCalled = false;
-        var commands = new List<IUndoCommand> { new TestMockCommand() };
-        var batch = new BatchCommand(commands, "Test", () => markDirtyCalled = true);
-
-        batch.Undo();
-
-        Assert.True(markDirtyCalled);
-    }
-
     // ===== Move via ChangePropertyCommand<(long,long)> с явными координатами =====
 
     [Fact]
@@ -396,42 +372,6 @@ public class CommandTests
 
         Assert.Equal(10000, rect.MicronsX);
         Assert.Equal(10000, rect.MicronsY);
-    }
-
-    [Fact]
-    public void ChangePropertyCommand_Move_ExplicitConstructor_CallsMarkDirtyOnExecute()
-    {
-        var markDirtyCalled = false;
-        var rect = new Rectangle(10000, 10000, 5000, 5000);
-        var cmd = new ChangePropertyCommand<(long X, long Y)>(
-            (10000, 10000),
-            v => { rect.MicronsX = v.X; rect.MicronsY = v.Y; },
-            (15000, 13000),
-            "Переместить объект",
-            () => markDirtyCalled = true);
-
-        cmd.Execute();
-
-        Assert.True(markDirtyCalled);
-    }
-
-    [Fact]
-    public void ChangePropertyCommand_Move_ExplicitConstructor_CallsMarkDirtyOnUndo()
-    {
-        var markDirtyCalled = false;
-        var rect = new Rectangle(10000, 10000, 5000, 5000);
-        var cmd = new ChangePropertyCommand<(long X, long Y)>(
-            (10000, 10000),
-            v => { rect.MicronsX = v.X; rect.MicronsY = v.Y; },
-            (15000, 13000),
-            "Переместить объект",
-            () => markDirtyCalled = true);
-        cmd.Execute();
-        markDirtyCalled = false;
-
-        cmd.Undo();
-
-        Assert.True(markDirtyCalled);
     }
 
     // ===== Tests from AdditionalCommandTests =====

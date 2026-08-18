@@ -10,7 +10,6 @@ public sealed class AddObjectCommand : IUndoCommand
 {
     private readonly ObservableCollection<TemplateObjectBase> _objects;
     private readonly TemplateObjectBase _object;
-    private readonly Action? _markDirty;
     private readonly string _name;
 
     /// <inheritdoc/>
@@ -22,12 +21,10 @@ public sealed class AddObjectCommand : IUndoCommand
     public AddObjectCommand(
         ObservableCollection<TemplateObjectBase> objects,
         TemplateObjectBase obj,
-        Action? markDirty = null,
         string? nameOverride = null)
     {
         _objects = objects ?? throw new ArgumentNullException(nameof(objects));
         _object = obj ?? throw new ArgumentNullException(nameof(obj));
-        _markDirty = markDirty;
         _name = nameOverride ?? "Добавить объект";
     }
 
@@ -35,7 +32,6 @@ public sealed class AddObjectCommand : IUndoCommand
     public void Execute()
     {
         _objects.Add(_object);
-        _markDirty?.Invoke();
     }
 
     /// <inheritdoc/>

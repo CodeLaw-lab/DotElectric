@@ -20,9 +20,8 @@ public partial class LinePropertiesViewModel : ObjectPropertiesViewModel<Line>
 
     public LinePropertiesViewModel(
         CommandHistory? commandHistory,
-        Action? markDirty,
         Action<string?> setValidationError)
-        : base(commandHistory, markDirty, setValidationError)
+        : base(commandHistory, setValidationError)
     {
     }
 

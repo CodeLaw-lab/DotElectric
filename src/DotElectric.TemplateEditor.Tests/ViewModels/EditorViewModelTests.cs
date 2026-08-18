@@ -152,6 +152,47 @@ public class EditorViewModelTests
         Assert.False(vm.DirtyStateManager.DisplayName.EndsWith(" *"));
     }
 
+    // === Грязность через историю команд (e2e-фиксация байт-в-байт) ===
+
+    [Fact]
+    public void Push_MarksTemplateDirty()
+    {
+        var vm = CreateViewModel();
+        var line = new Line(0, 0, 10000, 10000);
+
+        vm.CommandHistory.Push(new AddObjectCommand(vm.Template.Objects, line));
+
+        Assert.True(vm.DirtyStateManager.IsDirty);
+    }
+
+    [Fact]
+    public void Undo_AfterClearDirty_MarksDirtyAgain()
+    {
+        var vm = CreateViewModel();
+        var line = new Line(0, 0, 10000, 10000);
+        vm.CommandHistory.Push(new AddObjectCommand(vm.Template.Objects, line));
+        vm.ClearDirty();
+        Assert.False(vm.DirtyStateManager.IsDirty);
+
+        vm.UndoCommand.Execute(null);
+
+        Assert.True(vm.DirtyStateManager.IsDirty);
+    }
+
+    [Fact]
+    public void Redo_AfterUndo_MarksDirty()
+    {
+        var vm = CreateViewModel();
+        var line = new Line(0, 0, 10000, 10000);
+        vm.CommandHistory.Push(new AddObjectCommand(vm.Template.Objects, line));
+        vm.UndoCommand.Execute(null);
+        vm.ClearDirty();
+
+        vm.RedoCommand.Execute(null);
+
+        Assert.True(vm.DirtyStateManager.IsDirty);
+    }
+
     // === Zoom ===
 
     [Theory]

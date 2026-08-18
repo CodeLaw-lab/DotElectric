@@ -348,8 +348,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
                 () => t.RotationAngle,
                 v => t.RotationAngle = NormalizeAngle(v),
                 NormalizeAngle(t.RotationAngle + 90),
-                "Повернуть текст",
-                MarkDirty))
+                "Повернуть текст"))
             .ToList();
 
         if (commands.Count == 1)
@@ -372,8 +371,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
                 () => t.RotationAngle,
                 v => t.RotationAngle = NormalizeAngle(v),
                 NormalizeAngle(t.RotationAngle - 90),
-                "Повернуть текст",
-                MarkDirty))
+                "Повернуть текст"))
             .ToList();
 
         if (commands.Count == 1)
@@ -410,7 +408,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
             }
         }
 
-        MarkDirty();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(UndoDisplayName));
@@ -424,7 +421,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     {
         _commandHistory.Redo();
         PurgeOrphanedSelection();
-        MarkDirty();
         UndoCommand.NotifyCanExecuteChanged();
         RedoCommand.NotifyCanExecuteChanged();
         OnPropertyChanged(nameof(UndoDisplayName));
@@ -493,13 +489,13 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
             () => _gridManager.GridStepMm, v => _gridManager.GridStepMm = v,
             () => _gridManager.IsSnapEnabled, v => _gridManager.IsSnapEnabled = v,
             _gridManager.RefreshGridNodes);
-        _inlineEditManager = new InlineEditManager(_commandHistory, MarkDirty, msg => _statusBarManager.StatusMessage = msg);
+        _inlineEditManager = new InlineEditManager(_commandHistory, msg => _statusBarManager.StatusMessage = msg);
         _dirtyStateManager = new DirtyStateManager(Template);
 
         // Свойства IAutosaveTab делегированы в DirtyStateManager — PropertyChanged не нужен,
         // т.к. XAML биндится напрямую к DirtyStateManager.*, а AutosaveService читает значения синхронно.
 
-        PropertiesVm = new PropertiesViewModel(_selectionManager.SelectedObjects, _commandHistory, MarkDirty);
+        PropertiesVm = new PropertiesViewModel(_selectionManager.SelectedObjects, _commandHistory);
         var orientLabel = template.Sheet.Orientation == SheetOrientation.Portrait ? "кн." : "алб.";
         _dirtyStateManager.DisplayName = $"{template.Sheet.Format} ({orientLabel}) — Без имени";
 
@@ -724,8 +720,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
                 () => (obj.MicronsX, obj.MicronsY),
                 v => obj.Move(v.X, v.Y),
                 (newX, newY),
-                "Переместить объект",
-                MarkDirty);
+                "Переместить объект");
         }).ToList();
 
         if (commands.Count == 1)

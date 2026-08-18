@@ -11,7 +11,6 @@ namespace DotElectric.TemplateEditor.ViewModels.Managers;
 public sealed partial class InlineEditManager : ObservableObject
 {
     private readonly CommandHistory _commandHistory;
-    private readonly Action? _markDirty;
     private readonly Action<string>? _onStatusChanged;
 
     /// <summary>
@@ -33,11 +32,9 @@ public sealed partial class InlineEditManager : ObservableObject
 
     public InlineEditManager(
         CommandHistory commandHistory,
-        Action? markDirty = null,
         Action<string>? onStatusChanged = null)
     {
         _commandHistory = commandHistory;
-        _markDirty = markDirty;
         _onStatusChanged = onStatusChanged;
     }
 
@@ -70,7 +67,7 @@ public sealed partial class InlineEditManager : ObservableObject
                 var cmd = new ChangePropertyCommand<string?>(
                     () => textObj.Content,
                     v => textObj.Content = v ?? string.Empty,
-                    newText, "Содержимое текста", _markDirty);
+                    newText, "Содержимое текста");
                 _commandHistory.Push(cmd);
             }
         }
