@@ -160,8 +160,9 @@ All agents MUST read this file before any code operation.
 - `PurgeOrphanedSelection()` после Undo/Redo
 - Checkpoint: история НЕ очищается при сохранении
 
-### 5.4 MarkDirty
-- IsDirty только через `_dirtyStateManager.MarkDirty()` в командах
+### 5.4 Грязность (MarkDirty)
+- IsDirty только через `CommandHistory`: `Push`/`Undo`/`Redo` стреляют делегатом `markDirty` один раз после успешного выполнения (rollback при исключении не стреляет)
+- Команды делегат НЕ носят (кандидат 3 обзора №4): не добавлять `markDirty` в конструкторы команд и в `IUndoCommand`
 - НЕ вручную, НЕ в сеттерах свойств
 - `BatchCommand.Name` используется для сообщения в статус-баре
 
@@ -467,5 +468,5 @@ public void MethodName_Scenario_ExpectedResult()
 | 13 | IAutosaveTab внутри AutosaveService | Инверсия зависимости | Отдельный файл |
 | 14 | KeyBinding в Window.InputBindings | Зависит от раскладки | PreviewKeyDown |
 | 15 | Switch по типу в `GetCurrentTool()` | Нарушение OCP | Case для каждого инструмента |
-| 16 | `IsDirty` вручную | Рассинхрон с CommandHistory | MarkDirty() только в командах |
+| 16 | `IsDirty` вручную | Рассинхрон с CommandHistory | CommandHistory.Push/Undo/Redo — единственный источник |
 | 17 | `obj.MicronsX + delta` для drag | Дрифт на каждом MouseMove | `initialPos + delta` |
