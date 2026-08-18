@@ -271,7 +271,7 @@ All agents MUST read this file before any code operation.
 ### 9.1 General Rules
 - Все converter'ы: `sealed`, stateless
 - `[ValueConversion(typeof(TFrom), typeof(TTo))]` attribute
-- Зарегистрированы в ResourceDictionary (App.xaml или UserControl.Resources)
+- Каждый конвертер объявлен ровно один раз — в корневом словаре ресурсов приложения (App.xaml); view-локальная декларация допустима, только если вид загружается вне контекста приложения (STA-тесты без ресурсов приложения — прецедент SettingsView/InverseBooleanConverter, кандидат 8 обзора №4)
 - НЕ через `{x:Static}`
 
 ### 9.2 IValueConverter

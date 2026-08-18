@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2614, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2576, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 90.25% line-rate (CI gate 80%)
-**Последнее обновление:** 18.08.2026 — Кандидат 4 обзора №4 (#103, тикет #104, PR #106): раскладка маркеров — один модуль MarkerLayout — каталог/позиции/hit с допуском #82/классификация/курсоры; HitTestHelper — хит по телу, ResizeMath — чистая математика, ResizeTool — единственный ResizeState, IEditorContext 26→25, поведение байт-в-байт, coverage 90.25%
+**Покрытие:** 90.6% line-rate (CI gate 80%)
+**Последнее обновление:** 18.08.2026 — Кандидат 8 обзора №4 (#108, тикет #109, PR #111): мёртвые швы — deletion sweep — удалены callback-параметры ZoomPanManager, мёртвые зависимости EditorViewModel, ITextToolSettings, DI-регистрация IFontMetrics, 4 конвертера без биндингов, ValidateRotation; ресурсы конвертеров консолидированы в корневом словаре (каждый класс ровно один раз); контракт Автосохранения типизирован, механизм сохранён; поведение байт-в-байт, coverage 90.6%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2614 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2576 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,9 +245,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2614 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 90.25% line-rate (CI gate 80%)
+- ✅ **2576 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 90.6% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#108–#109:** Кандидат 8 обзора №4 — мёртвые швы deletion sweep: удалены callback-параметры ZoomPanManager, мёртвые зависимости EditorViewModel (`_templateService`, `_gridNodeGenerator`-поле), ITextToolSettings, DI-регистрация IFontMetrics, 4 конвертера без биндингов, ValidateRotation; ресурсы конвертеров — каждый класс ровно один раз в корневом словаре; контракт Автосохранения типизирован (механизм сохранён), поведение байт-в-байт
 - ✅ **#103–#104:** Кандидат 4 обзора №4 — раскладка маркеров один модуль MarkerLayout: каталог/позиции/hit с допуском #82/классификация/курсоры; HitTestHelper — хит по телу, ResizeMath — чистая математика, ResizeTool — единственный ResizeState, IEditorContext 26→25, поведение байт-в-байт
 - ✅ **#98–#99:** Кандидат 3 обзора №4 — CommandHistory единолично владеет грязностью: Push/Undo/Redo стреляют markDirty, команды делегат не носят, компенсация в VM удалена, IEditorContext 27→26, поведение байт-в-байт
 - ✅ **#93–#94:** Кандидат 2 обзора №4 — preview-сейм: PreviewManager единственный источник истины preview-состояния, ре-ассайн-трюк удалён структурно (рендерер подписан на INPC preview-объекта), IEditorContext 29→27, визуально байт-в-байт
@@ -415,7 +416,7 @@ src/
 
 ---
 
-**Последнее обновление:** 18.08.2026 — Кандидат 4 обзора №4 (#103, тикет #104, PR #106): раскладка маркеров — один модуль `MarkerLayout` — каталог маркеров по типу в порядке приоритета hit-проверки, позиции, hit-тест с допуском min(8 мм, minDim/3) (семантика фикса #82), классификация, курсорная политика; `HitTestHelper` сжат до хита по телу (6 мёртвых методов удалены), `ResizeMath` — чистая математика drag'а (курсоры и классификация переехали в модуль), `ResizeTool` — единственный модельный `ResizeState` (8 ручных снапшот-полей удалены); член `HoveredHandle` удалён из `IEditorContext` (26→25 членов, hover — приватное поле SelectTool); 4 silent-default ветки → явные throw; enum `ResizeHandle` определён единственно в MarkerLayout; поведение байт-в-байт (XAML не менялся); термин «Маркер выделения» в CONTEXT.md; coverage 90.25% (2614 тестов)
+**Последнее обновление:** 18.08.2026 — Кандидат 8 обзора №4 (#108, тикет #109, PR #111): мёртвые швы — deletion sweep — весь код с нулём production-потребителей удалён вместе с тестами: callback-параметры `ZoomPanManager` (wiring сетки — только `SetGridRefreshCallback`), `_templateService` в `EditorViewModel` (поле + параметр + проброс фабрики) и `_gridNodeGenerator`-поле, `ITextToolSettings` целиком (регистрация, интерфейс, опциональный параметр TextTool), DI-регистрация `IFontMetrics`, 4 конвертера без биндингов (ZoomToString/LineTypeToString/TextTypeToString/RelativeMicronsToPixel), `ValidationService.ValidateRotation`; ресурсы всех конвертеров консолидированы в корневом словаре ресурсов приложения — каждый класс объявлен ровно один раз (исключение — view-локальный `InverseBooleanConverter` в SettingsView: STA-тесты без ресурсов приложения); контракт Автосохранения типизирован (`Template` вместо `object`, мёртвый сеттер `FilePath` удалён), горизонт очистки — константа `AutosaveCleanupDays`; механизм Автосохранения сохранён (решение Q5-b), read-поверхность оставлена до продуктовой спеки восстановления; `EnumToIndexConverter` sealed; поведение байт-в-байт; термин «Автосохранение» в CONTEXT.md; coverage 90.6% (2576 тестов)
 
 
 
