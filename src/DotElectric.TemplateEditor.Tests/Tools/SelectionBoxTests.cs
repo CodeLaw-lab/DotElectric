@@ -18,9 +18,8 @@ public class SelectionBoxTests
         foreach (var obj in objects)
             template.Objects.Add(obj);
 
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 
     // === Selection Box in SelectTool ===

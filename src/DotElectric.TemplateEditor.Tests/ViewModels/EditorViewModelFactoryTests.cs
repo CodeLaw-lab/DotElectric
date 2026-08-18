@@ -10,17 +10,14 @@ namespace DotElectric.TemplateEditor.Tests.ViewModels;
 
 public class EditorViewModelFactoryTests
 {
-    private readonly Mock<ITemplateService> _mockTemplateService;
     private readonly Mock<IPrintService> _mockPrintService;
     private readonly IServiceProvider _serviceProvider;
 
     public EditorViewModelFactoryTests()
     {
-        _mockTemplateService = new Mock<ITemplateService>();
         _mockPrintService = new Mock<IPrintService>();
 
         var services = new ServiceCollection();
-        services.AddSingleton(_mockTemplateService.Object);
         services.AddSingleton(_mockPrintService.Object);
         _serviceProvider = services.BuildServiceProvider();
     }

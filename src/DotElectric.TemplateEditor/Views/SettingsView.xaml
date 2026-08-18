@@ -11,6 +11,8 @@
         TextElement.Foreground="{DynamicResource TextPrimaryBrush}">
 
     <Window.Resources>
+        <!-- Единственная view-локальная декларация конвертера: SettingsView загружается
+             в STA-тестах без ресурсов приложения -->
         <converters:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
         <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
             <Setter Property="FontWeight" Value="SemiBold"/>

@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.Json;
 using DotElectric.TemplateEditor.Abstractions;
+using DotElectric.TemplateEditor.Constants;
 using Microsoft.Extensions.Logging;
 
 namespace DotElectric.TemplateEditor.Services;
@@ -253,11 +254,7 @@ public sealed class AutosaveService : IDisposable
         var filePath = Path.Combine(_autosaveFolder, fileName);
 
         // РЎРѕС…СЂР°РЅСЏРµРј С€Р°Р±Р»РѕРЅ
-        // Template вЂ” СЌС‚Рѕ РѕР±СЉРµРєС‚, РїСЂРёРІРѕРґРёРј Рє С‚РёРїСѓ Template
-        if (tab.Template is Models.Template template)
-        {
-            _templateService.Save(template, filePath);
-        }
+        _templateService.Save(tab.Template, filePath);
 
         // РЈРґР°Р»СЏРµРј РїСЂРµРґС‹РґСѓС‰РёР№ С„Р°Р№Р» Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ РґР»СЏ СЌС‚РѕР№ РІРєР»Р°РґРєРё
         CleanupOldAutosaveForTab(tabId);
@@ -338,7 +335,7 @@ public sealed class AutosaveService : IDisposable
     {
         try
         {
-            var cutoffDate = _dateTimeProvider.UtcNow.AddDays(-7);
+            var cutoffDate = _dateTimeProvider.UtcNow.AddDays(-EditorSettings.AutosaveCleanupDays);
             var files = Directory.GetFiles(_autosaveFolder, "autosave_*.tdel");
 
             foreach (var file in files)

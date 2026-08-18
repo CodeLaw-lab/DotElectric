@@ -15,7 +15,7 @@ public class ZoomPanManagerTests
 
     private static ZoomPanManager CreateSut(double zoom = 1.0)
     {
-        var sut = new ZoomPanManager(CreateTemplate(), () => { }, () => { });
+        var sut = new ZoomPanManager(CreateTemplate());
         sut.SetZoom(zoom);
         return sut;
     }

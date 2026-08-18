@@ -17,17 +17,15 @@ public class ResizeToolTests
         var template = new Template();
         template.Objects.Add(obj);
 
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 
     private static EditorViewModel CreateEmptyEditor()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 
     // === Constructor ===

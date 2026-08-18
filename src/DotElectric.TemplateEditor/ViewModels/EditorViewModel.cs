@@ -23,7 +23,6 @@ namespace DotElectric.TemplateEditor.ViewModels;
 /// </summary>
 public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveTab, IEditorContext
 {
-    private readonly ITemplateService _templateService;
     private readonly IPrintService _printService;
     private readonly CommandHistory _commandHistory;
     private bool _isDisposed;
@@ -38,7 +37,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     private readonly StatusBarManager _statusBarManager;
     private readonly GridManager _gridManager;
     private readonly DirtyStateManager _dirtyStateManager;
-    private readonly IGridNodeGenerator _gridNodeGenerator;
     private readonly IThemeService? _themeService;
 
     // All PropertyChanged handlers are now managed by individual managers.
@@ -86,13 +84,8 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// </summary>
     public Template Template { get; }
 
-    object IAutosaveTab.Template => Template;
     bool IAutosaveTab.IsDirty => _dirtyStateManager.IsDirty;
-    string? IAutosaveTab.FilePath
-    {
-        get => _dirtyStateManager.FilePath;
-        set => _dirtyStateManager.FilePath = value;
-    }
+    string? IAutosaveTab.FilePath => _dirtyStateManager.FilePath;
     string IAutosaveTab.DisplayName => _dirtyStateManager.DisplayName;
 
     /// <summary>
@@ -447,19 +440,17 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// </summary>
     public EditorViewModel(
         Template template,
-        ITemplateService templateService,
         GridSettings? gridSettings = null,
         IPrintService? printService = null,
         IGridNodeGenerator? gridNodeGenerator = null,
         IThemeService? themeService = null)
     {
-        _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
         _printService = printService ?? throw new ArgumentNullException(nameof(printService));
         Template = template ?? throw new ArgumentNullException(nameof(template));
         _commandHistory = new CommandHistory(maxLevels: EditorSettings.CommandHistoryMaxLevels, markDirty: MarkDirty);
         TabId = Guid.NewGuid().ToString("N")[..12];
         GridSettings = gridSettings ?? GridSettings.FromDefaultGrid();
-        _gridNodeGenerator = gridNodeGenerator ?? new GridNodeGenerator();
+        var resolvedGridNodeGenerator = gridNodeGenerator ?? new GridNodeGenerator();
         _themeService = themeService;
 
         if (_themeService != null)
@@ -467,8 +458,8 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
 
         // Инициализация менеджеров
         _selectionManager = new SelectionManager(OnSelectionChangedInternal);
-        _zoomPanManager = new ZoomPanManager(Template, () => { }, () => { });
-        _gridManager = new GridManager(Template, GridSettings, _zoomPanManager, _gridNodeGenerator);
+        _zoomPanManager = new ZoomPanManager(Template);
+        _gridManager = new GridManager(Template, GridSettings, _zoomPanManager, resolvedGridNodeGenerator);
         _zoomPanManager.SetGridRefreshCallback(_gridManager.RefreshGridNodes);
         _clipboardManager = new ClipboardManager();
         _toolRegistry = new ToolRegistry(this);
@@ -527,12 +518,11 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     public EditorViewModel(
         Template template,
         string filePath,
-        ITemplateService templateService,
         GridSettings? gridSettings = null,
         IPrintService? printService = null,
         IGridNodeGenerator? gridNodeGenerator = null,
         IThemeService? themeService = null)
-        : this(template, templateService, gridSettings, printService, gridNodeGenerator, themeService)
+        : this(template, gridSettings, printService, gridNodeGenerator, themeService)
     {
         _dirtyStateManager.FilePath = filePath;
         _dirtyStateManager.DisplayName = System.IO.Path.GetFileName(filePath);

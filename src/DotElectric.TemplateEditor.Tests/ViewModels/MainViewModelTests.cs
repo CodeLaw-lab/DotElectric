@@ -56,17 +56,13 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
             .Returns((string? fmt, string? _, string? _) =>
             {
-                var templateService = new Mock<ITemplateService>();
-                templateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-                    .Returns(new Template());
                 return new EditorViewModel(
                     new Template(),
-                    templateService.Object,
                     printService: new Mock<IPrintService>().Object);
             });
 
         _mockTabOperations.Setup(t => t.CreateNewCustomTab(It.IsAny<double>(), It.IsAny<double>()))
-            .Returns(new EditorViewModel(new Template(), new Mock<ITemplateService>().Object,
+            .Returns(new EditorViewModel(new Template(),
                 printService: new Mock<IPrintService>().Object));
 
         _viewModel = new MainViewModel(
@@ -418,14 +414,12 @@ public class MainViewModelTests : IDisposable
     {
         // Create a real template service mock that throws on save
         var mockTemplateService = new Mock<ITemplateService>();
-        mockTemplateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-            .Returns(new Template());
         mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()))
             .Throws(new InvalidOperationException("Autosave failed"));
 
         _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
             .Returns((string? fmt, string? _, string? _) =>
-                new EditorViewModel(new Template(), mockTemplateService.Object,
+                new EditorViewModel(new Template(),
                     printService: new Mock<IPrintService>().Object));
 
         _viewModel.NewTabCommand.Execute("A4");
@@ -503,10 +497,7 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void PrintCommand_WithSelectedTab_DelegatesToTab()
     {
-        var mockTemplateService = new Mock<ITemplateService>();
-        mockTemplateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-            .Returns(new Template());
-        var editor = new EditorViewModel(new Template(), mockTemplateService.Object,
+        var editor = new EditorViewModel(new Template(),
             printService: new Mock<IPrintService>().Object);
         _viewModel.OpenedTabs.Add(editor);
         _viewModel.SelectedTab = editor;

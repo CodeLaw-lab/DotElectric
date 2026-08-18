@@ -16,9 +16,8 @@ public class SelectToolTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         // Отключаем привязку к сетке для тестов
         vm.GridSettings.SnapEnabled = false;
         return vm;
@@ -453,9 +452,8 @@ public class DrawingLineToolTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }
@@ -712,9 +710,8 @@ public class DrawingRectangleToolTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }
@@ -978,9 +975,8 @@ public class TextToolTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }
@@ -1266,9 +1262,8 @@ public class SelectToolDragTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }
@@ -1561,9 +1556,8 @@ public class DrawingTextToolTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }

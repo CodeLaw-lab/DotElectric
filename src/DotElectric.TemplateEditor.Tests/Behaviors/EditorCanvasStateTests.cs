@@ -13,12 +13,7 @@ public class EditorCanvasStateTests
     private static EditorViewModel CreateEditor()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
-        mockService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-            .Returns(() => new Template());
-        mockService.Setup(s => s.Validate(It.IsAny<Template>()))
-            .Returns(Enumerable.Empty<string>());
-        return new EditorViewModel(template, mockService.Object, printService: new Mock<IPrintService>().Object);
+        return new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
     }
 
     // ===== Constructor =====

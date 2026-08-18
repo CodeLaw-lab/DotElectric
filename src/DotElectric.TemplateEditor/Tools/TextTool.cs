@@ -13,17 +13,17 @@ namespace DotElectric.TemplateEditor.Tools;
 public sealed class TextTool : ITool
 {
     private readonly IEditorContext _context;
-    private readonly ITextToolSettings _settings;
+    private readonly TextToolSettings _settings;
     private TextType _textType;
     private long _fontSizeMicrons;
     private string _font;
     private string _content;
     private PointMicrons? _startPoint;
 
-    public TextTool(IEditorContext context, ITextToolSettings? settings = null)
+    public TextTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        _settings = settings ?? new TextToolSettings();
+        _settings = new TextToolSettings();
         _textType = _settings.DefaultTextType;
         _fontSizeMicrons = _settings.DefaultFontSizeMicrons;
         _font = _settings.DefaultFont;

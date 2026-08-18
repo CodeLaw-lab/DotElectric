@@ -14,21 +14,13 @@ namespace DotElectric.TemplateEditor.Tests.ViewModels;
 
 public class EditorViewModelTests
 {
-    private static ITemplateService CreateMockTemplateService()
-    {
-        var mock = new Mock<ITemplateService>();
-        mock.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>())).Returns((string fmt, SheetOrientation orient) => new Template());
-        mock.Setup(s => s.Validate(It.IsAny<Template>())).Returns(Enumerable.Empty<string>());
-        return mock.Object;
-    }
-
     private static EditorViewModel CreateViewModel()
     {
         var sheet = Sheet.FromFormat("A3", SheetOrientation.Landscape);
         var metadata = new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow };
         var template = new Template(metadata, sheet);
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, CreateMockTemplateService(), printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 
     // === Constructor ===
@@ -59,7 +51,7 @@ public class EditorViewModelTests
     public void Constructor_FromFile_SetsFilePath()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, "C:\\test\\file.tdel", CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, "C:\\test\\file.tdel", printService: new Mock<IPrintService>().Object);
 
         Assert.Equal("C:\\test\\file.tdel", vm.DirtyStateManager.FilePath);
         Assert.Equal("file.tdel", vm.DirtyStateManager.DisplayName);
@@ -72,8 +64,8 @@ public class EditorViewModelTests
         var template1 = new Template();
         var template2 = new Template();
 
-        var vm1 = new EditorViewModel(template1, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
-        var vm2 = new EditorViewModel(template2, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm1 = new EditorViewModel(template1, printService: new Mock<IPrintService>().Object);
+        var vm2 = new EditorViewModel(template2, printService: new Mock<IPrintService>().Object);
 
         Assert.NotEqual(vm1.TabId, vm2.TabId);
     }
@@ -82,7 +74,7 @@ public class EditorViewModelTests
     public void Constructor_PanOffset_StartsAtZero()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         // PanOffset начинается с 0; центрирование происходит при OnSizeChanged (View)
         Assert.Equal(0.0, vm.ZoomPanManager.PanOffsetX, 2);
@@ -94,7 +86,7 @@ public class EditorViewModelTests
     {
         var sheet = Sheet.FromFormat("A4");
         var template = new Template(new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow }, sheet);
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         // Установим viewport (имитация SizeChanged из View)
         vm.ZoomPanManager.SetViewportSize(800, 600);
@@ -917,7 +909,7 @@ public class EditorViewModelTests
     public void DisplayName_FromFile_SetsFileName()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, "C:\\test\\my_template.tdel", CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, "C:\\test\\my_template.tdel", printService: new Mock<IPrintService>().Object);
         Assert.Equal("my_template.tdel", vm.DirtyStateManager.DisplayName);
     }
 
@@ -1031,7 +1023,7 @@ public class EditorViewModelTests
         var sheet = Sheet.FromFormat("A4", SheetOrientation.Portrait);
         var metadata = new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow };
         var template = new Template(metadata, sheet);
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         vm.ZoomPanManager.SetViewportSize(sheet.WidthMm, sheet.HeightMm);
         vm.GridManager.GridStepMm = 10.0;
@@ -1055,7 +1047,7 @@ public class EditorViewModelTests
         var sheet = Sheet.FromFormat("A3", SheetOrientation.Landscape);
         var metadata = new Metadata { Name = "Test", Author = "Test", CreatedDate = DateTime.UtcNow, ModifiedDate = DateTime.UtcNow };
         var template = new Template(metadata, sheet);
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         vm.ZoomPanManager.SetViewportSize(sheet.WidthMm, sheet.HeightMm);
         vm.GridManager.GridStepMm = 10.0;
@@ -1078,7 +1070,7 @@ public class EditorViewModelTests
     public void Dispose_UnsubscribesFromSelectedObjectsChanged()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         // Добавляем объект в выделение — подписка работает
         var line = new Line(0, 0, 10000, 10000);
@@ -1103,7 +1095,7 @@ public class EditorViewModelTests
     public void Dispose_DisposesPropertiesViewModel()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         // PropertiesVm должна быть доступна
         Assert.NotNull(vm.PropertiesVm);
@@ -1119,7 +1111,7 @@ public class EditorViewModelTests
     public void Dispose_DoubleDispose_DoesNotThrow()
     {
         var template = new Template();
-        var vm = new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        var vm = new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
 
         vm.Dispose();
         vm.Dispose(); // Повторный вызов не должен вызывать исключений
@@ -1651,18 +1643,10 @@ public class EditorViewModelTests
 
 public class EditorViewModelZoomTests
 {
-    private static ITemplateService CreateMockTemplateService()
-    {
-        var mock = new Mock<ITemplateService>();
-        mock.Setup(s => s.CreateNew(It.IsAny<string>())).Returns(() => new Template());
-        mock.Setup(s => s.Validate(It.IsAny<Template>())).Returns(Enumerable.Empty<string>());
-        return mock.Object;
-    }
-
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        return new EditorViewModel(template, CreateMockTemplateService(), printService: new Mock<IPrintService>().Object);
+        return new EditorViewModel(template, printService: new Mock<IPrintService>().Object);
     }
 
     [Theory]

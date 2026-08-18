@@ -15,9 +15,8 @@ public class ZoomComboBoxBehaviorTests
     private static EditorViewModel CreateEditorViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 
     // ===== DP get/set — pure DependencyObject (no STA needed) =====

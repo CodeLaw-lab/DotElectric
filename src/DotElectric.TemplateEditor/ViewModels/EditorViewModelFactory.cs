@@ -29,7 +29,6 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
     {
         if (template == null) throw new ArgumentNullException(nameof(template));
 
-        var templateService = _serviceProvider.GetRequiredService<ITemplateService>();
         var resolvedPrintService = printService ?? _serviceProvider.GetService<IPrintService>();
         var resolvedGridNodeGenerator = gridNodeGenerator ?? _gridNodeGenerator
             ?? _serviceProvider.GetService<IGridNodeGenerator>();
@@ -38,7 +37,6 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
 
         return new EditorViewModel(
             template,
-            templateService,
             ResolveGridSettings(gridSettings),
             resolvedPrintService,
             resolvedGridNodeGenerator,
@@ -56,7 +54,6 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
         if (template == null) throw new ArgumentNullException(nameof(template));
         if (string.IsNullOrWhiteSpace(filePath)) throw new ArgumentException("File path cannot be null or empty.", nameof(filePath));
 
-        var templateService = _serviceProvider.GetRequiredService<ITemplateService>();
         var resolvedPrintService = printService ?? _serviceProvider.GetService<IPrintService>();
         var resolvedGridNodeGenerator = gridNodeGenerator ?? _gridNodeGenerator
             ?? _serviceProvider.GetService<IGridNodeGenerator>();
@@ -66,7 +63,6 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
         return new EditorViewModel(
             template,
             filePath,
-            templateService,
             ResolveGridSettings(gridSettings),
             resolvedPrintService,
             resolvedGridNodeGenerator,

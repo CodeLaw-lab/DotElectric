@@ -14,9 +14,8 @@ public sealed class ShortcutRegistryTests
     private static EditorViewModel CreateViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        var vm = new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        var vm = new EditorViewModel(template, printService: mockPrintService.Object);
         vm.GridSettings.SnapEnabled = false;
         return vm;
     }
