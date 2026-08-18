@@ -43,7 +43,7 @@ src/
 ├── DotElectric.TemplateEditor/          # Main WPF application
 │   ├── Commands/                        # Undo/Redo commands
 │   ├── Constants/                       # PhysicalConstants, EditorSettings
-│   ├── Converters/                      # Value converters (25 files)
+│   ├── Converters/                      # Value converters (26 files)
 │   ├── Helpers/                         # Utility classes
 │   ├── Models/                          # Domain models (microns)
 │   │   └── Objects/                     # TemplateObjectBase, Rectangle, Line, Text

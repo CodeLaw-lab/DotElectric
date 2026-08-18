@@ -22,7 +22,7 @@
 | **Print Preview** | **нет** | **Ctrl+Shift+P → DocumentViewer** |
 | **EditorConstants** | **36-line proxy** | **удалён → PhysicalConstants/EditorSettings** |
 | **FontMetrics** | **static class** | **IFontMetrics (тестовые моки) + статический FontMetrics.Default в production; DI-регистрация удалена** |
-| **Sealed classes** | **0** | **66 классов (Converters, Services, Tools, Managers, Commands)** |
+| **Sealed classes** | **0** | **68 классов (Converters, Services, Tools, Managers, Commands)** |
 | **Shortcut dispatch** | **code-behind 30 строк** | **ShortcutRegistry.TryHandle()** |
 | **ITool.OnMouseWheel** | **void** | **bool (tool может блокировать zoom)** |
 | **GridHelper** | **static class** | **IGridNodeGenerator/GridNodeGenerator (DI Singleton)** |
@@ -193,7 +193,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **PreviewManager:** единственный источник истины preview-состояния (PreviewLine/Rectangle/Text + рамка выделения); контракт «уведомление только при смене ссылки» (`[ObservableProperty]`); рендерер подписан на INPC preview-объекта
 - **Tools:** ITool (без Name) + IEditorContext (25 членов, типизированные `PushTool`/`PopTool`/`ActivateTool`, без WPF ICommand; рамка выделения — методы `SetSelectionBox`/`ClearSelectionBox`; preview — член `PreviewManager`; пан — жест роутера, не член интерфейса; грязность — не член интерфейса; hover-маркер — приватное состояние SelectTool) + `ToolKind` + ResizeMath (чистые функции) + ShortcutRegistry
 - **ToolRegistry:** глубокий module (бывший ToolManager) — идентичность `ToolKind`, фабрики+кэш, `ActiveToolKind`/`ActiveToolInstance`, `Stack<ToolKind>`, `SwitchTo` с reset'ом предыдущего; Пан — жест роутера, не инструмент (ADR-0001); строковые карты удалены
-- **Converters:** 25 файлов (все sealed); каждый конвертер объявлен ровно один раз — в корневом словаре ресурсов приложения (исключение: `InverseBooleanConverter` view-локально в SettingsView — окно загружается в STA-тестах без ресурсов приложения)
+- **Converters:** 26 файлов (все sealed); каждый конвертер объявлен ровно один раз — в корневом словаре ресурсов приложения (исключение: `InverseBooleanConverter` view-локально в SettingsView — окно загружается в STA-тестах без ресурсов приложения)
 - **RenderRules:** статический модуль правил рендеринга (Helpers) — карта шрифтов, frozen dash-карта, hex→Brush, `ModelYToTop`, карта выравнивания, anchor-политика на тип; единый источник для канваса/preview/печати/сетки; конвертеры — тонкие делегаты (guards в адаптерах)
 - **MarkerLayout:** статический модуль геометрии маркеров выделения (Helpers) — каталог маркеров по типу в порядке приоритета hit-проверки, позиции в модельных координатах, hit-тест с допуском `min(8 мм, minDim/3)` (#82), классификация (угол/ребро/конец), курсорная политика; HitTestHelper — только хит по телу; ResizeMath — только математика drag'а; ResizeTool — единственный снапшот ResizeState
 - **Naming:** `TemplateObjectBase` (не `ITemplateObject`)
