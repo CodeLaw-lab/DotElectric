@@ -17,7 +17,9 @@
                 <ResourceDictionary Source="Resources/Styles/DarkTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <!-- Глобальные конвертеры приложения: каждый конвертер объявлен ровно один раз, только здесь -->
+            <!-- Глобальные конвертеры приложения: каждый конвертер объявлен ровно один раз.
+                 Исключение — InverseBooleanConverter: объявлен view-локально в SettingsView,
+                 потому что это окно загружается в STA-тестах без ресурсов приложения -->
             <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
             <converters:MicronsToMmConverter x:Key="MicronsToMmConverter"/>
             <converters:IsNullConverter x:Key="IsNull"/>
