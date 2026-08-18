@@ -1402,13 +1402,13 @@ public class EditorViewModelTests
     public void ActivateTool_SwitchesAndClearsPreview()
     {
         var vm = CreateViewModel();
-        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+        vm.PreviewManager.PreviewLine = new Line(0, 0, 10000, 10000);
         vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
 
         vm.ActivateTool(ToolKind.Select);
 
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
     }
 
     [Fact]
@@ -1416,11 +1416,11 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
-        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+        vm.PreviewManager.PreviewLine = new Line(0, 0, 10000, 10000);
 
         vm.ActivateTool(ToolKind.Line);
 
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
     }
 
     // === FitToScreen ===
@@ -1488,36 +1488,36 @@ public class EditorViewModelTests
     public void SetActiveTool_ResetClearsPreviewLine()
     {
         var vm = CreateViewModel();
-        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+        vm.PreviewManager.PreviewLine = new Line(0, 0, 10000, 10000);
         vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
     }
 
     [Fact]
     public void SetActiveTool_ResetClearsPreviewRectangle()
     {
         var vm = CreateViewModel();
-        vm.PreviewRectangle = new Rectangle(0, 0, 10000, 10000);
+        vm.PreviewManager.PreviewRectangle = new Rectangle(0, 0, 10000, 10000);
         vm.ToolRegistry.ActiveToolKind = ToolKind.Rectangle;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
     }
 
     [Fact]
     public void SetActiveTool_ResetClearsPreviewText()
     {
         var vm = CreateViewModel();
-        vm.PreviewText = new Text(0, 0, "Test", 2500);
+        vm.PreviewManager.PreviewText = new Text(0, 0, "Test", 2500);
         vm.ToolRegistry.ActiveToolKind = ToolKind.Text;
 
         vm.SetActiveToolCommand.Execute(ToolKind.Select);
 
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
     }
 
     [Fact]
@@ -1525,11 +1525,11 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         vm.ToolRegistry.ActiveToolKind = ToolKind.Line;
-        vm.PreviewLine = new Line(0, 0, 10000, 10000);
+        vm.PreviewManager.PreviewLine = new Line(0, 0, 10000, 10000);
 
         vm.SetActiveToolCommand.Execute(ToolKind.Line);
 
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
     }
 
     // === IsObjectHovered ===
@@ -1578,7 +1578,7 @@ public class EditorViewModelTests
         var raised = false;
         vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.PreviewLine)) raised = true; };
 
-        vm.PreviewLine = new Line(0, 0, 1000, 1000);
+        vm.PreviewManager.PreviewLine = new Line(0, 0, 1000, 1000);
 
         Assert.True(raised);
     }
@@ -1590,7 +1590,7 @@ public class EditorViewModelTests
         var raised = false;
         vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.PreviewRectangle)) raised = true; };
 
-        vm.PreviewRectangle = new Rectangle(0, 0, 1000, 1000);
+        vm.PreviewManager.PreviewRectangle = new Rectangle(0, 0, 1000, 1000);
 
         Assert.True(raised);
     }
@@ -1602,7 +1602,7 @@ public class EditorViewModelTests
         var raised = false;
         vm.PreviewManager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.PreviewText)) raised = true; };
 
-        vm.PreviewText = new Text(0, 0, "Test", 3500);
+        vm.PreviewManager.PreviewText = new Text(0, 0, "Test", 3500);
 
         Assert.True(raised);
     }

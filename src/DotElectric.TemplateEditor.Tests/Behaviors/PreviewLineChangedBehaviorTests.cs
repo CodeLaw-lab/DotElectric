@@ -90,7 +90,7 @@ public class PreviewLineChangedBehaviorTests
             double sheetHeightMm = 297.0;
 
             // Set up a valid preview line
-            editor.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 1000,
+            editor.PreviewManager.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 1000,
                 endMicronsX: 10000, endMicronsY: 2000,
                 strokeThicknessMicrons: 500);
 
@@ -118,7 +118,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.0;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewLine = null;
+            editor.PreviewManager.PreviewLine = null;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewLine(canvas, editor, zoom, sheetHeightMm);
@@ -139,7 +139,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.0;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewRectangle = new Rectangle(micronsX: 0, micronsY: 0,
+            editor.PreviewManager.PreviewRectangle = new Rectangle(micronsX: 0, micronsY: 0,
                 widthMicrons: 10000, heightMicrons: 5000,
                 strokeThicknessMicrons: 500);
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
@@ -163,7 +163,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.0;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewRectangle = null;
+            editor.PreviewManager.PreviewRectangle = null;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewRectangle(canvas, editor, zoom, sheetHeightMm);
@@ -184,7 +184,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.0;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewText = new Text(micronsX: 1000, micronsY: 2000,
+            editor.PreviewManager.PreviewText = new Text(micronsX: 1000, micronsY: 2000,
                 content: "Test Preview", fontSizeMicrons: 5000,
                 fontName: "ГОСТ А");
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
@@ -208,7 +208,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.0;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewText = null;
+            editor.PreviewManager.PreviewText = null;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
@@ -233,7 +233,7 @@ public class PreviewLineChangedBehaviorTests
 
             var preview = new Text(micronsX: 1000, micronsY: 2000,
                 content: "Anchor", fontSizeMicrons: 5000, fontName: "ГОСТ А");
-            editor.PreviewText = preview;
+            editor.PreviewManager.PreviewText = preview;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
@@ -255,7 +255,7 @@ public class PreviewLineChangedBehaviorTests
 
             var preview = new Text(micronsX: 0, micronsY: 10_000,
                 content: "A\nB", fontSizeMicrons: 5000, fontName: "ГОСТ Б");
-            editor.PreviewText = preview;
+            editor.PreviewManager.PreviewText = preview;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewText(canvas, editor, zoom, sheetHeightMm);
@@ -275,7 +275,7 @@ public class PreviewLineChangedBehaviorTests
             double zoom = 1.5;
             double sheetHeightMm = 297.0;
 
-            editor.PreviewText = new Text(micronsX: 4_000, micronsY: 2000,
+            editor.PreviewManager.PreviewText = new Text(micronsX: 4_000, micronsY: 2000,
                 content: "Left", fontSizeMicrons: 5000);
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
@@ -293,7 +293,7 @@ public class PreviewLineChangedBehaviorTests
             var (canvas, elements) = CreateCanvasWithNamedElements();
             var editor = CreateEditorViewModel();
 
-            editor.PreviewText = new Text(micronsX: 0, micronsY: 0,
+            editor.PreviewManager.PreviewText = new Text(micronsX: 0, micronsY: 0,
                 content: "Font", fontSizeMicrons: 5000, fontName: "ГОСТ А");
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
@@ -316,7 +316,7 @@ public class PreviewLineChangedBehaviorTests
 
             var preview = new Rectangle(micronsX: 5_000, micronsY: 10_000,
                 widthMicrons: 20_000, heightMicrons: 8_000, strokeThicknessMicrons: 500);
-            editor.PreviewRectangle = preview;
+            editor.PreviewManager.PreviewRectangle = preview;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             PreviewLineChangedBehavior.UpdatePreviewRectangle(canvas, editor, zoom, sheetHeightMm);
@@ -339,16 +339,165 @@ public class PreviewLineChangedBehaviorTests
             var editor = CreateEditorViewModel();
 
             // Set preview before registration to test the full property change flow
-            editor.PreviewLine = null;
+            editor.PreviewManager.PreviewLine = null;
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             // Set a preview line - this triggers PropertyChanged
-            editor.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            editor.PreviewManager.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000,
                 strokeThicknessMicrons: 500);
 
             // The PropertyChanged handler should have updated the canvas
             Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+        });
+    }
+
+    // ===== P2: рендерер подписан на INPC preview-объекта (спека #93) =====
+
+    [Fact]
+    public void MutatingPreviewLine_UpdatesElement_WithoutReassign()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            var zoom = editor.ZoomPanManager.Zoom;
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var preview = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 5000, endMicronsY: 5000,
+                strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = preview;
+            Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+
+            // Мутация свойства без ре-ассайна — обновление приходит через INPC объекта
+            preview.EndMicronsX = 20_000;
+
+            Assert.Equal(Coordinate.ToMm(20_000) * zoom, elements.LineElement.X2, 4);
+        });
+    }
+
+    [Fact]
+    public void MutatingPreviewRectangle_UpdatesElement_WithoutReassign()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+            var zoom = editor.ZoomPanManager.Zoom;
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var preview = new Rectangle(micronsX: 0, micronsY: 0,
+                widthMicrons: 10_000, heightMicrons: 5_000,
+                strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewRectangle = preview;
+            Assert.Equal(Visibility.Visible, elements.RectangleElement.Visibility);
+
+            preview.WidthMicrons = 30_000;
+
+            Assert.Equal(Coordinate.ToMm(30_000) * zoom, elements.RectangleElement.Width, 4);
+        });
+    }
+
+    [Fact]
+    public void MutatingPreviewText_UpdatesElement_WithoutReassign()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var preview = new Text(micronsX: 0, micronsY: 0,
+                content: "До", fontSizeMicrons: 5000);
+            editor.PreviewManager.PreviewText = preview;
+            Assert.Equal(Visibility.Visible, elements.TextElement.Visibility);
+
+            preview.Content = "После";
+
+            Assert.Equal("После", elements.TextElement.Text);
+        });
+    }
+
+    [Fact]
+    public void ClearedPreviewLine_MutationsNoLongerUpdateElement()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var preview = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 5000, endMicronsY: 5000,
+                strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = preview;
+            Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+            Assert.Equal(Coordinate.ToMm(5000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+
+            editor.PreviewManager.PreviewLine = null;
+            Assert.Equal(Visibility.Collapsed, elements.LineElement.Visibility);
+
+            // Брошенный объект отписан: мутация не двигает элемент
+            preview.EndMicronsX = 99_000;
+            Assert.Equal(Coordinate.ToMm(5000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+        });
+    }
+
+    [Fact]
+    public void SwappedPreviewLine_OldObjectNoLongerUpdatesElement()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var first = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 5000, endMicronsY: 5000, strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = first;
+            Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+
+            // Swap на живой объект: старый отписывается, новый управляет элементом
+            var second = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 20_000, endMicronsY: 20_000, strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = second;
+
+            first.EndMicronsX = 99_000;
+            Assert.Equal(Coordinate.ToMm(20_000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+
+            second.EndMicronsX = 30_000;
+            Assert.Equal(Coordinate.ToMm(30_000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+        });
+    }
+
+    [Fact]
+    public void Unregister_WithActivePreviews_UnsubscribesAllObjects()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var line = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 5000, endMicronsY: 5000, strokeThicknessMicrons: 500);
+            var rect = new Rectangle(micronsX: 0, micronsY: 0, widthMicrons: 10_000, heightMicrons: 5_000, strokeThicknessMicrons: 500);
+            var text = new Text(micronsX: 0, micronsY: 0, content: "До", fontSizeMicrons: 5000);
+            editor.PreviewManager.PreviewLine = line;
+            editor.PreviewManager.PreviewRectangle = rect;
+            editor.PreviewManager.PreviewText = text;
+            Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+
+            PreviewLineChangedBehavior.Unregister(editor);
+
+            // После отвязки канваса мутации не доходят до элементов (подписки сняты, утечки нет)
+            line.EndMicronsX = 99_000;
+            rect.WidthMicrons = 99_000;
+            text.Content = "После";
+            Assert.Equal(Coordinate.ToMm(5000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+            Assert.Equal(Coordinate.ToMm(10_000) * editor.ZoomPanManager.Zoom, elements.RectangleElement.Width, 4);
+            Assert.Equal("До", elements.TextElement.Text);
         });
     }
 

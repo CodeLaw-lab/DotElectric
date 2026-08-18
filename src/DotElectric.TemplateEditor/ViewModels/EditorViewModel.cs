@@ -164,23 +164,8 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// Активный маркер изменения размера (null если не ресайзим).
     /// </summary>
 
-    // === IEditorContext Preview/SelectionBox (делегировано PreviewManager, без OnPropertyChanged) ===
+    // === IEditorContext SelectionBox (делегировано PreviewManager) ===
 
-    public Line? PreviewLine
-    {
-        get => _previewManager.PreviewLine;
-        set => _previewManager.PreviewLine = value;
-    }
-    public Models.Objects.Rectangle? PreviewRectangle
-    {
-        get => _previewManager.PreviewRectangle;
-        set => _previewManager.PreviewRectangle = value;
-    }
-    public Text? PreviewText
-    {
-        get => _previewManager.PreviewText;
-        set => _previewManager.PreviewText = value;
-    }
     public void SetSelectionBox(long left, long bottom, long width, long height, SelectionDirection direction)
         => _previewManager.SetSelectionBox(left, bottom, width, height, direction);
     public void ClearSelectionBox() => _previewManager.ClearSelectionBox();

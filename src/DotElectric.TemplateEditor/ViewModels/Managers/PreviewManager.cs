@@ -12,48 +12,27 @@ public sealed partial class PreviewManager : ObservableObject
 {
     /// <summary>
     /// Preview-линия для инструмента рисования линий.
-    /// NOT [ObservableProperty] — unconditional notify needed for preview re-assign.
+    /// Контракт: уведомление только при смене ссылки (создание/очистка предпросмотра);
+    /// мутации свойств объекта рендерер получает через INPC самого объекта.
     /// </summary>
+    [ObservableProperty]
     private Line? _previewLine;
-    public Line? PreviewLine
-    {
-        get => _previewLine;
-        set
-        {
-            _previewLine = value;
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Preview-прямоугольник для инструмента рисования прямоугольников.
-    /// NOT [ObservableProperty] — unconditional notify needed for preview re-assign.
+    /// Контракт: уведомление только при смене ссылки (создание/очистка предпросмотра);
+    /// мутации свойств объекта рендерер получает через INPC самого объекта.
     /// </summary>
+    [ObservableProperty]
     private Rectangle? _previewRectangle;
-    public Rectangle? PreviewRectangle
-    {
-        get => _previewRectangle;
-        set
-        {
-            _previewRectangle = value;
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Preview-текст для инструмента добавления текста.
-    /// NOT [ObservableProperty] — unconditional notify needed for preview re-assign.
+    /// Контракт: уведомление только при смене ссылки (создание/очистка предпросмотра);
+    /// мутации свойств объекта рендерер получает через INPC самого объекта.
     /// </summary>
+    [ObservableProperty]
     private Text? _previewText;
-    public Text? PreviewText
-    {
-        get => _previewText;
-        set
-        {
-            _previewText = value;
-            OnPropertyChanged();
-        }
-    }
 
     /// <summary>
     /// Preview-прямоугольник рамки выделения — левый край в микронах.
@@ -78,13 +57,7 @@ public sealed partial class PreviewManager : ObservableObject
     /// Preview-прямоугольник рамки выделения — ширина в микронах.
     /// </summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(SelectionBoxRight))]
     private long _selectionBoxWidth;
-
-    /// <summary>
-    /// Preview-прямоугольник рамки выделения — правый край (Left + Width).
-    /// </summary>
-    public long SelectionBoxRight => SelectionBoxLeft + SelectionBoxWidth;
 
     /// <summary>
     /// Preview-прямоугольник рамки выделения — высота в микронах.

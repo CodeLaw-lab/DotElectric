@@ -234,7 +234,7 @@ public class CanvasInputRouterTests
 
             Assert.True(args.Handled);
             Assert.Equal(0, state.LastButtonRaw);
-            Assert.NotNull(editor.PreviewLine);
+            Assert.NotNull(editor.PreviewManager.PreviewLine);
         });
     }
 

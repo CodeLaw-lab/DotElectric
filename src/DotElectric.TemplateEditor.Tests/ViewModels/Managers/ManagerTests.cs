@@ -447,6 +447,20 @@ public class PreviewManagerTests
     }
 
     [Fact]
+    public void PreviewLine_SameReferenceReassign_RaisesNothing()
+    {
+        var line = new Line(0, 0, 1000, 1000);
+        _manager.PreviewLine = line;
+
+        var raised = false;
+        _manager.PropertyChanged += (s, e) => { if (e.PropertyName == nameof(PreviewManager.PreviewLine)) raised = true; };
+
+        _manager.PreviewLine = line;
+
+        Assert.False(raised);
+    }
+
+    [Fact]
     public void SetSelectionBox_SetsAllProperties()
     {
         _manager.SetSelectionBox(1000, 2000, 3000, 4000, SelectionDirection.RightToLeft);
@@ -464,14 +478,6 @@ public class PreviewManagerTests
         _manager.SetSelectionBox(1000, 2000, 3000, 4000, SelectionDirection.LeftToRight);
 
         Assert.Equal(6000, _manager.SelectionBoxTop); // 2000 + 4000
-    }
-
-    [Fact]
-    public void SelectionBoxRight_CalculatedCorrectly()
-    {
-        _manager.SetSelectionBox(1000, 2000, 3000, 4000, SelectionDirection.LeftToRight);
-
-        Assert.Equal(4000, _manager.SelectionBoxRight); // 1000 + 3000
     }
 
     [Fact]

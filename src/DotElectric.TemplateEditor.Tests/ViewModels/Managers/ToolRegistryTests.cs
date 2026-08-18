@@ -101,11 +101,11 @@ public class ToolRegistryTests
         var tool = sut.GetOrCreateTool<DrawingLineTool>();
         sut.ActiveToolKind = ToolKind.Line;
         tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
 
         sut.SwitchTo(ToolKind.Select);
 
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
         Assert.Equal(ToolKind.Select, sut.ActiveToolKind);
     }
 
@@ -117,11 +117,11 @@ public class ToolRegistryTests
         var tool = sut.GetOrCreateTool<DrawingLineTool>();
         sut.ActiveToolKind = ToolKind.Line;
         tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
 
         sut.SwitchTo(ToolKind.Line);
 
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
         Assert.Equal(ToolKind.Line, sut.ActiveToolKind);
     }
 

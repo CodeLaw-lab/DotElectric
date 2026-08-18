@@ -2,6 +2,7 @@ using System.Collections.ObjectModel;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
+using DotElectric.TemplateEditor.ViewModels.Managers;
 
 namespace DotElectric.TemplateEditor.Tools;
 
@@ -22,9 +23,7 @@ public interface IEditorContext
     ResizeHandle? ActiveResizeHandle { get; set; }
 
     // Preview
-    Line? PreviewLine { get; set; }
-    Models.Objects.Rectangle? PreviewRectangle { get; set; }
-    Text? PreviewText { get; set; }
+    PreviewManager PreviewManager { get; }
     void SetSelectionBox(long left, long bottom, long width, long height, Models.SelectionDirection direction);
     void ClearSelectionBox();
 

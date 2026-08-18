@@ -35,7 +35,7 @@ public sealed class DrawingLineTool : ITool
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY,
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY,
             _lineType, strokeColor: EditorSettings.DefaultStrokeColor);
-        _context.PreviewLine = _previewLine;
+        _context.PreviewManager.PreviewLine = _previewLine;
     }
 
     public void OnMouseMove(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -45,12 +45,11 @@ public sealed class DrawingLineTool : ITool
 
         var end = ApplyConstraint(SnapHelper.SnapIfEnabled(modelPoint, _context.GridSettings), modifiers, _startPoint.Value);
 
+        // Мутация свойств без ре-ассайна: рендерер подписан на INPC preview-объекта
         _previewLine.StartMicronsX = _startPoint.Value.MicronsX;
         _previewLine.StartMicronsY = _startPoint.Value.MicronsY;
         _previewLine.EndMicronsX = end.MicronsX;
         _previewLine.EndMicronsY = end.MicronsY;
-
-        _context.PreviewLine = _previewLine;
     }
 
     public void OnMouseUp(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -76,7 +75,7 @@ public sealed class DrawingLineTool : ITool
 
         _startPoint = null;
         _previewLine = null;
-        _context.PreviewLine = null;
+        _context.PreviewManager.PreviewLine = null;
     }
 
     public void OnDoubleClick(PointMicrons modelPoint)
@@ -84,7 +83,7 @@ public sealed class DrawingLineTool : ITool
         // Двойной клик — отменить текущую линию и переключиться на Select
         _startPoint = null;
         _previewLine = null;
-        _context.PreviewLine = null;
+        _context.PreviewManager.PreviewLine = null;
         _context.ActivateTool(ToolKind.Select);
     }
 
@@ -99,7 +98,7 @@ public sealed class DrawingLineTool : ITool
     {
         _startPoint = null;
         _previewLine = null;
-        _context.PreviewLine = null;
+        _context.PreviewManager.PreviewLine = null;
     }
 
     public bool OnKeyDown(ToolKey key, ToolModifiers modifiers)
