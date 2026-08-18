@@ -37,7 +37,7 @@ public sealed class TextTool : ITool
 
         // Первый клик — создаём preview (НЕ добавляем в коллекцию)
         _startPoint = SnapHelper.SnapIfEnabled(modelPoint, _context.GridSettings);
-        _context.PreviewText = new Text(
+        _context.PreviewManager.PreviewText = new Text(
             _startPoint.Value.MicronsX,
             _startPoint.Value.MicronsY,
             _content,
@@ -49,28 +49,30 @@ public sealed class TextTool : ITool
 
     public void OnMouseMove(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
     {
-        if (_startPoint == null || _context.PreviewText == null)
+        if (_startPoint == null || _context.PreviewManager.PreviewText == null)
             return;
 
         var snapped = SnapHelper.SnapIfEnabled(modelPoint, _context.GridSettings);
-        var preview = _context.PreviewText;
+        var preview = _context.PreviewManager.PreviewText;
+
+        // Мутация свойств без ре-ассайна: рендерер подписан на INPC preview-объекта
         preview.MicronsX = snapped.MicronsX;
         preview.MicronsY = snapped.MicronsY;
-        _context.PreviewText = preview;
     }
 
     public void OnMouseUp(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
     {
         // Финализируем — создаём реальный объект
-        if (_startPoint != null && _context.PreviewText != null)
+        if (_startPoint != null && _context.PreviewManager.PreviewText != null)
         {
+            var preview = _context.PreviewManager.PreviewText;
             var text = new Text(
-                _context.ClampX(_context.PreviewText.MicronsX),
-                _context.ClampY(_context.PreviewText.MicronsY),
-                _context.PreviewText.Content,
-                _context.PreviewText.FontSizeMicrons,
-                _context.PreviewText.FontName,
-                _context.PreviewText.TextType,
+                _context.ClampX(preview.MicronsX),
+                _context.ClampY(preview.MicronsY),
+                preview.Content,
+                preview.FontSizeMicrons,
+                preview.FontName,
+                preview.TextType,
                 foreground: EditorSettings.DefaultTextForeground);
 
             var cmd = new Commands.AddObjectCommand(_context.Template.Objects, text);
@@ -81,14 +83,14 @@ public sealed class TextTool : ITool
         }
 
         _startPoint = null;
-        _context.PreviewText = null;
+        _context.PreviewManager.PreviewText = null;
     }
 
     public void OnDoubleClick(PointMicrons modelPoint)
     {
         // Двойной клик — отменить текущий preview и переключиться на Select
         _startPoint = null;
-        _context.PreviewText = null;
+        _context.PreviewManager.PreviewText = null;
         _context.ActivateTool(ToolKind.Select);
     }
 
@@ -108,7 +110,7 @@ public sealed class TextTool : ITool
     public void Reset()
     {
         _startPoint = null;
-        _context.PreviewText = null;
+        _context.PreviewManager.PreviewText = null;
     }
 
     public bool OnKeyDown(ToolKey key, ToolModifiers modifiers)

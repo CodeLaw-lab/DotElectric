@@ -470,9 +470,9 @@ public class DrawingLineToolTests
         var tool = new DrawingLineTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.NotNull(vm.PreviewLine);
-        Assert.Equal(1000, vm.PreviewLine.StartMicronsX);
-        Assert.Equal(2000, vm.PreviewLine.StartMicronsY);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
+        Assert.Equal(1000, vm.PreviewManager.PreviewLine.StartMicronsX);
+        Assert.Equal(2000, vm.PreviewManager.PreviewLine.StartMicronsY);
     }
 
     [Fact]
@@ -484,7 +484,7 @@ public class DrawingLineToolTests
         tool.OnMouseUp(new PointMicrons(3000, 4000), ToolMouseButton.Left, ToolModifiers.None);
 
         Assert.Single(vm.Template.Objects);
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
 
         var line = (Line)vm.Template.Objects[0];
         Assert.Equal(1000, line.StartMicronsX);
@@ -501,9 +501,9 @@ public class DrawingLineToolTests
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.NotNull(vm.PreviewLine);
-        Assert.Equal(5000, vm.PreviewLine.EndMicronsX);
-        Assert.Equal(6000, vm.PreviewLine.EndMicronsY);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
+        Assert.Equal(5000, vm.PreviewManager.PreviewLine.EndMicronsX);
+        Assert.Equal(6000, vm.PreviewManager.PreviewLine.EndMicronsY);
     }
 
     [Fact]
@@ -514,7 +514,7 @@ public class DrawingLineToolTests
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnDoubleClick(new PointMicrons(5000, 6000));
 
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
         Assert.Empty(vm.Template.Objects);
     }
 
@@ -528,7 +528,7 @@ public class DrawingLineToolTests
         // dx=9000, dy=100 → dx > dy+5000 → horizontal
         tool.OnMouseMove(new PointMicrons(10000, 2100), ToolMouseButton.Left, ToolModifiers.Shift);
 
-        Assert.Equal(2000, vm.PreviewLine!.EndMicronsY); // Y stays at start
+        Assert.Equal(2000, vm.PreviewManager.PreviewLine!.EndMicronsY); // Y stays at start
     }
 
     [Fact]
@@ -541,7 +541,7 @@ public class DrawingLineToolTests
         // dx=100, dy=8000 → dy > dx+5000 → vertical
         tool.OnMouseMove(new PointMicrons(1100, 10000), ToolMouseButton.Left, ToolModifiers.Shift);
 
-        Assert.Equal(1000, vm.PreviewLine!.EndMicronsX); // X stays at start
+        Assert.Equal(1000, vm.PreviewManager.PreviewLine!.EndMicronsX); // X stays at start
     }
 
     [Fact]
@@ -563,7 +563,7 @@ public class DrawingLineToolTests
         tool.OnMouseUp(new PointMicrons(3000, 4000), ToolMouseButton.Left, ToolModifiers.None);
 
         Assert.Empty(vm.Template.Objects);
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
     }
 
     [Fact]
@@ -573,7 +573,7 @@ public class DrawingLineToolTests
         var tool = new DrawingLineTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Right, ToolModifiers.None);
 
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
         Assert.Empty(vm.Template.Objects);
     }
 
@@ -619,11 +619,11 @@ public class DrawingLineToolTests
         var vm = CreateViewModel();
         var tool = new DrawingLineTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
 
         tool.Reset();
 
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
     }
 
     [Fact]
@@ -637,7 +637,7 @@ public class DrawingLineToolTests
 
         // After Reset, MouseMove should not update preview
         tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
 
         // After Reset, MouseUp should not create an object
         tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
@@ -668,12 +668,12 @@ public class DrawingLineToolTests
         var vm = CreateViewModel();
         var tool = new DrawingLineTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewLine);
+        Assert.NotNull(vm.PreviewManager.PreviewLine);
 
         var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
 
         Assert.True(result);
-        Assert.Null(vm.PreviewLine);
+        Assert.Null(vm.PreviewManager.PreviewLine);
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
@@ -729,9 +729,9 @@ public class DrawingRectangleToolTests
         var tool = new DrawingRectangleTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.NotNull(vm.PreviewRectangle);
-        Assert.Equal(1000, vm.PreviewRectangle.MicronsX);
-        Assert.Equal(2000, vm.PreviewRectangle.MicronsY);
+        Assert.NotNull(vm.PreviewManager.PreviewRectangle);
+        Assert.Equal(1000, vm.PreviewManager.PreviewRectangle.MicronsX);
+        Assert.Equal(2000, vm.PreviewManager.PreviewRectangle.MicronsY);
     }
 
     [Fact]
@@ -743,7 +743,7 @@ public class DrawingRectangleToolTests
         tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
 
         Assert.Single(vm.Template.Objects);
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
 
         var rect = (Rectangle)vm.Template.Objects[0];
         Assert.Equal(1000, rect.MicronsX);
@@ -760,9 +760,9 @@ public class DrawingRectangleToolTests
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
 
-        Assert.NotNull(vm.PreviewRectangle);
-        Assert.Equal(4000, vm.PreviewRectangle.WidthMicrons);
-        Assert.Equal(4000, vm.PreviewRectangle.HeightMicrons);
+        Assert.NotNull(vm.PreviewManager.PreviewRectangle);
+        Assert.Equal(4000, vm.PreviewManager.PreviewRectangle.WidthMicrons);
+        Assert.Equal(4000, vm.PreviewManager.PreviewRectangle.HeightMicrons);
     }
 
     [Fact]
@@ -773,7 +773,7 @@ public class DrawingRectangleToolTests
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
         tool.OnDoubleClick(new PointMicrons(5000, 6000));
 
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
         Assert.Empty(vm.Template.Objects);
     }
 
@@ -795,7 +795,7 @@ public class DrawingRectangleToolTests
         var tool = new DrawingRectangleTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Right, ToolModifiers.None);
 
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
     }
 
     [Fact]
@@ -885,11 +885,11 @@ public class DrawingRectangleToolTests
         var vm = CreateViewModel();
         var tool = new DrawingRectangleTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewRectangle);
+        Assert.NotNull(vm.PreviewManager.PreviewRectangle);
 
         tool.Reset();
 
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
     }
 
     [Fact]
@@ -903,7 +903,7 @@ public class DrawingRectangleToolTests
 
         // After Reset, MouseMove should not update preview
         tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
 
         // After Reset, MouseUp should not create an object
         tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
@@ -934,12 +934,12 @@ public class DrawingRectangleToolTests
         var vm = CreateViewModel();
         var tool = new DrawingRectangleTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewRectangle);
+        Assert.NotNull(vm.PreviewManager.PreviewRectangle);
 
         var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
 
         Assert.True(result);
-        Assert.Null(vm.PreviewRectangle);
+        Assert.Null(vm.PreviewManager.PreviewRectangle);
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
@@ -1072,11 +1072,11 @@ public class TextToolTests
         var vm = CreateViewModel();
         var tool = new TextTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewText);
+        Assert.NotNull(vm.PreviewManager.PreviewText);
 
         tool.Reset();
 
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
     }
 
     [Fact]
@@ -1090,7 +1090,7 @@ public class TextToolTests
 
         // After Reset, MouseMove should not update preview
         tool.OnMouseMove(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
 
         // After Reset, MouseUp should not create an object
         tool.OnMouseUp(new PointMicrons(5000, 6000), ToolMouseButton.Left, ToolModifiers.None);
@@ -1121,12 +1121,12 @@ public class TextToolTests
         var vm = CreateViewModel();
         var tool = new TextTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewText);
+        Assert.NotNull(vm.PreviewManager.PreviewText);
 
         var result = tool.OnKeyDown(ToolKey.Escape, ToolModifiers.None);
 
         Assert.True(result);
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
@@ -1149,11 +1149,11 @@ public class TextToolTests
         var vm = CreateViewModel();
         var tool = new TextTool(vm);
         tool.OnMouseDown(new PointMicrons(1000, 2000), ToolMouseButton.Left, ToolModifiers.None);
-        Assert.NotNull(vm.PreviewText);
+        Assert.NotNull(vm.PreviewManager.PreviewText);
 
         tool.OnDoubleClick(new PointMicrons(5000, 6000));
 
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
     }
 
@@ -1241,7 +1241,7 @@ public class TextToolTests
 
         Assert.True(result);
         Assert.Equal(ToolKind.Select, vm.ToolRegistry.ActiveToolKind);
-        Assert.Null(vm.PreviewText);
+        Assert.Null(vm.PreviewManager.PreviewText);
     }
 
     [Fact]

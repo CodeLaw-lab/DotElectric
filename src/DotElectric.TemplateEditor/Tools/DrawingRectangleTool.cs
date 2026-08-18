@@ -36,7 +36,7 @@ public sealed class DrawingRectangleTool : ITool
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY, 0, 0, _lineType,
             strokeColor: EditorSettings.DefaultStrokeColor,
             fillColor: EditorSettings.DefaultFillColor);
-        _context.PreviewRectangle = _previewRect;
+        _context.PreviewManager.PreviewRectangle = _previewRect;
     }
 
     public void OnMouseMove(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -46,12 +46,11 @@ public sealed class DrawingRectangleTool : ITool
 
         var rect = CalculateRectangle(SnapHelper.SnapIfEnabled(modelPoint, _context.GridSettings), modifiers, _startPoint.Value, _lineType);
 
+        // Мутация свойств без ре-ассайна: рендерер подписан на INPC preview-объекта
         _previewRect.MicronsX = rect.MicronsX;
         _previewRect.MicronsY = rect.MicronsY;
         _previewRect.WidthMicrons = rect.WidthMicrons;
         _previewRect.HeightMicrons = rect.HeightMicrons;
-
-        _context.PreviewRectangle = _previewRect;
     }
 
     public void OnMouseUp(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -85,7 +84,7 @@ public sealed class DrawingRectangleTool : ITool
 
         _startPoint = null;
         _previewRect = null;
-        _context.PreviewRectangle = null;
+        _context.PreviewManager.PreviewRectangle = null;
     }
 
     public void OnDoubleClick(PointMicrons modelPoint)
@@ -93,7 +92,7 @@ public sealed class DrawingRectangleTool : ITool
         // Двойной клик — отменить текущий прямоугольник
         _startPoint = null;
         _previewRect = null;
-        _context.PreviewRectangle = null;
+        _context.PreviewManager.PreviewRectangle = null;
     }
 
     public bool OnMouseWheel(int delta, PointMicrons modelPoint) => false;
@@ -107,7 +106,7 @@ public sealed class DrawingRectangleTool : ITool
     {
         _startPoint = null;
         _previewRect = null;
-        _context.PreviewRectangle = null;
+        _context.PreviewManager.PreviewRectangle = null;
     }
 
     public bool OnKeyDown(ToolKey key, ToolModifiers modifiers)
