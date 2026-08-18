@@ -445,6 +445,33 @@ public class PreviewLineChangedBehaviorTests
     }
 
     [Fact]
+    public void SwappedPreviewLine_OldObjectNoLongerUpdatesElement()
+    {
+        WpfContext.Execute(() =>
+        {
+            var (canvas, elements) = CreateCanvasWithNamedElements();
+            var editor = CreateEditorViewModel();
+
+            PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
+            var first = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 5000, endMicronsY: 5000, strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = first;
+            Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
+
+            // Swap на живой объект: старый отписывается, новый управляет элементом
+            var second = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+                endMicronsX: 20_000, endMicronsY: 20_000, strokeThicknessMicrons: 500);
+            editor.PreviewManager.PreviewLine = second;
+
+            first.EndMicronsX = 99_000;
+            Assert.Equal(Coordinate.ToMm(20_000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+
+            second.EndMicronsX = 30_000;
+            Assert.Equal(Coordinate.ToMm(30_000) * editor.ZoomPanManager.Zoom, elements.LineElement.X2, 4);
+        });
+    }
+
+    [Fact]
     public void Unregister_WithActivePreviews_UnsubscribesAllObjects()
     {
         WpfContext.Execute(() =>
