@@ -71,6 +71,7 @@ All agents MUST read this file before any code operation.
 - ViewModel НЕ содержит: `Dispatcher`, `UIElement`, `Visual`, `SolidColorBrush`, `Brush`, `Control`, `FrameworkElement`
 - Всё WPF — только во View и Converter'ах
 - Исключение: `IPrintVisualProvider` — через интерфейс, не через `Func<Visual?>`
+- Санкционированное исключение: `Helpers/RenderRules` — модуль правил рендеринга возвращает WPF-примитивы (`FontFamily`, `DoubleCollection`, `Brush`, `TextAlignment`): единый источник для канваса/preview/печати/сетки (спека #88, PR #91). Оформление по прецеденту §12.1 (ToolRegistry). Другие WPF-типы в Helpers не добавлять
 
 ### 3.2 NO Forwarding Properties
 - После R3.1 XAML биндится напрямую к manager'ам (`ZoomPanManager.ZoomPercent`, `GridManager.IsGridEnabled`)
