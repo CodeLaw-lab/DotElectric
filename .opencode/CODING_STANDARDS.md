@@ -131,9 +131,9 @@ All agents MUST read this file before any code operation.
 - Новые контролы: проверить Light/Dark стили
 
 ### 4.6 Preview Pattern
-- Create один раз в OnMouseDown
-- Mutate свойства в OnMouseMove
-- Re-assign ссылку для триггера INPC (ручной сеттер с безусловным `OnPropertyChanged()`)
+- Create один раз в OnMouseDown, assign в `PreviewManager`
+- Mutate свойства в OnMouseMove — рендерер подписан на INPC preview-объекта и обновляется сам; ре-ассайн той же ссылки НЕ нужен и не используется
+- Очистка (null) в OnMouseUp/OnDoubleClick/Reset; PreviewManager уведомляет только при смене ссылки (`[ObservableProperty]`, контракт зафиксирован тестом)
 
 ### 4.7 Маркеры выделения
 - `ShowSelectionMarkers` = `SelectedObjects.Count > 0` (не `== 1`)
@@ -213,7 +213,7 @@ All agents MUST read this file before any code operation.
 - Tools принимают `IEditorContext`, не `EditorViewModel`
 
 ### 7.3 Preview Pattern
-- Preview фигуры: create в OnMouseDown, mutate в OnMouseMove, re-assign
+- Preview фигуры: create/assign в OnMouseDown, mutate в OnMouseMove (рендерер подписан на INPC preview-объекта, ре-ассайн не нужен), null в конце жеста; доступ через `IEditorContext.PreviewManager`
 
 ### 7.4 Drag/Move
 - Drag delta от сохранённой начальной позиции (`_initialPositions[obj]`), НЕ от `obj.MicronsX`
