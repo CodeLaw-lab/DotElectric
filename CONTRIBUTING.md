@@ -53,7 +53,7 @@ src/
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, ToolRegistry, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
 │   └── Messages/                        # WeakReferenceMessenger сообщения
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2691 tests, 1 pre-existing skip)
+└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2674 tests, 1 pre-existing skip)
 ```
 
 ### Coding Standards
@@ -66,7 +66,7 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: ≥80% line-rate (CI gate, actual 90.13%)
+- Target coverage: ≥80% line-rate (CI gate, actual 90.08%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
@@ -110,7 +110,7 @@ Sprints are 1-week cycles tracked in `docs/`:
 1. Don't use `double` for coordinates — use microns (`long`)
 2. Don't create new Shape on every MouseMove — update properties instead
 3. Always use `Mode=OneWay` when binding to readonly properties
-4. IsDirty must be set by commands (`MarkDirty()`), NOT manually
+4. IsDirty must be set by `CommandHistory` (Push/Undo/Redo fire `markDirty`), NOT by individual commands and NOT manually
 5. EditorViewModel — instantiate via `IEditorViewModelFactory`, NOT `new` directly
 6. All services must be registered in `App.xaml.cs`
 7. Commands implement `IUndoCommand` (NOT `System.Windows.Input.ICommand`)
