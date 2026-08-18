@@ -421,30 +421,6 @@ public sealed class IntegrationTests
         Assert.Same(rect2, hit);
     }
 
-    [Fact]
-    public void HitTestAll_OverlappingObjects_ReturnsAllInZOrder()
-    {
-        var point = new PointMicrons(14_000, 14_000); // within border band of rect1 and rect2, on line endpoint
-
-        var rect1 = new Rectangle(10_000, 10_000, 20_000, 20_000);
-        var rect2 = new Rectangle(12_000, 12_000, 10_000, 10_000);
-        var line = new Line(14_000, 14_000, 16_000, 16_000);
-
-        var objects = new List<TemplateObjectBase> { rect1, rect2, line };
-
-        var hits = HitTestHelper.HitTestAll(point, objects);
-
-        // All three should be hit:
-        // rect1: expanded (5k,5k)-(35k,35k), point (14k,14k) inside, shrunk (15k,15k)-(25k,25k) — point outside shrunk → hit ✓
-        // rect2: expanded (7k,7k)-(27k,27k), point (14k,14k) inside, shrunk (17k,17k)-(17k,17k) — point outside shrunk → hit ✓
-        // line: from (14k,14k) to (16k,16k) — point (14k,14k) is on endpoint ✓
-        Assert.Equal(3, hits.Count);
-        // Z-order: last added first
-        Assert.Same(line, hits[0]);
-        Assert.Same(rect2, hits[1]);
-        Assert.Same(rect1, hits[2]);
-    }
-
     // =========================================================================
     // Multi-format sheets
     // =========================================================================

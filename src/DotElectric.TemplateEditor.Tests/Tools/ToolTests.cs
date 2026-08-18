@@ -253,7 +253,8 @@ public class SelectToolTests
         Assert.True(handled);
         Assert.Empty(vm.SelectedObjects);
         Assert.Null(vm.HoveredObject);
-        Assert.Null(vm.HoveredHandle);
+        // Hover-состояние маркеров сброшено: курсор возвращается к стрелке
+        Assert.Equal(ToolCursor.Arrow, tool.GetCursor());
     }
 
     [Fact]
@@ -428,7 +429,8 @@ public class SelectToolTests
         vm.SelectSingle(line);
 
         var tool = new SelectTool(vm);
-        vm.HoveredHandle = ResizeHandle.TopLeft;
+        // Реальный hover-поток: курсор на маркере начала линии
+        tool.OnMouseMove(new PointMicrons(0, 0), ToolMouseButton.Right, ToolModifiers.None);
 
         Assert.Equal(ToolCursor.Cross, tool.GetCursor());
     }

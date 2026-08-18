@@ -1,4 +1,3 @@
-using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 
 namespace DotElectric.TemplateEditor.Tools;
@@ -19,12 +18,8 @@ public static class ResizeMath
         long deltaX = (long)dx;
         long deltaY = (long)dy;
 
-        bool affectsHorizontal = handle is ResizeHandle.Left or ResizeHandle.Right
-            or ResizeHandle.TopLeft or ResizeHandle.TopRight
-            or ResizeHandle.BottomLeft or ResizeHandle.BottomRight;
-        bool affectsVertical = handle is ResizeHandle.Top or ResizeHandle.Bottom
-            or ResizeHandle.TopLeft or ResizeHandle.TopRight
-            or ResizeHandle.BottomLeft or ResizeHandle.BottomRight;
+        bool affectsHorizontal = MarkerLayout.TouchesLeft(handle) || MarkerLayout.TouchesRight(handle);
+        bool affectsVertical = MarkerLayout.TouchesTop(handle) || MarkerLayout.TouchesBottom(handle);
 
         long newX = startX;
         long newY = startY;
@@ -46,13 +41,13 @@ public static class ResizeMath
         }
         else
         {
-            if (handle is ResizeHandle.Left or ResizeHandle.TopLeft or ResizeHandle.BottomLeft)
+            if (MarkerLayout.TouchesLeft(handle))
                 newX = startX + deltaX;
-            if (handle is ResizeHandle.Right or ResizeHandle.TopRight or ResizeHandle.BottomRight)
+            if (MarkerLayout.TouchesRight(handle))
                 newRight = startRight + deltaX;
-            if (handle is ResizeHandle.Top or ResizeHandle.TopRight or ResizeHandle.TopLeft)
+            if (MarkerLayout.TouchesTop(handle))
                 newTop = startTop + deltaY;
-            if (handle is ResizeHandle.Bottom or ResizeHandle.BottomRight or ResizeHandle.BottomLeft)
+            if (MarkerLayout.TouchesBottom(handle))
                 newY = startY + deltaY;
         }
 
@@ -62,8 +57,7 @@ public static class ResizeMath
         long newWidth = newRight - newX;
         long newHeight = newTop - newY;
 
-        if (shiftPressed && handle is ResizeHandle.TopLeft or ResizeHandle.TopRight
-                               or ResizeHandle.BottomLeft or ResizeHandle.BottomRight)
+        if (shiftPressed && MarkerLayout.IsCorner(handle))
         {
             double aspect = (double)startWidth / startHeight;
 
@@ -137,8 +131,7 @@ public static class ResizeMath
         var dxLocal = dx * cosA + dy * sinA;
         var dyLocal = -dx * sinA + dy * cosA;
 
-        bool isCorner = handle is ResizeHandle.BottomRight or ResizeHandle.BottomLeft
-                        or ResizeHandle.TopRight or ResizeHandle.TopLeft;
+        bool isCorner = MarkerLayout.IsCorner(handle);
 
         if (!isCorner)
             return (Math.Clamp(startX + (long)dx, 0, sheetW), Math.Clamp(startY + (long)dy, 0, sheetH), startHeight);
@@ -242,7 +235,8 @@ public static class ResizeMath
             return (Math.Clamp(newX, 0, sheetW), Math.Clamp(newY, 0, sheetH));
         }
 
-        return (0, 0);
+        // У линии только два маркера — начало (TopLeft) и конец (BottomRight)
+        throw new NotSupportedException($"У линии нет маркера {handle}.");
     }
 
     private static (long newX, long newY, long newRight, long newTop) ClampMinimumSize(
@@ -250,10 +244,10 @@ public static class ResizeMath
         ResizeHandle handle, bool ctrlPressed,
         long minSize)
     {
-        bool leftMoves = handle is ResizeHandle.Left or ResizeHandle.TopLeft or ResizeHandle.BottomLeft;
-        bool rightMoves = handle is ResizeHandle.Right or ResizeHandle.TopRight or ResizeHandle.BottomRight;
-        bool bottomMoves = handle is ResizeHandle.Bottom or ResizeHandle.BottomLeft or ResizeHandle.BottomRight;
-        bool topMoves = handle is ResizeHandle.Top or ResizeHandle.TopRight or ResizeHandle.TopLeft;
+        bool leftMoves = MarkerLayout.TouchesLeft(handle);
+        bool rightMoves = MarkerLayout.TouchesRight(handle);
+        bool bottomMoves = MarkerLayout.TouchesBottom(handle);
+        bool topMoves = MarkerLayout.TouchesTop(handle);
 
         if (ctrlPressed)
         {
@@ -286,45 +280,5 @@ public static class ResizeMath
         }
 
         return (newX, newY, newRight, newTop);
-    }
-
-    public static ToolCursor CursorForHandle(ResizeHandle handle, bool isResizing, bool isLine)
-    {
-        if (isLine) return ToolCursor.Cross;
-        if (!isResizing) return ToolCursor.Arrow;
-
-        return handle switch
-        {
-            ResizeHandle.TopLeft or ResizeHandle.BottomRight => ToolCursor.SizeNWSE,
-            ResizeHandle.TopRight or ResizeHandle.BottomLeft => ToolCursor.SizeNESW,
-            ResizeHandle.Top or ResizeHandle.Bottom => ToolCursor.SizeNS,
-            ResizeHandle.Left or ResizeHandle.Right => ToolCursor.SizeWE,
-            _ => ToolCursor.Arrow
-        };
-    }
-
-    /// <summary>
-    /// Возвращает курсор ресайза с учётом поворота текста.
-    /// При 90°/270° визуальные углы смещены относительно имён маркеров,
-    /// поэтому курсоры диагональных пар меняются местами.
-    /// </summary>
-    public static ToolCursor VisualCursorForHandle(ResizeHandle handle, int rotationAngle)
-    {
-        var angle = ((rotationAngle % 360) + 360) % 360;
-
-        if (angle is 90 or 270)
-        {
-            return handle switch
-            {
-                ResizeHandle.TopLeft or ResizeHandle.BottomRight => ToolCursor.SizeNESW,
-                ResizeHandle.TopRight or ResizeHandle.BottomLeft => ToolCursor.SizeNWSE,
-                ResizeHandle.Top or ResizeHandle.Bottom => ToolCursor.SizeNS,
-                ResizeHandle.Left or ResizeHandle.Right => ToolCursor.SizeWE,
-                _ => ToolCursor.Arrow
-            };
-        }
-
-        // 0°, 180° и прочие — стандартное отображение
-        return CursorForHandle(handle, isResizing: true, isLine: false);
     }
 }

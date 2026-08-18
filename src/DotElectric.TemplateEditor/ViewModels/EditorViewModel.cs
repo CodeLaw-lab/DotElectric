@@ -154,16 +154,6 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     [ObservableProperty]
     private TemplateObjectBase? _hoveredObject;
 
-    /// <summary>
-    /// Маркер изменения размера, на который наведён курсор (null если не на маркере).
-    /// </summary>
-    [ObservableProperty]
-    private ResizeHandle? _hoveredHandle;
-
-    /// <summary>
-    /// Активный маркер изменения размера (null если не ресайзим).
-    /// </summary>
-
     // === IEditorContext SelectionBox (делегировано PreviewManager) ===
 
     public void SetSelectionBox(long left, long bottom, long width, long height, SelectionDirection direction)
