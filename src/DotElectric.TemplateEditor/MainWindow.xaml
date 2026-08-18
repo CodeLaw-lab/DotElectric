@@ -64,8 +64,6 @@
         <DataTemplate DataType="{x:Type vm:EditorViewModel}">
             <views:EditorCanvas />
         </DataTemplate>
-        <!-- Конвертер шага сетки -->
-        <converters:GridStepToStringConverter x:Key="GridStepToStringConverter"/>
     </Window.Resources>
 
     <Grid>

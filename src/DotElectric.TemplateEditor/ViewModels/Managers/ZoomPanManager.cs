@@ -7,19 +7,13 @@ namespace DotElectric.TemplateEditor.ViewModels.Managers;
 public sealed partial class ZoomPanManager : ObservableObject
 {
     private readonly Template _template;
-    private readonly Action _onZoomChanged;
-    private Action _onGridRefresh;
+    private Action _onGridRefresh = () => { };
     private double _viewportWidthPx;
     private double _viewportHeightPx;
 
-    public ZoomPanManager(
-        Template template,
-        Action onZoomChanged,
-        Action onGridRefresh)
+    public ZoomPanManager(Template template)
     {
         _template = template;
-        _onZoomChanged = onZoomChanged;
-        _onGridRefresh = onGridRefresh;
     }
 
     public void SetGridRefreshCallback(Action callback) => _onGridRefresh = callback;
@@ -120,7 +114,6 @@ public sealed partial class ZoomPanManager : ObservableObject
         OnPropertyChanged(nameof(CanvasOffsetY));
         if (IsCentered)
             CenterCanvas();
-        _onZoomChanged();
         _onGridRefresh();
     }
 

@@ -38,13 +38,6 @@ public static class ValidationService
         return null;
     }
 
-    public static string? ValidateRotation(int rotation)
-    {
-        if (rotation < 0 || rotation > 359)
-            return "Угол поворота должен быть в диапазоне 0-359°.";
-        return null;
-    }
-
     public static string? ValidateHexColor(string? value)
     {
         if (string.IsNullOrWhiteSpace(value))

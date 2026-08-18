@@ -5,8 +5,8 @@ namespace DotElectric.TemplateEditor.Abstractions;
 public interface IAutosaveTab
 {
     string? TabId { get; }
-    string? FilePath { get; set; }
+    string? FilePath { get; }
     string DisplayName { get; }
     bool IsDirty { get; }
-    object Template { get; }
+    Template Template { get; }
 }

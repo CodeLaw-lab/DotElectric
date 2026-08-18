@@ -64,92 +64,6 @@ public class MicronsToMmConverterTests
     }
 }
 
-public class ZoomToStringConverterTests
-{
-    private readonly ZoomToStringConverter _converter = new();
-
-    [Theory]
-    [InlineData(1.0, "100%")]
-    [InlineData(0.5, "50%")]
-    [InlineData(2.0, "200%")]
-    [InlineData(1.5, "150%")]
-    public void Convert_FormatsPercentage(double zoom, string expected)
-    {
-        var result = _converter.Convert(zoom, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
-    }
-
-    [Fact]
-    public void Convert_Null_Returns100Percent()
-    {
-        var result = _converter.Convert(null, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal("100%", result);
-    }
-
-    [Fact]
-    public void ConvertBack_ParsesPercentage()
-    {
-        var result = _converter.ConvertBack("150%", typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(1.5, (double)result, 10);
-    }
-}
-
-public class LineTypeToStringConverterTests
-{
-    private readonly LineTypeToStringConverter _converter = new();
-
-    [Theory]
-    [InlineData(LineType.Solid, "Сплошная")]
-    [InlineData(LineType.Dashed, "Штриховая")]
-    [InlineData(LineType.DashDot, "Штрихпунктирная")]
-    [InlineData(LineType.DashDotDot, "Штрихпунктирная с двумя штрихами")]
-    public void Convert_ReturnsCorrectString(LineType type, string expected)
-    {
-        var result = _converter.Convert(type, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
-    [InlineData("Сплошная", LineType.Solid)]
-    [InlineData("Штриховая", LineType.Dashed)]
-    [InlineData("Штрихпунктирная", LineType.DashDot)]
-    [InlineData("Штрихпунктирная с двумя штрихами", LineType.DashDotDot)]
-    public void ConvertBack_ReturnsCorrectLineType(string text, LineType expected)
-    {
-        var result = _converter.ConvertBack(text, typeof(LineType), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
-    }
-}
-
-public class TextTypeToStringConverterTests
-{
-    private readonly TextTypeToStringConverter _converter = new();
-
-    [Theory]
-    [InlineData(TextType.Text, "Текст")]
-    [InlineData(TextType.Dimension, "Размер")]
-    [InlineData(TextType.Tolerance, "Допуск")]
-    [InlineData(TextType.Note, "Примечание")]
-    [InlineData(TextType.Label, "Обозначение")]
-    public void Convert_ReturnsCorrectString(TextType type, string expected)
-    {
-        var result = _converter.Convert(type, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
-    }
-
-    [Theory]
-    [InlineData("Текст", TextType.Text)]
-    [InlineData("Размер", TextType.Dimension)]
-    [InlineData("Допуск", TextType.Tolerance)]
-    [InlineData("Примечание", TextType.Note)]
-    [InlineData("Обозначение", TextType.Label)]
-    public void ConvertBack_ReturnsCorrectTextType(string text, TextType expected)
-    {
-        var result = _converter.ConvertBack(text, typeof(TextType), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, result);
-    }
-}
-
 public class IsNullConverterTests
 {
     private readonly IsNullConverter _converter = new();
@@ -633,63 +547,6 @@ public class MicronsToMmConverterExtendedTests
     }
 }
 
-public class ZoomToStringConverterExtendedTests
-{
-    private readonly ZoomToStringConverter _converter = new();
-
-    [Fact]
-    public void ConvertBack_InvalidString_ReturnsDefaultOne()
-    {
-        var result = _converter.ConvertBack("invalid", typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(1.0, Assert.IsType<double>(result));
-    }
-
-    [Fact]
-    public void ConvertBack_ZeroPercent_ReturnsZero()
-    {
-        var result = _converter.ConvertBack("0%", typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(0.0, Assert.IsType<double>(result), 10);
-    }
-}
-
-public class LineTypeToStringConverterExtendedTests
-{
-    private readonly LineTypeToStringConverter _converter = new();
-
-    [Fact]
-    public void Convert_Null_ReturnsEmpty()
-    {
-        var result = _converter.Convert(null, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal("", result);
-    }
-
-    [Fact]
-    public void ConvertBack_UnknownString_ReturnsSolid()
-    {
-        var result = _converter.ConvertBack("Неизвестный", typeof(LineType), null, CultureInfo.InvariantCulture);
-        Assert.Equal(LineType.Solid, result);
-    }
-}
-
-public class TextTypeToStringConverterExtendedTests
-{
-    private readonly TextTypeToStringConverter _converter = new();
-
-    [Fact]
-    public void Convert_Null_ReturnsEmpty()
-    {
-        var result = _converter.Convert(null, typeof(string), null, CultureInfo.InvariantCulture);
-        Assert.Equal("", result);
-    }
-
-    [Fact]
-    public void ConvertBack_UnknownString_ReturnsText()
-    {
-        var result = _converter.ConvertBack("Неизвестный", typeof(TextType), null, CultureInfo.InvariantCulture);
-        Assert.Equal(TextType.Text, result);
-    }
-}
-
 public class EqualToBoolConverterExtendedTests
 {
     private readonly EqualToBoolConverter _converter = new();
@@ -1011,39 +868,6 @@ public class LeftEdgeMicronsMultiConverterTests
         var values = new object[] { 2000L, 6000L, DependencyProperty.UnsetValue, 2.0 };
         var result = _converter.Convert(values, typeof(double), null, CultureInfo.InvariantCulture);
         Assert.Equal(4.0, Assert.IsType<double>(result), 10);
-    }
-}
-
-public class RelativeMicronsToPixelConverterTests
-{
-    private readonly RelativeMicronsToPixelConverter _converter = new();
-
-    [Theory]
-    [InlineData(5000L, 1000L, 1.0, 4.0)]
-    [InlineData(1000L, 5000L, 1.0, 4.0)]
-    [InlineData(3000L, 3000L, 1.0, 0.0)]
-    [InlineData(5000L, 1000L, 2.0, 8.0)]
-    public void Convert_ReturnsPixels(long a, long b, double zoom, double expected)
-    {
-        var values = new object[] { a, b, zoom };
-        var result = _converter.Convert(values, typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(expected, Assert.IsType<double>(result), 10);
-    }
-
-    [Fact]
-    public void Convert_InsufficientValues_ReturnsZero()
-    {
-        var values = new object[] { 5000L };
-        var result = _converter.Convert(values, typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(0.0, Assert.IsType<double>(result), 10);
-    }
-
-    [Fact]
-    public void Convert_ZeroZoom_ReturnsZero()
-    {
-        var values = new object[] { 5000L, 1000L, 0.0 };
-        var result = _converter.Convert(values, typeof(double), null, CultureInfo.InvariantCulture);
-        Assert.Equal(0.0, Assert.IsType<double>(result), 10);
     }
 }
 
@@ -1394,18 +1218,6 @@ public class LineLocalConverterConvertBackTests
     {
         Assert.Throws<NotSupportedException>(() =>
             _converter.ConvertBack(1.0, new[] { typeof(double) }, "X1", CultureInfo.InvariantCulture));
-    }
-}
-
-public class RelativeMicronsToPixelConverterConvertBackTests
-{
-    private readonly RelativeMicronsToPixelConverter _converter = new();
-
-    [Fact]
-    public void ConvertBack_ThrowsNotSupported()
-    {
-        Assert.Throws<NotSupportedException>(() =>
-            _converter.ConvertBack(1.0, new[] { typeof(double) }, null, CultureInfo.InvariantCulture));
     }
 }
 

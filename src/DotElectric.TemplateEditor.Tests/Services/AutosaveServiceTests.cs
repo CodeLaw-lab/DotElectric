@@ -317,20 +317,6 @@ public class AutosaveServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task AutosaveAllTabsAsync_TemplateNotOfTypeTemplate_DoesNotSave()
-    {
-        // Вкладка с Template, который НЕ является Models.Template → ветка `is Models.Template` не выполняется
-        var tabs = new List<MockAutosaveTab>
-        {
-            new MockAutosaveTab { TabId = "tab1", IsDirty = true, Template = "not a template" }
-        };
-
-        await _service.AutosaveAllTabsAsync(tabs, TestContext.Current.CancellationToken);
-
-        _mockTemplateService.Verify(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()), Times.Never);
-    }
-
-    [Fact]
     public async Task AutosaveAllTabsAsync_NoDirtyTabs_DeletesStaleSessionFile()
     {
         // session.json существует, но dirty-вкладок нет → SaveSession удаляет файл
@@ -439,5 +425,5 @@ public class MockAutosaveTab : IAutosaveTab
     public string? FilePath { get; set; }
     public string DisplayName { get; set; } = "Mock Tab";
     public bool IsDirty { get; set; }
-    public object Template { get; set; } = new Template();
+    public Template Template { get; set; } = new();
 }

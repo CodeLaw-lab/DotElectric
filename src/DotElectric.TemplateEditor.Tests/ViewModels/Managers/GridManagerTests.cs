@@ -17,7 +17,7 @@ public class GridManagerTests
 
     private static ZoomPanManager CreateZoomPanManager(Template template)
     {
-        return new ZoomPanManager(template, () => { }, () => { });
+        return new ZoomPanManager(template);
     }
 
     private static GridManager CreateSut(
@@ -316,7 +316,7 @@ public class GridManagerTests
         var sheet = Sheet.FromFormat("A4");
         var template = new Template(new Metadata(), sheet);
         var gs = new GridSettings { Enabled = true, Visible = true, StepMicrons = 5000 };
-        var zpm = new ZoomPanManager(template, () => { }, () => { });
+        var zpm = new ZoomPanManager(template);
         zpm.SetZoom(7.51);
         var sut = new GridManager(template, gs, zpm, new GridNodeGenerator());
 

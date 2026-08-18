@@ -36,21 +36,6 @@
     </UserControl.ContextMenu>
 
     <UserControl.Resources>
-        <!-- Конвертеры -->
-        <converters:ModelXToCanvasLeftConverter x:Key="ModelXToCanvasLeftConverter"/>
-        <converters:ModelYToCanvasTopConverter x:Key="ModelYToCanvasTopConverter"/>
-        <converters:MicronsToPixelConverter x:Key="MicronsToPixelConverter"/>
-        <converters:LineTypeToDashArrayConverter x:Key="LineTypeToDashArrayConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
-        <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibility"/>
-        <converters:IsHoveredConverter x:Key="IsHoveredConverter"/>
-        <converters:IsObjectSelectedConverter x:Key="IsObjectSelectedConverter"/>
-        <converters:NonZeroToVisibilityConverter x:Key="NonZeroToVisibilityConverter"/>
-        <converters:HexToBrushConverter x:Key="HexToBrushConverter"/>
-        <converters:GridNodeColorConverter x:Key="GridNodeColorConverter"/>
-        <converters:BoolToTextWrappingConverter x:Key="BoolToTextWrappingConverter"/>
-        <converters:StringToTextAlignmentConverter x:Key="StringToTextAlignmentConverter"/>
-
         <Style x:Key="WorkspaceScrollBar" TargetType="ScrollBar">
             <Setter Property="Background" Value="#E0E0E0"/>
             <Setter Property="Foreground" Value="#888"/>

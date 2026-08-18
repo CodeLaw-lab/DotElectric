@@ -6,7 +6,7 @@ namespace DotElectric.TemplateEditor.Tools;
 /// <summary>
 /// Настройки TextTool по умолчанию.
 /// </summary>
-public sealed class TextToolSettings : ITextToolSettings
+public sealed class TextToolSettings
 {
     public TextType DefaultTextType => TextType.Text;
     public long DefaultFontSizeMicrons => EditorSettings.DefaultFontSizeMicrons;

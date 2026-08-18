@@ -5,14 +5,6 @@
              xmlns:behaviors="clr-namespace:DotElectric.TemplateEditor.Behaviors"
              xmlns:vm="clr-namespace:DotElectric.TemplateEditor.ViewModels">
     <UserControl.Resources>
-        <converters:MicronsToMmConverter x:Key="MicronsToMmConverter"/>
-        <converters:BoolToVisibilityConverter x:Key="BoolToVisibility"/>
-        <converters:NotNullToVisibilityConverter x:Key="NotNullToVisibility"/>
-        <converters:LineTypeToStringConverter x:Key="LineTypeToStringConverter"/>
-        <converters:TextTypeToStringConverter x:Key="TextTypeToStringConverter"/>
-        <converters:TextAlignmentToIndexConverter x:Key="TextAlignmentToIndexConverter"/>
-        <converters:NotConverter x:Key="NotConverter"/>
-
         <!-- DataTemplate for Line properties -->
         <DataTemplate DataType="{x:Type vm:LinePropertiesViewModel}">
             <StackPanel>

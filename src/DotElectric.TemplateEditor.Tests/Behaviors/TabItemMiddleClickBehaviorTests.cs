@@ -67,9 +67,8 @@ public class TabItemMiddleClickBehaviorTests
             // Arrange
             var tabControl = new TabControl();
             var template = new Template();
-            var mockService = new Mock<ITemplateService>();
             var mockPrintService = new Mock<IPrintService>();
-            var editorVm = new EditorViewModel(template, mockService.Object,
+            var editorVm = new EditorViewModel(template,
                 printService: mockPrintService.Object);
             var tabItem = new TabItem { DataContext = editorVm };
             tabControl.Items.Add(tabItem);
@@ -212,9 +211,8 @@ public class TabItemMiddleClickBehaviorTests
         {
             var tabControl = new TabControl();
             var template = new Template();
-            var mockService = new Mock<ITemplateService>();
             var mockPrintService = new Mock<IPrintService>();
-            var editorVm = new EditorViewModel(template, mockService.Object,
+            var editorVm = new EditorViewModel(template,
                 printService: mockPrintService.Object);
             var tabItem = new TabItem { DataContext = editorVm };
             tabControl.Items.Add(tabItem);
@@ -310,8 +308,7 @@ public class TabItemMiddleClickBehaviorTests
     private static EditorViewModel CreateEditorViewModel()
     {
         var template = new Template();
-        var mockService = new Mock<ITemplateService>();
         var mockPrintService = new Mock<IPrintService>();
-        return new EditorViewModel(template, mockService.Object, printService: mockPrintService.Object);
+        return new EditorViewModel(template, printService: mockPrintService.Object);
     }
 }

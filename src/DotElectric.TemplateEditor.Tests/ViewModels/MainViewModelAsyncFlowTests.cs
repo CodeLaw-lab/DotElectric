@@ -85,10 +85,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
 
     private static EditorViewModel CreateEditor()
     {
-        var templateService = new Mock<ITemplateService>();
-        templateService.Setup(s => s.CreateNew(It.IsAny<string>(), It.IsAny<SheetOrientation>()))
-            .Returns(new Template());
-        return new EditorViewModel(new Template(), templateService.Object,
+        return new EditorViewModel(new Template(),
             printService: new Mock<IPrintService>().Object);
     }
 

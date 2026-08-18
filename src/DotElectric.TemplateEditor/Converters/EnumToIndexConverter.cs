@@ -3,7 +3,7 @@ using System.Windows.Data;
 
 namespace DotElectric.TemplateEditor.Converters;
 
-public class EnumToIndexConverter : IValueConverter
+public sealed class EnumToIndexConverter : IValueConverter
 {
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {

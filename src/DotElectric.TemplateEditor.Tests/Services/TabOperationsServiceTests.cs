@@ -48,11 +48,10 @@ public class TabOperationsServiceTests
 
     private static EditorViewModel CreateEditor(Template template, string? filePath = null)
     {
-        var templateService = new Mock<ITemplateService>().Object;
         var printService = new Mock<IPrintService>().Object;
         return filePath == null
-            ? new EditorViewModel(template, templateService, printService: printService)
-            : new EditorViewModel(template, filePath, templateService, printService: printService);
+            ? new EditorViewModel(template, printService: printService)
+            : new EditorViewModel(template, filePath, printService: printService);
     }
 
     private static void VerifyLogErrorOnce(Mock<ILogger<TabOperationsService>> logger)
