@@ -93,6 +93,24 @@ public class RenderRulesTests
         Assert.Same(first, second);
     }
 
+    // ===== Карта выравнивания текста =====
+
+    [Theory]
+    [InlineData("Center", System.Windows.TextAlignment.Center)]
+    [InlineData("Right", System.Windows.TextAlignment.Right)]
+    [InlineData("Left", System.Windows.TextAlignment.Left)]
+    [InlineData("unknown", System.Windows.TextAlignment.Left)]
+    public void TextAlignmentFor_KnownAndUnknownValues(string alignment, System.Windows.TextAlignment expected)
+    {
+        Assert.Equal(expected, RenderRules.TextAlignmentFor(alignment));
+    }
+
+    [Fact]
+    public void TextAlignmentFor_Null_ReturnsLeft()
+    {
+        Assert.Equal(System.Windows.TextAlignment.Left, RenderRules.TextAlignmentFor(null));
+    }
+
     // ===== hex → Brush =====
     // Семантика — канон канваса (HexToBrushConverter).
 
@@ -221,16 +239,18 @@ public class RenderRulesTests
         Assert.True(RenderRules.AnchorTopMicrons(multi) > RenderRules.AnchorTopMicrons(single));
     }
 
-    [Fact]
-    public void AnchorTopMicrons_RotatedText_SlotAnchorInvariant()
+    [Theory]
+    [InlineData(45)]
+    [InlineData(90)]
+    [InlineData(135)]
+    [InlineData(270)]
+    public void AnchorTopMicrons_RotatedText_SlotAnchorInvariant(int angle)
     {
         // Слот-anchor (позиция Canvas.Left/Top) не зависит от поворота:
         // смещение LayoutTransform применяет WPF при раскладке, не правила.
         var text = new Text(micronsX: 1_000, micronsY: 2_000, content: "ABC", fontSizeMicrons: 5_000, fontName: "ГОСТ А");
         var before = RenderRules.AnchorTopMicrons(text);
-        text.RotationAngle = 90;
-        Assert.Equal(before, RenderRules.AnchorTopMicrons(text));
-        text.RotationAngle = 45;
+        text.RotationAngle = angle;
         Assert.Equal(before, RenderRules.AnchorTopMicrons(text));
     }
 

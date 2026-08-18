@@ -126,7 +126,7 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
             FontSize = Math.Max(wpfFontSize, 1.0),
             Foreground = RenderRules.BrushFromHex(text.Foreground),
             TextWrapping = text.TextWrapping ? System.Windows.TextWrapping.Wrap : System.Windows.TextWrapping.NoWrap,
-            TextAlignment = TextAlignmentFromString(text.TextAlignment)
+            TextAlignment = RenderRules.TextAlignmentFor(text.TextAlignment)
         };
 
         if (text.RotationAngle != 0)
@@ -138,12 +138,4 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
         FixedPage.SetTop(textBlock, wpfY);
         return textBlock;
     }
-
-    private static System.Windows.TextAlignment TextAlignmentFromString(string alignment)
-        => alignment switch
-        {
-            "Center" => System.Windows.TextAlignment.Center,
-            "Right" => System.Windows.TextAlignment.Right,
-            _ => System.Windows.TextAlignment.Left
-        };
 }

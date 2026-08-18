@@ -1,3 +1,4 @@
+using System.Windows;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Models.Objects;
@@ -50,6 +51,18 @@ public static class RenderRules
             LineType.DashDot => _dashDot,
             LineType.DashDotDot => _dashDotDot,
             _ => null
+        };
+
+    /// <summary>
+    /// Карта выравнивания текста: строковое значение модели → WPF TextAlignment.
+    /// Неизвестное значение или null → Left.
+    /// </summary>
+    public static TextAlignment TextAlignmentFor(string? alignment)
+        => alignment switch
+        {
+            "Center" => TextAlignment.Center,
+            "Right" => TextAlignment.Right,
+            _ => TextAlignment.Left
         };
 
     /// <summary>
