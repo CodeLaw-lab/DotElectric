@@ -1,4 +1,5 @@
-﻿using DotElectric.TemplateEditor.Tools;
+﻿using DotElectric.TemplateEditor.Helpers;
+using DotElectric.TemplateEditor.Tools;
 
 namespace DotElectric.TemplateEditor.Tests.Tools;
 
@@ -511,92 +512,14 @@ public class ResizeMathTests
     }
 
     [Fact]
-    public void ComputeLineEndpoint_NonEndpointHandle_ReturnsZero()
+    public void ComputeLineEndpoint_NonEndpointHandle_Throws()
     {
-        var (x, y) = ResizeMath.ComputeLineEndpoint(
+        // У линии только два маркера — начало (TopLeft) и конец (BottomRight)
+        Assert.Throws<NotSupportedException>(() => ResizeMath.ComputeLineEndpoint(
             dx: 5000, dy: 5000,
             ResizeHandle.Left,
             lineStartX: 10000, lineStartY: 10000,
             lineEndX: 30000, lineEndY: 30000,
-            snapEnabled: false, 0, SheetW, SheetH);
-
-        Assert.Equal((0, 0), (x, y));
-    }
-
-    // ==================== CursorForHandle ====================
-
-    [Theory]
-    [InlineData(ResizeHandle.TopLeft, true)]
-    [InlineData(ResizeHandle.BottomRight, true)]
-    [InlineData(ResizeHandle.Left, true)]
-    [InlineData((ResizeHandle)999, true)]
-    public void CursorForHandle_IsLine_ReturnsCross(ResizeHandle handle, bool isLine)
-    {
-        Assert.Equal(ToolCursor.Cross, ResizeMath.CursorForHandle(handle, isResizing: true, isLine));
-    }
-
-    [Fact]
-    public void CursorForHandle_NotResizing_ReturnsArrow()
-    {
-        Assert.Equal(ToolCursor.Arrow, ResizeMath.CursorForHandle(ResizeHandle.TopRight, isResizing: false, isLine: false));
-    }
-
-    [Theory]
-    [InlineData(ResizeHandle.TopLeft, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.BottomRight, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.TopRight, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomLeft, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.Top, ToolCursor.SizeNS)]
-    [InlineData(ResizeHandle.Bottom, ToolCursor.SizeNS)]
-    [InlineData(ResizeHandle.Left, ToolCursor.SizeWE)]
-    [InlineData(ResizeHandle.Right, ToolCursor.SizeWE)]
-    [InlineData((ResizeHandle)999, ToolCursor.Arrow)]
-    public void CursorForHandle_ResizingRectangle_ReturnsHandleCursor(ResizeHandle handle, ToolCursor expected)
-    {
-        Assert.Equal(expected, ResizeMath.CursorForHandle(handle, isResizing: true, isLine: false));
-    }
-
-    // ==================== VisualCursorForHandle ====================
-
-    [Theory]
-    [InlineData(ResizeHandle.TopLeft, 90, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomRight, 90, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.TopRight, 90, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.BottomLeft, 90, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.TopLeft, 270, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomRight, 270, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.TopRight, 270, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.BottomLeft, 270, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.TopLeft, -90, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomRight, -90, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.TopRight, -270, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.BottomLeft, -270, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.TopLeft, 450, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomRight, 450, ToolCursor.SizeNESW)]
-    public void VisualCursorForHandle_QuarterTurns_SwapDiagonalCursors(ResizeHandle handle, int angle, ToolCursor expected)
-    {
-        Assert.Equal(expected, ResizeMath.VisualCursorForHandle(handle, angle));
-    }
-
-    [Theory]
-    [InlineData(ResizeHandle.TopLeft, 0, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.TopRight, 0, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.BottomRight, 180, ToolCursor.SizeNWSE)]
-    [InlineData(ResizeHandle.BottomLeft, 180, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.TopRight, 540, ToolCursor.SizeNESW)]
-    [InlineData(ResizeHandle.TopLeft, 540, ToolCursor.SizeNWSE)]
-    public void VisualCursorForHandle_StraightAngles_StandardCursors(ResizeHandle handle, int angle, ToolCursor expected)
-    {
-        Assert.Equal(expected, ResizeMath.VisualCursorForHandle(handle, angle));
-    }
-
-    [Theory]
-    [InlineData(ResizeHandle.Top, 90, ToolCursor.SizeNS)]
-    [InlineData(ResizeHandle.Bottom, 90, ToolCursor.SizeNS)]
-    [InlineData(ResizeHandle.Left, 90, ToolCursor.SizeWE)]
-    [InlineData(ResizeHandle.Right, 90, ToolCursor.SizeWE)]
-    public void VisualCursorForHandle_EdgeHandles_UnchangedByRotation(ResizeHandle handle, int angle, ToolCursor expected)
-    {
-        Assert.Equal(expected, ResizeMath.VisualCursorForHandle(handle, angle));
+            snapEnabled: false, 0, SheetW, SheetH));
     }
 }

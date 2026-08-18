@@ -8,21 +8,6 @@ using DotElectric.TemplateEditor.ViewModels;
 namespace DotElectric.TemplateEditor.Tools;
 
 /// <summary>
-/// Маркер изменения размера.
-/// </summary>
-public enum ResizeHandle
-{
-    TopLeft,
-    Top,
-    TopRight,
-    Right,
-    BottomRight,
-    Bottom,
-    BottomLeft,
-    Left
-}
-
-/// <summary>
 /// Инструмент изменения размера объектов.
 /// Активируется при перетаскивании маркера выделения.
 /// Shift = сохранение пропорций, Ctrl = от центра, мин. размер 1мм.
@@ -33,18 +18,6 @@ public sealed class ResizeTool : ITool
     private TemplateObjectBase? _resizedObject;
     private ResizeHandle _activeHandle;
     private PointMicrons _startPoint;
-
-    // Сохранённые начальные параметры объекта
-    private long _startX;
-    private long _startY;
-    private long _startWidth;
-    private long _startHeight;
-
-    // Явные поля для Line (начальные и конечные точки)
-    private long _lineStartX;
-    private long _lineStartY;
-    private long _lineEndX;
-    private long _lineEndY;
 
     private ResizeState? _initialState;
     private bool _isResizing;
@@ -65,34 +38,8 @@ public sealed class ResizeTool : ITool
         _startPoint = modelPoint;
         _isResizing = true;
 
-        // Сохраняем начальные параметры
-        if (_context.SingleSelectedObject is Rectangle rect)
-        {
-            _resizedObject = rect;
-            _startX = rect.MicronsX;
-            _startY = rect.MicronsY;
-            _startWidth = rect.WidthMicrons;
-            _startHeight = rect.HeightMicrons;
-        }
-        else if (_context.SingleSelectedObject is Text text)
-        {
-            // Для текста меняем только позицию (перемещение базовой линии)
-            _resizedObject = text;
-            _startX = text.MicronsX;
-            _startY = text.MicronsY;
-            _startWidth = text.WidthMicrons;
-            _startHeight = text.FontSizeMicrons;
-        }
-        else if (_context.SingleSelectedObject is Line line)
-        {
-            // Для линии — меняем конечную точку
-            _resizedObject = line;
-            _lineStartX = line.StartMicronsX;
-            _lineStartY = line.StartMicronsY;
-            _lineEndX = line.EndMicronsX;
-            _lineEndY = line.EndMicronsY;
-        }
-
+        // Единственный снапшот начальной геометрии — модельный (он же идёт в undo-команду)
+        _resizedObject = _context.SingleSelectedObject;
         _initialState = _resizedObject?.CaptureResizeState();
     }
 
@@ -154,8 +101,8 @@ public sealed class ResizeTool : ITool
     public ToolCursor GetCursor()
     {
         if (_context.SingleSelectedObject is Text text)
-            return ResizeMath.VisualCursorForHandle(_activeHandle, text.RotationAngle);
-        return ResizeMath.CursorForHandle(_activeHandle, _isResizing, _context.SingleSelectedObject is Line);
+            return MarkerLayout.VisualCursorForHandle(_activeHandle, text.RotationAngle);
+        return MarkerLayout.CursorForHandle(_activeHandle, _isResizing, _context.SingleSelectedObject is Line);
     }
 
     // === Resize Logic ===
@@ -163,7 +110,7 @@ public sealed class ResizeTool : ITool
     private void ResizeRectangle(Rectangle rect, double dx, double dy, bool shiftPressed, bool ctrlPressed, bool snapEnabled, long stepMicrons)
     {
         var (newX, newY, newWidth, newHeight) = ResizeMath.ComputeRectangleResize(
-            _startX, _startY, _startWidth, _startHeight,
+            _initialState!.X, _initialState.Y, _initialState.Width, _initialState.Height,
             dx, dy,
             _activeHandle,
             shiftPressed, ctrlPressed,
@@ -180,8 +127,9 @@ public sealed class ResizeTool : ITool
 
     private void ResizeText(Text text, double dx, double dy, bool shiftPressed, bool ctrlPressed, bool snapEnabled, long stepMicrons)
     {
+        // В ResizeState текста Height — FontSizeMicrons (Width вычисляемая)
         var (newX, newY, newFontSize) = ResizeMath.ComputeTextResize(
-            _startX, _startY, _startWidth, _startHeight,
+            _initialState!.X, _initialState.Y, _initialState.Width, _initialState.Height,
             dx, dy,
             _activeHandle,
             ctrlPressed,
@@ -198,11 +146,12 @@ public sealed class ResizeTool : ITool
 
     private void ResizeLine(Line line, double dx, double dy, bool snapEnabled, long stepMicrons)
     {
+        // В ResizeState линии Width/Height — дельты конца относительно начала
         var (newX, newY) = ResizeMath.ComputeLineEndpoint(
             dx, dy,
             _activeHandle,
-            _lineStartX, _lineStartY,
-            _lineEndX, _lineEndY,
+            _initialState!.X, _initialState.Y,
+            _initialState.X + _initialState.Width, _initialState.Y + _initialState.Height,
             snapEnabled, stepMicrons,
             _context.Template.Sheet.WidthMicrons,
             _context.Template.Sheet.HeightMicrons);

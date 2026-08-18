@@ -42,6 +42,12 @@ public sealed class SelectTool : ITool
     /// </summary>
     private bool _wasDragged;
 
+    /// <summary>
+    /// Маркер изменения размера под курсором (null если курсор не на маркере).
+    /// Личное состояние инструмента: писатель и единственный читатель — SelectTool.
+    /// </summary>
+    private ResizeHandle? _hoveredHandle;
+
     // === Selection Box ===
 
     /// <summary>
@@ -73,11 +79,11 @@ public sealed class SelectTool : ITool
         // === Приоритет 1: Hit по маркеру single-selected объекта → ResizeTool ===
         if (_context.SingleSelectedObject != null)
         {
-            var handle = HitTestHelper.GetHitHandle(modelPoint, _context.SingleSelectedObject);
+            var handle = MarkerLayout.HitHandle(modelPoint, _context.SingleSelectedObject);
             if (handle.HasValue)
             {
                 _context.ActiveResizeHandle = handle;
-                _context.HoveredHandle = handle;
+                _hoveredHandle = handle;
                 _context.PushTool(ToolKind.Resize);
                 // Делегируем ResizeTool
                 var resizeTool = _context.GetOrCreateTool<ResizeTool>();
@@ -298,7 +304,7 @@ public sealed class SelectTool : ITool
     public ToolCursor GetCursor()
     {
         // Если наведены на маркер — перекрестие
-        if (_context.HoveredHandle.HasValue)
+        if (_hoveredHandle.HasValue)
             return ToolCursor.Cross;
         // Если drag — рука
         if (_isDragging)
@@ -317,8 +323,8 @@ public sealed class SelectTool : ITool
         // Сначала проверяем hit по маркерам single-selected объекта
         if (_context.SingleSelectedObject != null)
         {
-            var handle = HitTestHelper.GetHitHandle(modelPoint, _context.SingleSelectedObject);
-            _context.HoveredHandle = handle;
+            var handle = MarkerLayout.HitHandle(modelPoint, _context.SingleSelectedObject);
+            _hoveredHandle = handle;
             if (handle.HasValue)
             {
                 _context.HoveredObject = null;
@@ -329,7 +335,7 @@ public sealed class SelectTool : ITool
         // Проверяем hit по объектам
         var hit = HitTestHelper.HitTest(modelPoint, _context.Template.Objects);
         _context.HoveredObject = hit;
-        _context.HoveredHandle = null;
+        _hoveredHandle = null;
     }
 
     public void Reset()
@@ -354,7 +360,7 @@ public sealed class SelectTool : ITool
         {
             _context.ClearSelection();
             _context.HoveredObject = null;
-            _context.HoveredHandle = null;
+            _hoveredHandle = null;
             Reset();
             return true;
         }
