@@ -18,25 +18,8 @@ public static class TextGeometry
     /// </summary>
     public static (long OffsetX, long OffsetY) LayoutOffset(Text text)
     {
-        var w = text.WidthMicrons;
-        var h = text.HeightMicrons;
-        var angleRad = text.RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
-
-        // Four corners of the local Y-down box after rotation around origin (0,0):
-        // (0,0), (W·cos, W·sin), (-H·sin, H·cos), (W·cos-H·sin, W·sin+H·cos)
-        var c1x = w * cosA;
-        var c1y = w * sinA;
-        var c2x = -h * sinA;
-        var c2y = h * cosA;
-        var c3x = w * cosA - h * sinA;
-        var c3y = w * sinA + h * cosA;
-
-        var minX = Math.Min(0, Math.Min(Math.Min(c1x, c2x), c3x));
-        var minY = Math.Min(0, Math.Min(Math.Min(c1y, c2y), c3y));
-
-        return ((long)Math.Round(minX), (long)Math.Round(minY));
+        var (cosA, sinA) = Trig(text.RotationAngle);
+        return LayoutOffset(text.WidthMicrons, text.HeightMicrons, cosA, sinA);
     }
 
     /// <summary>
@@ -49,9 +32,7 @@ public static class TextGeometry
         var (minX, minY) = LayoutOffset(text);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
-        var angleRad = text.RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
+        var (cosA, sinA) = Trig(text.RotationAngle);
         var anchorX = text.MicronsX;
         var anchorY = text.MicronsY + text.HeightMicrons;
 
@@ -73,14 +54,11 @@ public static class TextGeometry
     {
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
-        var angleRad = text.RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
+        var (cosA, sinA) = Trig(text.RotationAngle);
 
         var (minX, minY) = LayoutOffset(text);
         // Фактический центр вращения с учётом LayoutTransform offset
-        var centerX = text.MicronsX - minX;
-        var centerY = text.MicronsY + text.HeightMicrons + minY;
+        var (centerX, centerY) = RotationCenter(text, minX, minY);
 
         var cpX = point.MicronsX - centerX;
         var cpY = centerY - point.MicronsY;
@@ -98,14 +76,11 @@ public static class TextGeometry
     {
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
-        var angleRad = text.RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
+        var (cosA, sinA) = Trig(text.RotationAngle);
 
         var (minX, minY) = LayoutOffset(text);
         // Фактический центр вращения с учётом LayoutTransform offset
-        var centerX = text.MicronsX - minX;
-        var centerY = text.MicronsY + text.HeightMicrons + minY;
+        var (centerX, centerY) = RotationCenter(text, minX, minY);
 
         var corners = new[] {
             (0L, 0L),
@@ -132,4 +107,30 @@ public static class TextGeometry
 
         return new RectMicrons(minXbb, minYbb, maxXbb, maxYbb);
     }
+
+    private static (double CosA, double SinA) Trig(int rotationAngle)
+    {
+        var angleRad = rotationAngle * Math.PI / 180.0;
+        return (Math.Cos(angleRad), Math.Sin(angleRad));
+    }
+
+    private static (long MinX, long MinY) LayoutOffset(long w, long h, double cosA, double sinA)
+    {
+        // Four corners of the local Y-down box after rotation around origin (0,0):
+        // (0,0), (W·cos, W·sin), (-H·sin, H·cos), (W·cos-H·sin, W·sin+H·cos)
+        var c1x = w * cosA;
+        var c1y = w * sinA;
+        var c2x = -h * sinA;
+        var c2y = h * cosA;
+        var c3x = w * cosA - h * sinA;
+        var c3y = w * sinA + h * cosA;
+
+        var minX = Math.Min(0, Math.Min(Math.Min(c1x, c2x), c3x));
+        var minY = Math.Min(0, Math.Min(Math.Min(c1y, c2y), c3y));
+
+        return ((long)Math.Round(minX), (long)Math.Round(minY));
+    }
+
+    private static (long CenterX, long CenterY) RotationCenter(Text text, long minX, long minY) =>
+        (text.MicronsX - minX, text.MicronsY + text.HeightMicrons + minY);
 }
