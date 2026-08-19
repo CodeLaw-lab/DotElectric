@@ -3,8 +3,8 @@
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
 **Тестов:** 2630, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 90.38% line-rate (CI gate 80%)
-**Последнее обновление:** 19.08.2026 — Кандидат 5 обзора №4 (#113, тикет #114, PR #116): форматы листа — один каталог `SheetFormatCatalog` (Models) + record `SheetFormat`; 11 точек знания стали потребителями; строковая идентичность (ADR-0002); меню «Файл > Новый шаблон» генерируется из каталога; мёртвая настройка формата оживает fallback'ом; поведение байт-в-байт, coverage 90.38%
+**Покрытие:** 90.34% line-rate (CI gate 80%)
+**Последнее обновление:** 19.08.2026 — Кандидат 6 обзора №4 (#118, тикет #119, PR #121): TextGeometry — геометрия повёрнутого текста из модели; WPF-знание (~60% класса `Text`) вынесено в статический модуль `TextGeometry` (Helpers); модель — тонкие делегации (XAML маркеров 0 изменений); мёртвые `Visual*`×4 и `RotationAngleValid` удалены; print-дефект обзора проверен и не подтвердился; поведение байт-в-байт, coverage 90.34%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -246,7 +246,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 ### Тестирование
 
 - ✅ **2630 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 90.38% line-rate (CI gate 80%)
+- ✅ **Покрытие:** 90.34% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
 - ✅ **#108–#109:** Кандидат 8 обзора №4 — мёртвые швы deletion sweep: удалены callback-параметры ZoomPanManager, мёртвые зависимости EditorViewModel (`_templateService`, `_gridNodeGenerator`-поле), ITextToolSettings, DI-регистрация IFontMetrics, 4 конвертера без биндингов, ValidateRotation; ресурсы конвертеров — каждый класс ровно один раз в корневом словаре; контракт Автосохранения типизирован (механизм сохранён), поведение байт-в-байт
 - ✅ **#103–#104:** Кандидат 4 обзора №4 — раскладка маркеров один модуль MarkerLayout: каталог/позиции/hit с допуском #82/классификация/курсоры; HitTestHelper — хит по телу, ResizeMath — чистая математика, ResizeTool — единственный ResizeState, IEditorContext 26→25, поведение байт-в-байт
@@ -416,7 +416,7 @@ src/
 
 ---
 
-**Последнее обновление:** 19.08.2026 — Кандидат 5 обзора №4 (#113, тикет #114, PR #116): форматы листа — один каталог `SheetFormatCatalog` (Models, статический, без DI) + sealed record `SheetFormat`: 11 точек знания (switch'и `Sheet`, HashSet валидатора, список настроек, 20 MenuItem с размерами в заголовках, 5 кнопок диалога, парсер суффиксов, дефолт «A3» ×6) стали потребителями; строковая идентичность формата — ADR-0002; `FromFormat`/`GetDefaultOrientation` делегируют (единый throw, молчаливый Landscape удалён); валидатор — `Contains` + Custom (V-006 без латинских дублей, `A4X2` валиден); меню «Файл > Новый шаблон» генерируется из каталога через ItemsSource (заголовки байт-в-байт); мёртвая настройка `DefaultSheetFormat` оживает fallback'ом; дефолт «A3» ×6 — через `const DefaultName`; диалог — TryGet-no-op; термины «Стандартный формат»/«Пользовательский формат» в CONTEXT.md; поведение байт-в-байт; coverage 90.38% (2630 тестов)
+**Последнее обновление:** 19.08.2026 — Кандидат 6 обзора №4 (#118, тикет #119, PR #121): TextGeometry — геометрия повёрнутого текста из модели. WPF-знание о геометрии повёрнутого текста (~60% класса `Text`: LayoutTransform-offset, повёрнутые углы, contains/bounding box при повороте) вынесено в статический модуль `TextGeometry` (Helpers: `LayoutOffset`/`Corner`/`Contains`/`BoundingBox`) — единственный носитель формул поворота; модель `Text` — тонкие делегации (8 свойств углов для XAML маркеров + полиморфные contains/bounding box; INPC-проводка на модели; 393 → 217 строк); мёртвые швы удалены (`Visual*`×4 с INPC-обвязкой — 0 потребителей, `RotationAngleValid` — тавтология); 12 геометрических тестов мигрированы в `TextGeometryTests` (offset-тесты — прямым вызовом `LayoutOffset`), `RotatedCorners_AllLieOnBoundingBoxEdges` остался пином XAML-поверхности; print-дефект обзора («повёрнутый текст смещён в print preview») проверен на коде и не подтвердился — печать и канвас компенсируются WPF-раскладкой одинаково (фикс кандидата 1); XAML и все потребители — 0 изменений; поведение байт-в-байт; coverage 90.34% (2630 тестов)
 
 
 
