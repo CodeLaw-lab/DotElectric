@@ -7,7 +7,7 @@ namespace DotElectric.TemplateEditor.Tests.Services;
 /// <summary>
 /// STA-тесты ThemeDictionaryManager.FindThemeDictionary.
 /// Словари загружаются через pack URI реальных тем главной сборки.
-/// Pack-инфраструктура WPF инициализируется созданием Application.
+/// Pack-инфраструктура WPF инициализируется через WpfApplicationHost.
 /// </summary>
 [Collection("ThemeDictionaryManager")]
 public class ThemeDictionaryManagerTests
@@ -23,7 +23,7 @@ public class ThemeDictionaryManagerTests
     {
         WpfContext.Execute(() =>
         {
-            EnsureApplication();
+            WpfApplicationHost.Ensure();
             var dictionaries = new List<ResourceDictionary>
             {
                 new() { Source = new Uri(LightThemePath) }
@@ -41,7 +41,7 @@ public class ThemeDictionaryManagerTests
     {
         WpfContext.Execute(() =>
         {
-            EnsureApplication();
+            WpfApplicationHost.Ensure();
             var dictionaries = new List<ResourceDictionary>
             {
                 new() { Source = new Uri(DarkThemePath) }
@@ -75,7 +75,7 @@ public class ThemeDictionaryManagerTests
     {
         WpfContext.Execute(() =>
         {
-            EnsureApplication();
+            WpfApplicationHost.Ensure();
             var dictionaries = new List<ResourceDictionary>
             {
                 new(),
@@ -87,13 +87,5 @@ public class ThemeDictionaryManagerTests
             Assert.NotNull(found);
             Assert.Contains("LightTheme.xaml", found.Source.OriginalString);
         });
-    }
-
-    private static void EnsureApplication()
-    {
-        if (Application.Current == null)
-        {
-            _ = new Application();
-        }
     }
 }

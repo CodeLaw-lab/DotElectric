@@ -68,6 +68,11 @@
         <!-- Вложенные пункты ориентаций меню «Файл > Новый шаблон»
              (модель пунктов генерируется из каталога стандартных форматов) -->
         <Style x:Key="NewSheetOrientationItemStyle" TargetType="MenuItem">
+            <!-- #123: явный стиль контейнера подавляет implicit-стиль MenuItem из темы —
+                 кисти подключены DynamicResource, чтобы пункты переключались при смене темы -->
+            <Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Padding" Value="12,6"/>
             <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
             <Setter Property="Command" Value="{Binding DataContext.NewTabCommand, RelativeSource={RelativeSource AncestorType=Menu}}"/>
             <Setter Property="CommandParameter" Value="{Binding CommandParameter, Mode=OneWay}"/>
@@ -106,6 +111,11 @@
                     </MenuItem.Icon>
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem">
+                            <!-- #123: явный стиль контейнера подавляет implicit-стиль MenuItem из темы —
+                                 кисти подключены DynamicResource, чтобы пункты переключались при смене темы -->
+                            <Setter Property="Background" Value="{DynamicResource MenuBackgroundBrush}"/>
+                            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+                            <Setter Property="Padding" Value="12,6"/>
                             <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
                             <Setter Property="ItemsSource" Value="{Binding Orientations, Mode=OneWay}"/>
                             <Setter Property="ItemContainerStyle" Value="{StaticResource NewSheetOrientationItemStyle}"/>
