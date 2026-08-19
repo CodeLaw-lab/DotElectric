@@ -21,8 +21,6 @@ public partial class Text : TemplateObjectBase
             OnPropertyChanged();
             OnPropertyChanged(nameof(RightMicronsX));
             OnPropertyChanged(nameof(CenterMicronsX));
-            OnPropertyChanged(nameof(VisualLeft));
-            OnPropertyChanged(nameof(VisualRight));
             NotifyAllRotatedCorners();
         }
     }
@@ -37,8 +35,6 @@ public partial class Text : TemplateObjectBase
             OnPropertyChanged();
             OnPropertyChanged(nameof(BottomMicronsY));
             OnPropertyChanged(nameof(CenterMicronsY));
-            OnPropertyChanged(nameof(VisualBottom));
-            OnPropertyChanged(nameof(VisualTop));
             NotifyAllRotatedCorners();
         }
     }
@@ -49,10 +45,6 @@ public partial class Text : TemplateObjectBase
     [NotifyPropertyChangedFor(nameof(LineCount))]
     [NotifyPropertyChangedFor(nameof(RightMicronsX))]
     [NotifyPropertyChangedFor(nameof(CenterMicronsX))]
-    [NotifyPropertyChangedFor(nameof(VisualLeft))]
-    [NotifyPropertyChangedFor(nameof(VisualRight))]
-    [NotifyPropertyChangedFor(nameof(VisualBottom))]
-    [NotifyPropertyChangedFor(nameof(VisualTop))]
     private string _content = string.Empty;
 
     [ObservableProperty]
@@ -63,10 +55,6 @@ public partial class Text : TemplateObjectBase
     [NotifyPropertyChangedFor(nameof(BottomMicronsY))]
     [NotifyPropertyChangedFor(nameof(CenterMicronsX))]
     [NotifyPropertyChangedFor(nameof(CenterMicronsY))]
-    [NotifyPropertyChangedFor(nameof(VisualLeft))]
-    [NotifyPropertyChangedFor(nameof(VisualRight))]
-    [NotifyPropertyChangedFor(nameof(VisualBottom))]
-    [NotifyPropertyChangedFor(nameof(VisualTop))]
     private long _fontSizeMicrons;
 
     [ObservableProperty]
@@ -77,10 +65,6 @@ public partial class Text : TemplateObjectBase
     private TextType _textType;
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(VisualLeft))]
-    [NotifyPropertyChangedFor(nameof(VisualRight))]
-    [NotifyPropertyChangedFor(nameof(VisualBottom))]
-    [NotifyPropertyChangedFor(nameof(VisualTop))]
     private string? _key;
 
     [ObservableProperty]
@@ -111,10 +95,6 @@ public partial class Text : TemplateObjectBase
             if (_rotationAngle == normalized) return;
             _rotationAngle = normalized;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(VisualLeft));
-            OnPropertyChanged(nameof(VisualRight));
-            OnPropertyChanged(nameof(VisualBottom));
-            OnPropertyChanged(nameof(VisualTop));
             NotifyAllRotatedCorners();
         }
     }
@@ -150,119 +130,17 @@ public partial class Text : TemplateObjectBase
     public long BottomMicronsY => MicronsY + HeightMicrons;
     public long CenterMicronsX => MicronsX + WidthMicrons / 2;
     public long CenterMicronsY => MicronsY + HeightMicrons / 2;
-    public bool RotationAngleValid => true;
 
-    /// <summary>
-    /// WPF LayoutTransform offset: the framework positions a transformed element so
-    /// the top-left of the transformed bounding box (not the local origin) lands at
-    /// the layout position. This computes the offset between the anchor
-    /// (MicronsX, MicronsY+HeightMicrons) and the actual visual rotation center.
-    /// Returns (minX, minY) in microns; the offset is applied as (-minX, +minY).
-    /// </summary>
-    private (long offsetX, long offsetY) GetLayoutTransformOffset()
-    {
-        var w = WidthMicrons;
-        var h = HeightMicrons;
-        var angleRad = RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
-
-        // Four corners of the local Y-down box after rotation around origin (0,0):
-        // (0,0), (W·cos, W·sin), (-H·sin, H·cos), (W·cos-H·sin, W·sin+H·cos)
-        var c1x = w * cosA;
-        var c1y = w * sinA;
-        var c2x = -h * sinA;
-        var c2y = h * cosA;
-        var c3x = w * cosA - h * sinA;
-        var c3y = w * sinA + h * cosA;
-
-        var minX = Math.Min(0, Math.Min(Math.Min(c1x, c2x), c3x));
-        var minY = Math.Min(0, Math.Min(Math.Min(c1y, c2y), c3y));
-
-        return ((long)Math.Round(minX), (long)Math.Round(minY));
-    }
-
-    public long VisualLeft => GetBoundingBox().Left;
-    public long VisualBottom => GetBoundingBox().Bottom;
-    public long VisualRight => GetBoundingBox().Right;
-    public long VisualTop => GetBoundingBox().Top;
-
-    // Повёрнутые углы (для маркеров выделения) — с учётом LayoutTransform offset.
-    // WPF позиционирует трансформированный элемент по верхнему левому углу
-    // bounding box, а не по origin (0,0), поэтому добавляем смещение (-minX, +minY).
-    public long RotatedCorner0X
-    {
-        get
-        {
-            var (minX, _) = GetLayoutTransformOffset();
-            return MicronsX - minX;
-        }
-    }
-    public long RotatedCorner0Y
-    {
-        get
-        {
-            var (_, minY) = GetLayoutTransformOffset();
-            return MicronsY + HeightMicrons + minY;
-        }
-    }
-
-    public long RotatedCorner1X
-    {
-        get
-        {
-            var (minX, _) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return MicronsX + (long)Math.Round(WidthMicrons * Math.Cos(angleRad)) - minX;
-        }
-    }
-    public long RotatedCorner1Y
-    {
-        get
-        {
-            var (_, minY) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return (MicronsY + HeightMicrons) - (long)Math.Round(WidthMicrons * Math.Sin(angleRad)) + minY;
-        }
-    }
-
-    public long RotatedCorner2X
-    {
-        get
-        {
-            var (minX, _) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return MicronsX - (long)Math.Round(HeightMicrons * Math.Sin(angleRad)) - minX;
-        }
-    }
-    public long RotatedCorner2Y
-    {
-        get
-        {
-            var (_, minY) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return (MicronsY + HeightMicrons) - (long)Math.Round(HeightMicrons * Math.Cos(angleRad)) + minY;
-        }
-    }
-
-    public long RotatedCorner3X
-    {
-        get
-        {
-            var (minX, _) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return MicronsX + (long)Math.Round(WidthMicrons * Math.Cos(angleRad) - HeightMicrons * Math.Sin(angleRad)) - minX;
-        }
-    }
-    public long RotatedCorner3Y
-    {
-        get
-        {
-            var (_, minY) = GetLayoutTransformOffset();
-            var angleRad = RotationAngle * Math.PI / 180.0;
-            return (MicronsY + HeightMicrons) - (long)Math.Round(WidthMicrons * Math.Sin(angleRad) + HeightMicrons * Math.Cos(angleRad)) + minY;
-        }
-    }
+    // Повёрнутые углы (для маркеров выделения) — делегации в TextGeometry,
+    // учитывающие LayoutTransform offset WPF.
+    public long RotatedCorner0X => TextGeometry.Corner(this, 0).MicronsX;
+    public long RotatedCorner0Y => TextGeometry.Corner(this, 0).MicronsY;
+    public long RotatedCorner1X => TextGeometry.Corner(this, 1).MicronsX;
+    public long RotatedCorner1Y => TextGeometry.Corner(this, 1).MicronsY;
+    public long RotatedCorner2X => TextGeometry.Corner(this, 2).MicronsX;
+    public long RotatedCorner2Y => TextGeometry.Corner(this, 2).MicronsY;
+    public long RotatedCorner3X => TextGeometry.Corner(this, 3).MicronsX;
+    public long RotatedCorner3Y => TextGeometry.Corner(this, 3).MicronsY;
 
     private void NotifyAllRotatedCorners()
     {
@@ -322,66 +200,9 @@ public partial class Text : TemplateObjectBase
         };
     }
 
-    public override bool ContainsPoint(PointMicrons point)
-    {
-        var w = WidthMicrons;
-        var h = HeightMicrons;
-        var angleRad = RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
+    public override bool ContainsPoint(PointMicrons point) => TextGeometry.Contains(this, point);
 
-        var (minX, minY) = GetLayoutTransformOffset();
-        // Фактический центр вращения с учётом LayoutTransform offset
-        var centerX = MicronsX - minX;
-        var centerY = MicronsY + HeightMicrons + minY;
-
-        var cpX = point.MicronsX - centerX;
-        var cpY = centerY - point.MicronsY;
-
-        var u = cpX * cosA + cpY * sinA;
-        var v = -cpX * sinA + cpY * cosA;
-
-        return u >= 0 && u <= w && v >= 0 && v <= h;
-    }
-
-    public override RectMicrons GetBoundingBox()
-    {
-        var w = WidthMicrons;
-        var h = HeightMicrons;
-        var angleRad = RotationAngle * Math.PI / 180.0;
-        var cosA = Math.Cos(angleRad);
-        var sinA = Math.Sin(angleRad);
-
-        var (minX, minY) = GetLayoutTransformOffset();
-        // Фактический центр вращения с учётом LayoutTransform offset
-        var centerX = MicronsX - minX;
-        var centerY = MicronsY + HeightMicrons + minY;
-
-        var corners = new[] {
-            (0L, 0L),
-            (w, 0L),
-            (0L, h),
-            (w, h)
-        };
-
-        long minXbb = long.MaxValue, minYbb = long.MaxValue;
-        long maxXbb = long.MinValue, maxYbb = long.MinValue;
-
-        foreach (var (lx, ly) in corners)
-        {
-            var cpX = lx * cosA - ly * sinA;
-            var cpY = lx * sinA + ly * cosA;
-
-            var wx = centerX + (long)Math.Round(cpX);
-            var wy = centerY - (long)Math.Round(cpY);
-            if (wx < minXbb) minXbb = wx;
-            if (wy < minYbb) minYbb = wy;
-            if (wx > maxXbb) maxXbb = wx;
-            if (wy > maxYbb) maxYbb = wy;
-        }
-
-        return new RectMicrons(minXbb, minYbb, maxXbb, maxYbb);
-    }
+    public override RectMicrons GetBoundingBox() => TextGeometry.BoundingBox(this);
 
     public override ResizeState CaptureResizeState() =>
         new(MicronsX, MicronsY, WidthMicrons, FontSizeMicrons);
