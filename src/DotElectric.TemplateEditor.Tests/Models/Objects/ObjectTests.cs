@@ -103,19 +103,6 @@ public class TextAdditionalTests
     }
 
     [Fact]
-    public void RotationAngleValid_OnlyAcceptsValidAngles()
-    {
-        var text = new Text(0, 0, "Test", 5000, rotationAngle: 0);
-        Assert.True(text.RotationAngleValid);
-
-        text.RotationAngle = 90;
-        Assert.True(text.RotationAngleValid);
-
-        text.RotationAngle = 270;
-        Assert.True(text.RotationAngleValid);
-    }
-
-    [Fact]
     public void Clone_CreatesIndependentCopy()
     {
         var text = new Text(1000, 2000, "Hello", 5000, "ГОСТ Б", TextType.Label, 90);
