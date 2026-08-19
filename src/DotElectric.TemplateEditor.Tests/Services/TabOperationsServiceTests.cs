@@ -192,6 +192,38 @@ public class TabOperationsServiceTests
             a.LastUsedSheetOrientation == "Landscape")), Times.Once);
     }
 
+    [Fact]
+    public void CreateNewTab_FormatAndLastUsedNull_UsesDefaultSheetFormatFromSettings()
+    {
+        _appSettings.DefaultSheetFormat = "A4";
+
+        _service.CreateNewTab(null, null, null);
+
+        _templateServiceMock.Verify(s => s.CreateNew("A4", SheetOrientation.Landscape), Times.Once);
+        _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
+            a.LastUsedSheetFormat == "A4")), Times.Once);
+    }
+
+    [Fact]
+    public void CreateNewTab_InvalidDefaultSheetFormatInSettings_FallsBackToCatalogDefault()
+    {
+        _appSettings.DefaultSheetFormat = "Bogus";
+
+        _service.CreateNewTab(null, null, null);
+
+        _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Landscape), Times.Once);
+    }
+
+    [Fact]
+    public void CreateNewTab_LastUsedFormat_WinsOverDefaultSheetFormat()
+    {
+        _appSettings.DefaultSheetFormat = "A4";
+
+        _service.CreateNewTab(null, "A1L", null);
+
+        _templateServiceMock.Verify(s => s.CreateNew("A1", SheetOrientation.Landscape), Times.Once);
+    }
+
     // === OpenFileAsync ===
 
     [Fact]

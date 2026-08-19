@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 
 namespace DotElectric.TemplateEditor.ViewModels;
@@ -46,10 +47,7 @@ public partial class SettingsViewModel : ObservableObject
     public string[] ThemeOptions { get; } = ["Light", "Dark"];
 
     public string[] FormatOptions { get; } =
-    [
-        "A0", "A1", "A2", "A3", "A4",
-        "A4×2", "A3×2", "A2×2", "A1×2", "A0×2"
-    ];
+        SheetFormatCatalog.All.Select(f => f.Name).ToArray();
 
     public double[] ZoomOptions { get; } = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0];
 

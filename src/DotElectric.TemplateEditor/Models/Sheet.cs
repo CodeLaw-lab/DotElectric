@@ -51,20 +51,8 @@ public class Sheet
     /// </summary>
     public static Sheet FromFormat(string format, SheetOrientation orientation)
     {
-        return format.ToUpperInvariant() switch
-        {
-            "A0" => CreateSheet("A0", 1_189_000, 841_000, orientation),
-            "A1" => CreateSheet("A1", 841_000, 594_000, orientation),
-            "A2" => CreateSheet("A2", 594_000, 420_000, orientation),
-            "A3" => CreateSheet("A3", 420_000, 297_000, orientation),
-            "A4" => CreateSheet("A4", 297_000, 210_000, orientation),
-            "A4×2" or "A4X2" => CreateSheet("A4×2", 594_000, 210_000, orientation),
-            "A3×2" or "A3X2" => CreateSheet("A3×2", 840_000, 297_000, orientation),
-            "A2×2" or "A2X2" => CreateSheet("A2×2", 1_188_000, 420_000, orientation),
-            "A1×2" or "A1X2" => CreateSheet("A1×2", 1_682_000, 594_000, orientation),
-            "A0×2" or "A0X2" => CreateSheet("A0×2", 2_378_000, 841_000, orientation),
-            _ => throw new ArgumentException($"Неизвестный формат листа: {format}", nameof(format)),
-        };
+        var entry = SheetFormatCatalog.Get(format);
+        return CreateSheet(entry.Name, entry.LongSideMicrons, entry.ShortSideMicrons, orientation);
     }
 
     /// <summary>
@@ -101,24 +89,11 @@ public class Sheet
 
     /// <summary>
     /// Определить ориентацию по умолчанию для заданного формата.
-    /// A4 → Portrait (книжная), остальные → Landscape (альбомная).
+    /// A4 и полуформаты → Portrait (книжная), A0–A3 → Landscape (альбомная).
+    /// Неизвестный формат — <see cref="ArgumentException"/> (едино с FromFormat).
     /// </summary>
     public static SheetOrientation GetDefaultOrientation(string format)
-    {
-        if (string.IsNullOrWhiteSpace(format))
-            return SheetOrientation.Landscape;
-
-        return format.ToUpperInvariant() switch
-        {
-            "A4" => SheetOrientation.Portrait,
-            "A4×2" or "A4X2" => SheetOrientation.Portrait,
-            "A3×2" or "A3X2" => SheetOrientation.Portrait,
-            "A2×2" or "A2X2" => SheetOrientation.Portrait,
-            "A1×2" or "A1X2" => SheetOrientation.Portrait,
-            "A0×2" or "A0X2" => SheetOrientation.Portrait,
-            _ => SheetOrientation.Landscape
-        };
-    }
+        => SheetFormatCatalog.Get(format).DefaultOrientation;
 
     /// <summary>
     /// Создать пользовательский лист.

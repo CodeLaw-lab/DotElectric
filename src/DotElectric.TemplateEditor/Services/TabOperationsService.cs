@@ -38,7 +38,8 @@ public sealed class TabOperationsService : ITabOperationsService
 
     public EditorViewModel CreateNewTab(string? format, string? lastUsedFormat, string? lastUsedOrientation)
     {
-        var rawFormat = format ?? lastUsedFormat ?? "A3";
+        var settings = _settingsService.Load();
+        var rawFormat = format ?? lastUsedFormat ?? ResolveDefaultFormat(settings);
 
         // Parse format and orientation from string like "A4P", "A3L", "A4", "A3"
         var fmt = ParseSheetFormat(rawFormat, out var orientation);
@@ -52,7 +53,6 @@ public sealed class TabOperationsService : ITabOperationsService
                 : Sheet.GetDefaultOrientation(fmt);
         }
 
-        var settings = _settingsService.Load();
         settings.LastUsedSheetFormat = fmt;
         settings.LastUsedSheetOrientation = orientation.Value.ToString();
         _settingsService.Save(settings);
@@ -180,6 +180,15 @@ public sealed class TabOperationsService : ITabOperationsService
 
         return true;
     }
+
+    /// <summary>
+    /// Формат по умолчанию из настроек; мусорные значения отбрасываются
+    /// в пользу дефолта каталога (байт-в-байт с прежним хардкодом «A3»).
+    /// </summary>
+    private static string ResolveDefaultFormat(AppSettings settings)
+        => SheetFormatCatalog.Contains(settings.DefaultSheetFormat)
+            ? settings.DefaultSheetFormat
+            : SheetFormatCatalog.DefaultName;
 
     internal static string ParseSheetFormat(string rawFormat, out SheetOrientation? orientation)
     {

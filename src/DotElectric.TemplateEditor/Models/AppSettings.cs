@@ -54,12 +54,12 @@ public sealed class AppSettings
     /// <summary>
     /// Формат листа по умолчанию (A3).
     /// </summary>
-    public string DefaultSheetFormat { get; set; } = "A3";
+    public string DefaultSheetFormat { get; set; } = SheetFormatCatalog.DefaultName;
 
     /// <summary>
     /// Последний использованный формат листа (для Ctrl+N и кнопки «Новый»).
     /// </summary>
-    public string LastUsedSheetFormat { get; set; } = "A3";
+    public string LastUsedSheetFormat { get; set; } = SheetFormatCatalog.DefaultName;
 
     /// <summary>
     /// Последняя используемая орентация листа.
