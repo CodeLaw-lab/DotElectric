@@ -68,9 +68,9 @@
         <!-- Вложенные пункты ориентаций меню «Файл > Новый шаблон»
              (модель пунктов генерируется из каталога стандартных форматов) -->
         <Style x:Key="NewSheetOrientationItemStyle" TargetType="MenuItem">
-            <Setter Property="Header" Value="{Binding Header}"/>
+            <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
             <Setter Property="Command" Value="{Binding DataContext.NewTabCommand, RelativeSource={RelativeSource AncestorType=Menu}}"/>
-            <Setter Property="CommandParameter" Value="{Binding CommandParameter}"/>
+            <Setter Property="CommandParameter" Value="{Binding CommandParameter, Mode=OneWay}"/>
         </Style>
     </Window.Resources>
 
@@ -106,8 +106,8 @@
                     </MenuItem.Icon>
                     <MenuItem.ItemContainerStyle>
                         <Style TargetType="MenuItem">
-                            <Setter Property="Header" Value="{Binding Header}"/>
-                            <Setter Property="ItemsSource" Value="{Binding Orientations}"/>
+                            <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
+                            <Setter Property="ItemsSource" Value="{Binding Orientations, Mode=OneWay}"/>
                             <Setter Property="ItemContainerStyle" Value="{StaticResource NewSheetOrientationItemStyle}"/>
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding Kind}" Value="Separator">

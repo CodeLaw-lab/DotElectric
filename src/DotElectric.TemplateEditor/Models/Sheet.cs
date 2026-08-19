@@ -6,6 +6,11 @@ namespace DotElectric.TemplateEditor.Models;
 public class Sheet
 {
     /// <summary>
+    /// Имя пользовательского формата (произвольные размеры, вне каталога).
+    /// </summary>
+    public const string CustomName = "Custom";
+
+    /// <summary>
     /// Формат листа (A0, A1, A2, A3, A4, Custom).
     /// </summary>
     public string Format { get; set; } = string.Empty;
@@ -101,7 +106,7 @@ public class Sheet
     public static Sheet Custom(double widthMm, double heightMm)
         => new()
         {
-            Format = "Custom",
+            Format = CustomName,
             WidthMicrons = Coordinate.ToMicrons(widthMm),
             HeightMicrons = Coordinate.ToMicrons(heightMm),
             Orientation = widthMm >= heightMm

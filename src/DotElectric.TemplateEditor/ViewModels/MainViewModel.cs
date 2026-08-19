@@ -203,7 +203,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
 
         foreach (var format in SheetFormatCatalog.All)
         {
-            if (!halfFormatSeparatorAdded && format.Name.Contains("×2"))
+            if (!halfFormatSeparatorAdded && format.IsHalfFormat)
             {
                 entries.Add(new NewSheetMenuEntry(NewSheetMenuKind.Separator, string.Empty));
                 halfFormatSeparatorAdded = true;

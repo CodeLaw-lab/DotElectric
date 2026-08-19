@@ -39,11 +39,6 @@ public static class SheetFormatCatalog
     public static IReadOnlyList<SheetFormat> All { get; } = Formats;
 
     /// <summary>
-    /// Формат по умолчанию (<see cref="DefaultName"/>).
-    /// </summary>
-    public static SheetFormat Default => Get(DefaultName);
-
-    /// <summary>
     /// Получить формат по имени. Регистр не учитывается; латинская «X»
     /// в записи полуформатов эквивалентна «×».
     /// Неизвестный формат — <see cref="ArgumentException"/>.

@@ -272,10 +272,10 @@ public sealed class TemplateValidator : ITemplateValidator
             yield break;
         }
 
-        var isCustom = sheet.Format.Equals("Custom", StringComparison.OrdinalIgnoreCase);
+        var isCustom = sheet.Format.Equals(Sheet.CustomName, StringComparison.OrdinalIgnoreCase);
         if (!isCustom && !SheetFormatCatalog.Contains(sheet.Format))
         {
-            var allowed = string.Join(", ", SheetFormatCatalog.All.Select(f => f.Name)) + ", Custom";
+            var allowed = string.Join(", ", SheetFormatCatalog.All.Select(f => f.Name)) + $", {Sheet.CustomName}";
             yield return new ValidationError(
                 "V-006",
                 $"Некорректный формат листа: '{sheet.Format}'. Допустимые: {allowed}.");

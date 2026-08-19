@@ -170,12 +170,15 @@ public class SheetFormatCatalogTests
         Assert.Equal("A3", SheetFormatCatalog.DefaultName);
     }
 
-    [Fact]
-    public void Default_ReturnsA3Entry()
+    [Theory]
+    [InlineData("A0", false)]
+    [InlineData("A4", false)]
+    [InlineData("A4×2", true)]
+    [InlineData("A0×2", true)]
+    public void IsHalfFormat_TrueOnlyForDoubledFormats(string name, bool expected)
     {
-        var entry = SheetFormatCatalog.Default;
+        var entry = SheetFormatCatalog.Get(name);
 
-        Assert.Equal("A3", entry.Name);
-        Assert.Equal(SheetOrientation.Landscape, entry.DefaultOrientation);
+        Assert.Equal(expected, entry.IsHalfFormat);
     }
 }

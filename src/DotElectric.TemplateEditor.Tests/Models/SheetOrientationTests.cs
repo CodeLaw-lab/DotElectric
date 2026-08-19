@@ -184,4 +184,19 @@ public class SheetOrientationTests
     {
         Assert.Throws<ArgumentException>(() => Sheet.FromFormat(format));
     }
+
+    [Theory]
+    [InlineData("A5")]
+    [InlineData("")]
+    [InlineData("invalid")]
+    public void GetDefaultOrientation_UnknownFormat_ThrowsArgumentException(string format)
+    {
+        Assert.Throws<ArgumentException>(() => Sheet.GetDefaultOrientation(format));
+    }
+
+    [Fact]
+    public void GetDefaultOrientation_Null_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => Sheet.GetDefaultOrientation(null!));
+    }
 }

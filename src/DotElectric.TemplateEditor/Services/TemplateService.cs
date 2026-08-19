@@ -203,7 +203,7 @@ public sealed class TemplateService : ITemplateService
         var orientation = sheetDto?.Orientation ?? DetermineOrientation(sheetDto);
 
         // Аварийный fallback повреждённого файла: формат по умолчанию (семантика сохранена).
-        var defaultFormat = SheetFormatCatalog.Default;
+        var defaultFormat = SheetFormatCatalog.Get(SheetFormatCatalog.DefaultName);
         var sheet = new Sheet
         {
             Format = dto.Sheet?.Format ?? SheetFormatCatalog.DefaultName,

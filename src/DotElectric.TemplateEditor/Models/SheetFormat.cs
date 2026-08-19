@@ -11,4 +11,10 @@ public sealed record SheetFormat(
     string Name,
     long LongSideMicrons,
     long ShortSideMicrons,
-    SheetOrientation DefaultOrientation);
+    SheetOrientation DefaultOrientation)
+{
+    /// <summary>
+    /// Полуформат — удвоенная длинная сторона (A4×2…A0×2).
+    /// </summary>
+    public bool IsHalfFormat => Name.EndsWith("×2", StringComparison.Ordinal);
+}
