@@ -144,6 +144,30 @@ public class ValidationServiceTests
     }
 
     [Fact]
+    public void Validate_V006_InvalidFormat_MessageListsCanonicalFormatsWithoutLatinDuplicates()
+    {
+        var template = CreateValidTemplate();
+        template.Sheet.Format = "A5";
+
+        var error = Assert.Single(new TemplateValidator().Validate(template), e => e.RuleId == "V-006");
+
+        Assert.Contains("A0, A1, A2, A3, A4, A4×2, A3×2, A2×2, A1×2, A0×2, Custom", error.Message);
+        Assert.DoesNotContain("A4X2", error.Message);
+    }
+
+    [Fact]
+    public void Validate_V006_LatinXHalfFormat_StillValid()
+    {
+        var template = CreateValidTemplate();
+        template.Sheet.Format = "A4X2";
+        template.Sheet.WidthMicrons = 210_000;
+        template.Sheet.HeightMicrons = 594_000;
+
+        var errors = new TemplateValidator().Validate(template).Where(e => e.RuleId == "V-006").ToList();
+        Assert.Empty(errors);
+    }
+
+    [Fact]
     public void Validate_V006_CustomSheetZeroWidth_ReturnsError()
     {
         var template = CreateValidTemplate();

@@ -190,6 +190,64 @@ public class MainViewModelTests : IDisposable
         Assert.Single(_viewModel.OpenedTabs);
     }
 
+    // ===== NewSheetMenu (модель меню «Файл > Новый шаблон») =====
+
+    [Fact]
+    public void NewSheetMenu_Structure_GroupsSeparatorsCustomInOrder()
+    {
+        var menu = _viewModel.NewSheetMenu;
+
+        Assert.Equal(13, menu.Count);
+
+        Assert.Equal(
+            ["A0", "A1", "A2", "A3", "A4"],
+            menu.Take(5).Select(e => e.Header).ToArray());
+        Assert.All(menu.Take(5), e => Assert.Equal(NewSheetMenuKind.FormatGroup, e.Kind));
+
+        Assert.Equal(NewSheetMenuKind.Separator, menu[5].Kind);
+
+        Assert.Equal(
+            ["A4×2", "A3×2", "A2×2", "A1×2", "A0×2"],
+            menu.Skip(6).Take(5).Select(e => e.Header).ToArray());
+        Assert.All(menu.Skip(6).Take(5), e => Assert.Equal(NewSheetMenuKind.FormatGroup, e.Kind));
+
+        Assert.Equal(NewSheetMenuKind.Separator, menu[11].Kind);
+
+        Assert.Equal(NewSheetMenuKind.CustomCommand, menu[12].Kind);
+        Assert.Equal("Пользовательский...", menu[12].Header);
+        Assert.Null(menu[12].Orientations);
+    }
+
+    [Fact]
+    public void NewSheetMenu_OrientationHeadersAndParameters_ByteForByteWithPreviousMenu()
+    {
+        var groups = _viewModel.NewSheetMenu
+            .Where(e => e.Kind == NewSheetMenuKind.FormatGroup)
+            .Select(e => (e.Header, Orientations: e.Orientations!.Select(o => (o.Header, o.CommandParameter)).ToArray()))
+            .ToArray();
+
+        var expected = new (string Header, (string Header, string Parameter)[] Orientations)[]
+        {
+            ("A0", new[] { ("Альбомная (1189×841)", "A0L"), ("Книжная (841×1189)", "A0P") }),
+            ("A1", new[] { ("Альбомная (841×594)", "A1L"), ("Книжная (594×841)", "A1P") }),
+            ("A2", new[] { ("Альбомная (594×420)", "A2L"), ("Книжная (420×594)", "A2P") }),
+            ("A3", new[] { ("Альбомная (420×297)", "A3L"), ("Книжная (297×420)", "A3P") }),
+            ("A4", new[] { ("Книжная (210×297)", "A4P"), ("Альбомная (297×210)", "A4L") }),
+            ("A4×2", new[] { ("Книжная (210×594)", "A4×2P"), ("Альбомная (594×210)", "A4×2L") }),
+            ("A3×2", new[] { ("Книжная (297×840)", "A3×2P"), ("Альбомная (840×297)", "A3×2L") }),
+            ("A2×2", new[] { ("Книжная (420×1188)", "A2×2P"), ("Альбомная (1188×420)", "A2×2L") }),
+            ("A1×2", new[] { ("Книжная (594×1682)", "A1×2P"), ("Альбомная (1682×594)", "A1×2L") }),
+            ("A0×2", new[] { ("Книжная (841×2378)", "A0×2P"), ("Альбомная (2378×841)", "A0×2L") })
+        };
+
+        Assert.Equal(expected.Length, groups.Length);
+        for (var i = 0; i < expected.Length; i++)
+        {
+            Assert.Equal(expected[i].Header, groups[i].Header);
+            Assert.Equal(expected[i].Orientations, groups[i].Orientations);
+        }
+    }
+
     // ===== CloseTab =====
 
     [Fact]

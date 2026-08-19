@@ -13,7 +13,7 @@ public interface ITemplateService
    /// <param name="format">Формат листа (A0-A4).</param>
    /// <param name="orientation">Ориентация листа. Если null, используется ориентация по умолчанию для формата.</param>
    /// <returns>Новый шаблон.</returns>
-   Template CreateNew(string format = "A3", SheetOrientation? orientation = null);
+   Template CreateNew(string format = SheetFormatCatalog.DefaultName, SheetOrientation? orientation = null);
 
     /// <summary>
     /// Создать новый шаблон из готового объекта Sheet (для пользовательских форматов).

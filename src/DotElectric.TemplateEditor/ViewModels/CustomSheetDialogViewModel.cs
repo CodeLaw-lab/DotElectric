@@ -48,21 +48,17 @@ public partial class CustomSheetDialogViewModel : ObservableObject, ICustomSheet
     }
 
     /// <summary>
-    /// Быстрый выбор стандартного формата.
+    /// Быстрый выбор стандартного формата. Неизвестное имя — no-op.
     /// </summary>
     [RelayCommand]
     private void SetQuickFormat(string formatName)
     {
-        try
-        {
-            var sheet = Sheet.FromFormat(formatName);
-            WidthMm = sheet.WidthMm;
-            HeightMm = sheet.HeightMm;
-        }
-        catch
-        {
-            // ignore invalid format names
-        }
+        if (!SheetFormatCatalog.TryGet(formatName, out var format))
+            return;
+
+        var sheet = Sheet.FromFormat(format.Name);
+        WidthMm = sheet.WidthMm;
+        HeightMm = sheet.HeightMm;
     }
 
     /// <summary>

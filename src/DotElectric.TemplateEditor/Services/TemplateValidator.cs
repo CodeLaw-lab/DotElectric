@@ -16,15 +16,6 @@ public sealed class TemplateValidator : ITemplateValidator
         _validation = validation;
     }
 
-    private static readonly HashSet<string> ValidFormats = new(
-        StringComparer.OrdinalIgnoreCase)
-    {
-        "A0", "A1", "A2", "A3", "A4", "Custom",
-        "A4×2", "A4X2", "A3×2", "A3X2",
-        "A2×2", "A2X2", "A1×2", "A1X2",
-        "A0×2", "A0X2"
-    };
-
     public IEnumerable<ValidationError> Validate(Template template)
     {
         if (template == null)
@@ -281,14 +272,16 @@ public sealed class TemplateValidator : ITemplateValidator
             yield break;
         }
 
-        if (!ValidFormats.Contains(sheet.Format))
+        var isCustom = sheet.Format.Equals(Sheet.CustomName, StringComparison.OrdinalIgnoreCase);
+        if (!isCustom && !SheetFormatCatalog.Contains(sheet.Format))
         {
+            var allowed = string.Join(", ", SheetFormatCatalog.All.Select(f => f.Name)) + $", {Sheet.CustomName}";
             yield return new ValidationError(
                 "V-006",
-                $"Некорректный формат листа: '{sheet.Format}'. Допустимые: {string.Join(", ", ValidFormats)}.");
+                $"Некорректный формат листа: '{sheet.Format}'. Допустимые: {allowed}.");
         }
 
-        if (sheet.Format.Equals("Custom", StringComparison.OrdinalIgnoreCase))
+        if (isCustom)
         {
             if (sheet.WidthMicrons <= 0)
             {

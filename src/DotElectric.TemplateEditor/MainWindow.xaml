@@ -64,6 +64,14 @@
         <DataTemplate DataType="{x:Type vm:EditorViewModel}">
             <views:EditorCanvas />
         </DataTemplate>
+
+        <!-- Вложенные пункты ориентаций меню «Файл > Новый шаблон»
+             (модель пунктов генерируется из каталога стандартных форматов) -->
+        <Style x:Key="NewSheetOrientationItemStyle" TargetType="MenuItem">
+            <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
+            <Setter Property="Command" Value="{Binding DataContext.NewTabCommand, RelativeSource={RelativeSource AncestorType=Menu}}"/>
+            <Setter Property="CommandParameter" Value="{Binding CommandParameter, Mode=OneWay}"/>
+        </Style>
     </Window.Resources>
 
     <Grid>
@@ -90,60 +98,34 @@
               Foreground="{DynamicResource TextPrimaryBrush}"
               FontSize="14">
             <MenuItem Header="_Файл">
-                <!-- Подменю "Новый шаблон" с выбором форматов -->
-                <MenuItem Header="_Новый шаблон">
+                <!-- Подменю "Новый шаблон" — пункты генерируются из каталога
+                     стандартных форматов (MainViewModel.NewSheetMenu) -->
+                <MenuItem Header="_Новый шаблон" ItemsSource="{Binding NewSheetMenu}">
                     <MenuItem.Icon>
                         <materialDesign:PackIcon Kind="FilePlusOutline" Width="16" Height="16"/>
                     </MenuItem.Icon>
-                    <!-- A0 -->
-                    <MenuItem Header="A0">
-                        <MenuItem Header="Альбомная (1189×841)" Command="{Binding NewTabCommand}" CommandParameter="A0L"/>
-                        <MenuItem Header="Книжная (841×1189)" Command="{Binding NewTabCommand}" CommandParameter="A0P"/>
-                    </MenuItem>
-                    <!-- A1 -->
-                    <MenuItem Header="A1">
-                        <MenuItem Header="Альбомная (841×594)" Command="{Binding NewTabCommand}" CommandParameter="A1L"/>
-                        <MenuItem Header="Книжная (594×841)" Command="{Binding NewTabCommand}" CommandParameter="A1P"/>
-                    </MenuItem>
-                    <!-- A2 -->
-                    <MenuItem Header="A2">
-                        <MenuItem Header="Альбомная (594×420)" Command="{Binding NewTabCommand}" CommandParameter="A2L"/>
-                        <MenuItem Header="Книжная (420×594)" Command="{Binding NewTabCommand}" CommandParameter="A2P"/>
-                    </MenuItem>
-                    <!-- A3 -->
-                    <MenuItem Header="A3">
-                        <MenuItem Header="Альбомная (420×297)" Command="{Binding NewTabCommand}" CommandParameter="A3L"/>
-                        <MenuItem Header="Книжная (297×420)" Command="{Binding NewTabCommand}" CommandParameter="A3P"/>
-                    </MenuItem>
-                    <!-- A4 -->
-                    <MenuItem Header="A4">
-                        <MenuItem Header="Книжная (210×297)" Command="{Binding NewTabCommand}" CommandParameter="A4P"/>
-                        <MenuItem Header="Альбомная (297×210)" Command="{Binding NewTabCommand}" CommandParameter="A4L"/>
-                    </MenuItem>
-                    <Separator/>
-                    <!-- Half-форматы -->
-                    <MenuItem Header="A4×2">
-                        <MenuItem Header="Книжная (210×594)" Command="{Binding NewTabCommand}" CommandParameter="A4×2P"/>
-                        <MenuItem Header="Альбомная (594×210)" Command="{Binding NewTabCommand}" CommandParameter="A4×2L"/>
-                    </MenuItem>
-                    <MenuItem Header="A3×2">
-                        <MenuItem Header="Книжная (297×840)" Command="{Binding NewTabCommand}" CommandParameter="A3×2P"/>
-                        <MenuItem Header="Альбомная (840×297)" Command="{Binding NewTabCommand}" CommandParameter="A3×2L"/>
-                    </MenuItem>
-                    <MenuItem Header="A2×2">
-                        <MenuItem Header="Книжная (420×1188)" Command="{Binding NewTabCommand}" CommandParameter="A2×2P"/>
-                        <MenuItem Header="Альбомная (1188×420)" Command="{Binding NewTabCommand}" CommandParameter="A2×2L"/>
-                    </MenuItem>
-                    <MenuItem Header="A1×2">
-                        <MenuItem Header="Книжная (594×1682)" Command="{Binding NewTabCommand}" CommandParameter="A1×2P"/>
-                        <MenuItem Header="Альбомная (1682×594)" Command="{Binding NewTabCommand}" CommandParameter="A1×2L"/>
-                    </MenuItem>
-                    <MenuItem Header="A0×2">
-                        <MenuItem Header="Книжная (841×2378)" Command="{Binding NewTabCommand}" CommandParameter="A0×2P"/>
-                        <MenuItem Header="Альбомная (2378×841)" Command="{Binding NewTabCommand}" CommandParameter="A0×2L"/>
-                    </MenuItem>
-                    <Separator/>
-                    <MenuItem Header="Пользовательский..." Command="{Binding NewCustomTabCommand}"/>
+                    <MenuItem.ItemContainerStyle>
+                        <Style TargetType="MenuItem">
+                            <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
+                            <Setter Property="ItemsSource" Value="{Binding Orientations, Mode=OneWay}"/>
+                            <Setter Property="ItemContainerStyle" Value="{StaticResource NewSheetOrientationItemStyle}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Kind}" Value="Separator">
+                                    <Setter Property="IsEnabled" Value="False"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="MenuItem">
+                                                <Separator/>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Kind}" Value="CustomCommand">
+                                    <Setter Property="Command" Value="{Binding DataContext.NewCustomTabCommand, RelativeSource={RelativeSource AncestorType=Menu}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </MenuItem.ItemContainerStyle>
                 </MenuItem>
                 <MenuItem Header="_Открыть..." Command="{Binding OpenFileCommand}"
                           InputGestureText="Ctrl+O">

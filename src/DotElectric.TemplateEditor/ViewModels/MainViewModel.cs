@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Messages;
+using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels.Abstractions;
 using DotElectric.TemplateEditor.Views;
@@ -61,6 +62,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     [ObservableProperty]
     private string _theme = "Light";
+
+    /// <summary>
+    /// Модель меню «Файл > Новый шаблон» — генерируется из каталога
+    /// стандартных форматов (единственный источник списка и размеров).
+    /// </summary>
+    public IReadOnlyList<NewSheetMenuEntry> NewSheetMenu { get; } = BuildNewSheetMenu();
 
     // === РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ ===
 
@@ -182,6 +189,48 @@ public partial class MainViewModel : ObservableObject, IDisposable
                 OpenedTabs.Add(editor);
                 SelectedTab = editor;
             }
+    }
+
+    /// <summary>
+    /// Собирает модель меню «Новый шаблон» из каталога: группы форматов
+    /// в порядке каталога, разделитель перед полуформатами и после последней
+    /// группы, затем пункт «Пользовательский...».
+    /// </summary>
+    private static IReadOnlyList<NewSheetMenuEntry> BuildNewSheetMenu()
+    {
+        var entries = new List<NewSheetMenuEntry>();
+        var halfFormatSeparatorAdded = false;
+
+        foreach (var format in SheetFormatCatalog.All)
+        {
+            if (!halfFormatSeparatorAdded && format.IsHalfFormat)
+            {
+                entries.Add(new NewSheetMenuEntry(NewSheetMenuKind.Separator, string.Empty));
+                halfFormatSeparatorAdded = true;
+            }
+
+            entries.Add(new NewSheetMenuEntry(NewSheetMenuKind.FormatGroup, format.Name, BuildOrientations(format)));
+        }
+
+        entries.Add(new NewSheetMenuEntry(NewSheetMenuKind.Separator, string.Empty));
+        entries.Add(new NewSheetMenuEntry(NewSheetMenuKind.CustomCommand, "Пользовательский..."));
+        return entries;
+    }
+
+    /// <summary>
+    /// Пункты ориентаций группы: ориентация по умолчанию первая.
+    /// Заголовки компонуются из размеров каталога («Альбомная (1189×841)»).
+    /// </summary>
+    private static IReadOnlyList<NewSheetOrientationEntry> BuildOrientations(SheetFormat format)
+    {
+        var longMm = format.LongSideMicrons / 1000;
+        var shortMm = format.ShortSideMicrons / 1000;
+        var landscape = new NewSheetOrientationEntry($"Альбомная ({longMm}×{shortMm})", $"{format.Name}L");
+        var portrait = new NewSheetOrientationEntry($"Книжная ({shortMm}×{longMm})", $"{format.Name}P");
+
+        return format.DefaultOrientation == SheetOrientation.Portrait
+            ? [portrait, landscape]
+            : [landscape, portrait];
     }
 
     /// <summary>

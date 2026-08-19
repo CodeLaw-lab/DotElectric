@@ -54,6 +54,16 @@ public class SettingsViewModelTests
     }
 
     [Fact]
+    public void FormatOptions_MatchesCatalogExactly()
+    {
+        var vm = new SettingsViewModel(_settingsMock.Object);
+
+        Assert.Equal(
+            ["A0", "A1", "A2", "A3", "A4", "A4×2", "A3×2", "A2×2", "A1×2", "A0×2"],
+            vm.FormatOptions);
+    }
+
+    [Fact]
     public void Confirm_SavesSettingsAndFiresEvent()
     {
         var vm = new SettingsViewModel(_settingsMock.Object);

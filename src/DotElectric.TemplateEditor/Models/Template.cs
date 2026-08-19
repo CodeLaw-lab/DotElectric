@@ -51,7 +51,7 @@ public class Template : ObservableObject
     public Template()
     {
         Metadata = new Metadata();
-        _sheet = Sheet.FromFormat("A3");
+        _sheet = Sheet.FromFormat(SheetFormatCatalog.DefaultName);
         Objects = new ObservableCollection<TemplateObjectBase>();
     }
 

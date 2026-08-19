@@ -47,7 +47,7 @@ public sealed class TemplateService : ITemplateService
         _templateValidator = templateValidator ?? new TemplateValidator();
     }
 
-    public Template CreateNew(string format = "A3", SheetOrientation? orientation = null)
+    public Template CreateNew(string format = SheetFormatCatalog.DefaultName, SheetOrientation? orientation = null)
     {
         var orient = orientation ?? Sheet.GetDefaultOrientation(format);
         var sheet = Sheet.FromFormat(format, orient);
@@ -202,11 +202,13 @@ public sealed class TemplateService : ITemplateService
         var sheetDto = dto.Sheet;
         var orientation = sheetDto?.Orientation ?? DetermineOrientation(sheetDto);
 
+        // Аварийный fallback повреждённого файла: формат по умолчанию (семантика сохранена).
+        var defaultFormat = SheetFormatCatalog.Get(SheetFormatCatalog.DefaultName);
         var sheet = new Sheet
         {
-            Format = dto.Sheet?.Format ?? "A3",
-            WidthMicrons = dto.Sheet?.WidthMicrons ?? 420_000,
-            HeightMicrons = dto.Sheet?.HeightMicrons ?? 297_000,
+            Format = dto.Sheet?.Format ?? SheetFormatCatalog.DefaultName,
+            WidthMicrons = dto.Sheet?.WidthMicrons ?? defaultFormat.LongSideMicrons,
+            HeightMicrons = dto.Sheet?.HeightMicrons ?? defaultFormat.ShortSideMicrons,
             Orientation = orientation
         };
 
