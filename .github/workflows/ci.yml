@@ -37,18 +37,22 @@ jobs:
       - name: Test with coverage
         run: dotnet test src/DotElectric.TemplateEditor.slnx --no-restore --configuration Release --collect:"XPlat Code Coverage" --results-directory TestResults/
 
-      - name: Check coverage gate (≥80%)
+      - name: Install ReportGenerator
+        run: dotnet tool install dotnet-reportgenerator-globaltool --tool-path .reporttools --version 5.5.11
+
+      - name: Check coverage gate (≥80%, merged across test projects)
         shell: pwsh
         run: |
-          $coverageFile = Get-ChildItem -Path TestResults -Recurse -Filter "*.cobertura.xml" | Select-Object -First 1
-          if (-not $coverageFile) {
-            Write-Host "❌ Coverage file not found"
+          & "$PWD/.reporttools/reportgenerator.exe" "-reports:TestResults/*/coverage.cobertura.xml" "-targetdir:TestResults/merged" "-reporttypes:Cobertura"
+          $merged = Join-Path TestResults 'merged' 'Cobertura.xml'
+          if (-not (Test-Path $merged)) {
+            Write-Host "❌ Merged coverage file not found"
             exit 1
           }
-          [xml]$xml = Get-Content $coverageFile.FullName
+          [xml]$xml = Get-Content $merged
           $lineRate = [double]$xml.coverage.'line-rate'
           $pct = [math]::Round($lineRate * 100, 2)
-          Write-Host "📊 Line coverage: $pct%"
+          Write-Host "📊 Merged line coverage: $pct%"
           if ($pct -lt 80) {
             Write-Host "❌ Coverage $pct% is below gate 80%"
             exit 1
