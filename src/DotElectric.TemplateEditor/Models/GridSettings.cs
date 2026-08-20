@@ -22,7 +22,7 @@ public sealed class GridSettings
 
     /// <summary>
     /// Шаг сетки в микронах (500, 1000, 5000, 10000).
-    /// По умолчанию — 5 мм (совпадает с DefaultGrid шаблона).
+    /// По умолчанию — 5 мм (Grid.Default).
     /// </summary>
     public long StepMicrons { get; set; } = EditorSettings.DefaultGridStepMicrons;
 
@@ -52,7 +52,7 @@ public sealed class GridSettings
     public GridSettings() { }
 
     /// <summary>
-    /// Создать настройки из DefaultGrid шаблона.
+    /// Создать настройки из Grid.Default (шаг 5 мм).
     /// </summary>
     public static GridSettings FromDefaultGrid()
         => new()

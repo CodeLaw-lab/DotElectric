@@ -5,9 +5,9 @@ using Moq;
 namespace DotElectric.TemplateEditor.Tests.Services;
 
 [Collection("FontMetrics")]
-public class FontMetricsTests : IDisposable
+public class WpfFontMetricsTests : IDisposable
 {
-    public FontMetricsTests()
+    public WpfFontMetricsTests()
     {
         WpfFontMetrics.Default.Reset();
     }

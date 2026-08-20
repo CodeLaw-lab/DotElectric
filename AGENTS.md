@@ -207,7 +207,7 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 - **Constants:** `PhysicalConstants` + `EditorSettings` (вместо `EditorConstants.cs`-прокладки)
 - **Validation:** `ITemplateValidator`/`TemplateValidator` (domain) + `ValidationService` (UI)
 - **EditorCanvasBehavior:** 78 строк (AttachedProperty + stubs), 3 файла: State, Transform, Router
-- **FontMetrics:** `IFontMetrics` (жив тестовыми моками) + `FontMetrics.Default` static Singleton в production; DI-регистрация удалена кандидатом 8 обзора №4
+- **FontMetrics:** `WpfFontMetrics` (Services) — WPF-реализация; read-only `IFontMetrics` + эмбиентный слот `FontMetricsProvider.Current` в `DotElectric.Document` (ADR-0003); `Text` читает метрики из слота, запасной поставщик для headless
 - **ShortcutRegistry:** `TryHandle()` — единая точка входа для всех горячих клавиш
 - **Grid:** `IGridNodeGenerator`/`GridNodeGenerator` (DI Singleton), узлы в абсолютных координатах листа, pan без регенерации; `GridSettings` + `MaxGridNodes`/`NodeColor`/`NodeSize`; `GridSettings.FromAppSettings` + `EditorViewModelFactory.ResolveGridSettings` — настройки применяются к вкладкам
 - **Панели свойств:** глубокая база `ObjectPropertiesViewModel<TObject>` (конструктор-пара — markDirty удалён в кандидате 3 обзора №4, декларативная nameof-карта `PropertyMap`, `UpdateObject`/notify-all, `Dispose`, `SetProperty<T>`, `ChangeFromMmString`, `ParseLineType`) + 3 тонких наследника: Line (7 пар), Rectangle (8 пар), Text (13 пар + особые null-coalescing команды в sub-VM)

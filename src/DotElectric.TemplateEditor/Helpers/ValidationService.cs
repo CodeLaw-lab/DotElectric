@@ -17,7 +17,7 @@ public static class ValidationService
     public static string? ValidateDimension(long value)
     {
         if (value <= 0)
-            return $"Размер должен быть положительным (текущая: {Coordinate.FormatMm(value)}).";
+            return $"Размер должен быть положительным (текущий: {Coordinate.FormatMm(value)}).";
         if (value < PhysicalConstants.MinDimensionMicrons)
             return $"Минимальный размер — 0.4 мм ({PhysicalConstants.MinDimensionMicrons} микрон).";
         return null;
