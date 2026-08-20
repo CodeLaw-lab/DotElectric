@@ -69,7 +69,7 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: ≥80% line-rate (CI gate, actual 91.11%)
+- Target coverage: ≥80% line-rate (CI gate, actual 91.13%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
