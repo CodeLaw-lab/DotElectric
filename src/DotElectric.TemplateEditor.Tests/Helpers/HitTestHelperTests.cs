@@ -116,4 +116,31 @@ public class HitTestHelperTests
 
         Assert.Same(text, result);
     }
+
+    // ===== Перенесено из AdditionalHitTestHelperTests (приложение) =====
+
+    [Fact]
+    public void HitTest_WithEmptyList_ReturnsNull()
+    {
+        var objects = new List<TemplateObjectBase>();
+        var point = new PointMicrons(0, 0);
+
+        var hit = HitTestHelper.HitTest(point, objects);
+        Assert.Null(hit);
+    }
+
+    [Fact]
+    public void HitTest_FindsTopMostObject()
+    {
+        var objects = new List<TemplateObjectBase>
+        {
+            new Rectangle(0, 0, 10000, 10000), // bottom
+            new Rectangle(0, 0, 5000, 5000),   // top
+        };
+        var point = new PointMicrons(2000, 2000);
+
+        var hit = HitTestHelper.HitTest(point, objects);
+        Assert.IsType<Rectangle>(hit);
+        Assert.Equal(5000, ((Rectangle)hit!).WidthMicrons); // smaller one is on top
+    }
 }

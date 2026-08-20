@@ -353,4 +353,75 @@ public class FileServiceTests : IDisposable
     }
 
     #endregion
+
+    #region Перенесено из FileServiceUnitTests (конструктор по умолчанию)
+
+    [Fact]
+    public void GetTemplatesFolder_CreatesDirectory()
+    {
+        var service = new FileService();
+        var folder = service.GetTemplatesFolder();
+
+        Assert.True(Directory.Exists(folder));
+        Assert.Contains("DotElectric", folder);
+        Assert.Contains("Templates", folder);
+    }
+
+    [Fact]
+    public void GetBackupFolder_CreatesDirectory()
+    {
+        var service = new FileService();
+        var folder = service.GetBackupFolder();
+
+        Assert.True(Directory.Exists(folder));
+        Assert.Contains("DotElectric", folder);
+        Assert.Contains("Backups", folder);
+    }
+
+    [Fact]
+    public void CreateBackup_NullPath_ThrowsArgumentException_DefaultCtor()
+    {
+        var service = new FileService();
+        Assert.Throws<ArgumentException>(() => service.CreateBackup(null!));
+    }
+
+    [Fact]
+    public void CreateBackup_EmptyPath_ThrowsArgumentException_DefaultCtor()
+    {
+        var service = new FileService();
+        Assert.Throws<ArgumentException>(() => service.CreateBackup(""));
+    }
+
+    [Fact]
+    public void CreateBackup_NonExistentFile_ThrowsFileNotFoundException_DefaultCtor()
+    {
+        var service = new FileService();
+        Assert.Throws<FileNotFoundException>(() => service.CreateBackup("nonexistent.tdel"));
+    }
+
+    [Fact]
+    public void CreateBackup_CreatesBackupFile()
+    {
+        var service = new FileService();
+        var tempFile = Path.Combine(Path.GetTempPath(), $"test_backup_{Guid.NewGuid():N}.tdel");
+        File.WriteAllText(tempFile, "test content");
+
+        try
+        {
+            service.CreateBackup(tempFile);
+
+            var backupFolder = service.GetBackupFolder();
+            var backupFiles = Directory.GetFiles(backupFolder, "test_backup_*.tdel");
+            Assert.NotEmpty(backupFiles);
+
+            // Clean up
+            foreach (var f in backupFiles) File.Delete(f);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    #endregion
 }

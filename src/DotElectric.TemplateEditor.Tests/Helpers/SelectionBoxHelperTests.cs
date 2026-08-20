@@ -31,70 +31,6 @@ public class SelectionBoxHelperTests
         Assert.Equal(SelectionDirection.LeftToRight, SelectionBoxHelper.GetDirection(start, end));
     }
 
-    // ===== RectMicrons =====
-
-    [Fact]
-    public void RectMicrons_NormalizesCoordinates()
-    {
-        var rect = new RectMicrons(10000, 10000, 0, 0);
-        Assert.Equal(0, rect.Left);
-        Assert.Equal(0, rect.Bottom);
-        Assert.Equal(10000, rect.Right);
-        Assert.Equal(10000, rect.Top);
-    }
-
-    [Fact]
-    public void RectMicrons_WidthHeight_CalculatedCorrectly()
-    {
-        var rect = new RectMicrons(0, 0, 10000, 5000);
-        Assert.Equal(10000, rect.Width);
-        Assert.Equal(5000, rect.Height);
-    }
-
-    [Fact]
-    public void RectMicrons_FromPoints_CreatesCorrectRect()
-    {
-        var rect = RectMicrons.FromPoints(
-            new PointMicrons(0, 0),
-            new PointMicrons(10000, 5000));
-        Assert.Equal(0, rect.Left);
-        Assert.Equal(0, rect.Bottom);
-        Assert.Equal(10000, rect.Right);
-        Assert.Equal(5000, rect.Top);
-    }
-
-    [Fact]
-    public void RectMicrons_Contains_FullContainment_ReturnsTrue()
-    {
-        var outer = new RectMicrons(0, 0, 10000, 10000);
-        var inner = new RectMicrons(2000, 2000, 8000, 8000);
-        Assert.True(outer.Contains(inner));
-    }
-
-    [Fact]
-    public void RectMicrons_Contains_PartialOverlap_ReturnsFalse()
-    {
-        var a = new RectMicrons(0, 0, 5000, 5000);
-        var b = new RectMicrons(3000, 3000, 8000, 8000);
-        Assert.False(a.Contains(b));
-    }
-
-    [Fact]
-    public void RectMicrons_Intersects_Overlap_ReturnsTrue()
-    {
-        var a = new RectMicrons(0, 0, 5000, 5000);
-        var b = new RectMicrons(3000, 3000, 8000, 8000);
-        Assert.True(a.Intersects(b));
-    }
-
-    [Fact]
-    public void RectMicrons_Intersects_NoOverlap_ReturnsFalse()
-    {
-        var a = new RectMicrons(0, 0, 1000, 1000);
-        var b = new RectMicrons(5000, 5000, 10000, 10000);
-        Assert.False(a.Intersects(b));
-    }
-
     // ===== GetFullyContained (LeftToRight) =====
 
     [Fact]
@@ -201,5 +137,118 @@ public class SelectionBoxHelperTests
 
         Assert.Single(result);
         Assert.Same(line, result[0]);
+    }
+
+    // ===== Перенесено из ExtendedSelectionBoxHelperTests (приложение) =====
+
+    [Theory]
+    [InlineData(0, 0, 5000, 5000, SelectionDirection.LeftToRight)]
+    [InlineData(5000, 5000, 0, 0, SelectionDirection.RightToLeft)]
+    [InlineData(0, 0, 0, 5000, SelectionDirection.LeftToRight)]
+    [InlineData(5000, 0, 5000, 5000, SelectionDirection.LeftToRight)]
+    public void GetDirection_CorrectDirection(
+        int startX, int startY, int endX, int endY,
+        SelectionDirection expected)
+    {
+        var start = new PointMicrons(startX, startY);
+        var end = new PointMicrons(endX, endY);
+        var direction = SelectionBoxHelper.GetDirection(start, end);
+        Assert.Equal(expected, direction);
+    }
+
+    [Fact]
+    public void GetFullyContained_OnlyFullyInside()
+    {
+        var box = new RectMicrons(0, 0, 10000, 10000);
+        var objects = new List<TemplateObjectBase>
+        {
+            new Rectangle(1000, 1000, 2000, 2000),    // fully inside: bounds 1000-3000
+            new Rectangle(5000, 5000, 2000, 2000),    // fully inside: bounds 5000-7000
+            new Rectangle(8000, 8000, 5000, 5000),    // partially outside: bounds 8000-13000
+        };
+
+        var selected = SelectionBoxHelper.GetFullyContained(box, objects);
+        Assert.Equal(2, selected.Count);
+    }
+
+    [Fact]
+    public void GetIntersecting_AnyOverlap()
+    {
+        var box = new RectMicrons(0, 0, 5000, 5000);
+        var objects = new List<TemplateObjectBase>
+        {
+            new Rectangle(1000, 1000, 2000, 2000),    // fully inside
+            new Rectangle(4000, 4000, 3000, 3000),    // partially overlaps
+            new Rectangle(8000, 8000, 2000, 2000),    // no overlap
+        };
+
+        var selected = SelectionBoxHelper.GetIntersecting(box, objects);
+        Assert.Equal(2, selected.Count);
+    }
+
+    [Fact]
+    public void GetSelectedObjects_LeftToRight_UsesFullContain()
+    {
+        var box = new RectMicrons(0, 0, 5000, 5000);
+        var objects = new List<TemplateObjectBase>
+        {
+            new Rectangle(1000, 1000, 2000, 2000),    // fully inside
+            new Rectangle(4000, 4000, 3000, 3000),    // partial
+        };
+
+        var selected = SelectionBoxHelper.GetSelectedObjects(
+            box, objects, SelectionDirection.LeftToRight);
+
+        Assert.Single(selected);
+    }
+
+    [Fact]
+    public void GetSelectedObjects_RightToLeft_UsesIntersect()
+    {
+        var box = new RectMicrons(0, 0, 5000, 5000);
+        var objects = new List<TemplateObjectBase>
+        {
+            new Rectangle(1000, 1000, 2000, 2000),    // fully inside
+            new Rectangle(4000, 4000, 3000, 3000),    // partial
+        };
+
+        var selected = SelectionBoxHelper.GetSelectedObjects(
+            box, objects, SelectionDirection.RightToLeft);
+
+        Assert.Equal(2, selected.Count);
+    }
+
+    [Fact]
+    public void GetObjectBounds_Line_ReturnsCorrectBounds()
+    {
+        var line = new Line(0, 0, 10000, 5000);
+        var objects = new List<TemplateObjectBase> { line };
+        var box = new RectMicrons(0, 0, 10000, 5000);
+
+        var selected = SelectionBoxHelper.GetFullyContained(box, objects);
+        Assert.Single(selected);
+    }
+
+    [Fact]
+    public void GetObjectBounds_Text_CalculatesWidthFromContent()
+    {
+        var text = new Text(0, 0, "Hello", 5000); // width = 5 * 5000 * 0.6 = 15000
+        var objects = new List<TemplateObjectBase> { text };
+        var box = new RectMicrons(0, 0, 20000, 10000);
+
+        var selected = SelectionBoxHelper.GetFullyContained(box, objects);
+        Assert.Single(selected);
+    }
+
+    [Fact]
+    public void GetObjectBounds_Text_Rotated90Degrees()
+    {
+        var text = new Text(0, 0, "Hi", 5000, rotationAngle: 90);
+        var objects = new List<TemplateObjectBase> { text };
+        // 90°: X stays, Y + width, X + height, Y + width + height
+        var box = new RectMicrons(-5000, -6000, 10000, 10000);
+
+        var selected = SelectionBoxHelper.GetIntersecting(box, objects);
+        Assert.Single(selected);
     }
 }

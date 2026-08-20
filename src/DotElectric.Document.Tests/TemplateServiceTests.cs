@@ -200,4 +200,112 @@ public class TemplateServiceTests
         Assert.Equal(594_000, template.Sheet.WidthMicrons);
         Assert.Equal(420_000, template.Sheet.HeightMicrons);
     }
+
+    // ===== Перенесено из TemplateServiceExtendedTests (приложение) =====
+
+    [Fact]
+    public void SaveAndLoad_PreservesMultipleObjectTypes()
+    {
+        var template = TestTemplates.CreateA3(FixedDate);
+        template.Objects.Add(new Line(0, 0, 10000, 10000, LineType.Solid));
+        template.Objects.Add(new Rectangle(5000, 5000, 10000, 8000, LineType.Dashed));
+        template.Objects.Add(new Text(2000, 3000, "Label", 5000, "ГОСТ А", TextType.Label));
+        template.Objects.Add(new Text(20000, 30000, "Note", 3500, "ГОСТ Б", TextType.Note, 180));
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_multi_{Guid.NewGuid():N}.tdel");
+        try
+        {
+            _service.Save(template, filePath);
+            var loaded = _service.Load(filePath);
+
+            Assert.Equal(4, loaded.Objects.Count);
+            Assert.IsType<Line>(loaded.Objects[0]);
+            Assert.IsType<Rectangle>(loaded.Objects[1]);
+            Assert.IsType<Text>(loaded.Objects[2]);
+            Assert.IsType<Text>(loaded.Objects[3]);
+
+            var text2 = (Text)loaded.Objects[3];
+            Assert.Equal(180, text2.RotationAngle);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void SaveAndLoad_PreservesMetadata()
+    {
+        var template = new Template(
+            new Metadata
+            {
+                Name = "My Template",
+                Author = "John Doe",
+                Description = "A test template",
+                CreatedDate = new DateTime(2024, 1, 15),
+                ModifiedDate = new DateTime(2024, 6, 20)
+            },
+            Sheet.FromFormat("A3"));
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_meta_{Guid.NewGuid():N}.tdel");
+        try
+        {
+            _service.Save(template, filePath);
+            var loaded = _service.Load(filePath);
+
+            Assert.Equal("My Template", loaded.Metadata.Name);
+            Assert.Equal("John Doe", loaded.Metadata.Author);
+            Assert.Equal("A test template", loaded.Metadata.Description);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void Save_CreatesValidZipArchive()
+    {
+        var template = TestTemplates.CreateA3(FixedDate);
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_zip_{Guid.NewGuid():N}.tdel");
+        try
+        {
+            _service.Save(template, filePath);
+
+            // Verify it's a valid ZIP
+            using var archive = System.IO.Compression.ZipFile.OpenRead(filePath);
+            Assert.NotEmpty(archive.Entries);
+            Assert.Contains("template.xml", archive.Entries.Select(e => e.Name));
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void Save_OverwritesExistingFile()
+    {
+        var template = TestTemplates.CreateA3(FixedDate);
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_overwrite_{Guid.NewGuid():N}.tdel");
+        try
+        {
+            _service.Save(template, filePath);
+
+            template.Metadata.Name = "Updated";
+            _service.Save(template, filePath);
+
+            // Verify the saved file contains updated name
+            using var archive = System.IO.Compression.ZipFile.OpenRead(filePath);
+            var entry = archive.GetEntry("template.xml");
+            Assert.NotNull(entry);
+            using var reader = new StreamReader(entry.Open());
+            var xml = reader.ReadToEnd();
+            Assert.Contains("Updated", xml);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
 }

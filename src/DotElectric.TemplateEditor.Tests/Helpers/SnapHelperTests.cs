@@ -126,4 +126,61 @@ public class SnapHelperTests
         Assert.Equal(10000, snapped.MicronsX);
         Assert.Equal(5000, snapped.MicronsY);
     }
+
+    // ===== Перенесено из PointMicronsExtendedTests (привязка к сетке — понятие редактора) =====
+
+    [Fact]
+    public void SnapToGrid_ReturnsSnappedPoint()
+    {
+        var point = new PointMicrons(7500, 12500);
+        var snapped = SnapHelper.SnapToGrid(point, 5000);
+
+        Assert.Equal(10000, snapped.MicronsX);
+        Assert.True(snapped.MicronsY >= 10000 && snapped.MicronsY <= 15000);
+    }
+
+    // ===== Перенесено из AdditionalSnapHelperTests (приложение) =====
+
+    [Theory]
+    [InlineData(0, 0, 5000, 0, 0)]     // on grid
+    [InlineData(1000, 5000, 5000, 0, 5000)] // between grid points, snaps to nearest
+    [InlineData(2500, 5000, 5000, 5000, 5000)] // exactly middle, rounds up
+    [InlineData(7000, 7000, 5000, 5000, 5000)] // rounds down
+    public void SnapToGrid_SnapsToNearestGridPoint(long x, long y, long step, long expectedX, long expectedY)
+    {
+        var point = new PointMicrons(x, y);
+        var snapped = SnapHelper.SnapToGrid(point, step);
+
+        Assert.Equal(expectedX, snapped.MicronsX);
+        Assert.Equal(expectedY, snapped.MicronsY);
+    }
+
+    [Fact]
+    public void SnapToGrid_ZeroStep_ThrowsException()
+    {
+        var point = new PointMicrons(1234, 5678);
+        Assert.Throws<ArgumentOutOfRangeException>(() => SnapHelper.SnapToGrid(point, 0));
+    }
+
+    [Fact]
+    public void SnapToGrid_NegativeStep_ThrowsException()
+    {
+        var point = new PointMicrons(1234, 5678);
+        Assert.Throws<ArgumentOutOfRangeException>(() => SnapHelper.SnapToGrid(point, -5000));
+    }
+
+    [Fact]
+    public void SnapHelper_SnapPoint_AlignsToGrid()
+    {
+        var point = SnapHelper.SnapToGrid(new PointMicrons(12345, 67890), 5000);
+        Assert.Equal(10000, point.MicronsX);
+        Assert.Equal(70000, point.MicronsY);
+    }
+
+    [Fact]
+    public void SnapHelper_SnapPoint_ZeroStep_ThrowsException()
+    {
+        var point = new PointMicrons(12345, 67890);
+        Assert.Throws<ArgumentOutOfRangeException>(() => SnapHelper.SnapToGrid(point, 0));
+    }
 }
