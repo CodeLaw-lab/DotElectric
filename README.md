@@ -62,9 +62,8 @@ dotElectric/
 │   │   ├── App.xaml / App.xaml.cs   # DI, Serilog, Mutex
 │   │   ├── AssemblyInfo.cs
 │   │   ├── MainWindow.xaml / .cs
-│   │   ├── Constants/               # PhysicalConstants, EditorSettings
-│   │   ├── Models/                  # Template, Sheet, Coordinate, PointMicrons
-│   │   │   └── Objects/             # Line, Rectangle, Text
+│   │   ├── Constants/               # EditorSettings (interaction constants included)
+│   │   ├── Models/                  # AppSettings, GridSettings, Grid
 │   │   ├── Messages/                # WeakReferenceMessenger сообщения
 │   │   ├── ViewModels/
 │   │   │   ├── Abstractions/
@@ -84,6 +83,10 @@ dotElectric/
 │   │       ├── Fonts/               # GOST Type AU/BU
 │   │       ├── Icons/               # SVG/PNG иконки
 │   │       └── Styles/              # XAML темы Light/Dark
+│   ├── DotElectric.Document/        # Документная модель (объекты, .tdel, проверка) — без знания редактора
+│   ├── DotElectric.Sheets/          # Форматы листа (изолирована, без зависимостей)
+│   ├── DotElectric.Document.Tests/  # xUnit v3 тесты DotElectric.Document (268, 1 pre-existing skip)
+│   ├── DotElectric.Sheets.Tests/    # xUnit v3 тесты DotElectric.Sheets (97)
 │   └── DotElectric.TemplateEditor.Tests/
 │       ├── Models/
 │       │   └── Objects/             # Line, Rectangle, Text тесты
