@@ -192,7 +192,7 @@ All agents MUST read this file before any code operation.
 - Нет циклических зависимостей
 
 ### 6.3 NO Static Services
-- `ValidationService` — проверки полей редактора; проверка цвета делегируется `HexColorValidation` (Document); контракты `IValidationService`/`ITemplateValidator` в Document
+- `ValidationService` — проверки полей редактора (координата, размер, содержимое текста, размер шрифта); проверка цвета — `HexColorValidation` (Document), потребители вызывают её напрямую; контракты `IValidationService`/`ITemplateValidator` в Document; проверка документа при сохранении — `ITemplateValidator` напрямую у потребителя (`TabOperationsService`), сервис шаблона — только чтение/запись
 - Метрики шрифта — read-only `IFontMetrics` (Document) + эмбиентный слот `FontMetricsProvider.Current` (ADR-0003); WPF-реализация `WpfFontMetrics` (Services) пишется в слот при старте
 - `EditorConstants` → `DocumentConstants` (Document — только то, что читает сам документ) + `EditorSettings` (редактор, секция Interaction — константы взаимодействия) и `DocumentDefaults` (Document)
 - WPF-диалоги: `IDialogFileService`/`WpfDialogFileService` для CI/testability
