@@ -1,9 +1,10 @@
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Services;
-
 namespace DotElectric.TemplateEditor.Helpers;
 
+/// <summary>
+/// Проверки полей панели свойств редактора (координата, размер, содержимое текста,
+/// размер шрифта, цвет). Проверка формата цвета делегируется документной библиотеке
+/// (<see cref="HexColorValidation"/>) — копий кода нет.
+/// </summary>
 public static class ValidationService
 {
     public static string? ValidateCoordinate(long value)
@@ -16,7 +17,7 @@ public static class ValidationService
     public static string? ValidateDimension(long value)
     {
         if (value <= 0)
-            return $"Размер должен быть положительным (текущий: {Coordinate.FormatMm(value)}).";
+            return $"Размер должен быть положительным (текущая: {Coordinate.FormatMm(value)}).";
         if (value < PhysicalConstants.MinDimensionMicrons)
             return $"Минимальный размер — 0.4 мм ({PhysicalConstants.MinDimensionMicrons} микрон).";
         return null;
@@ -38,27 +39,13 @@ public static class ValidationService
         return null;
     }
 
-    public static string? ValidateHexColor(string? value)
-    {
-        if (string.IsNullOrWhiteSpace(value))
-            return "Цвет не может быть пустым.";
+    /// <summary>
+    /// Проверка формата цвета — делегирование документной библиотеке (копий кода нет).
+    /// </summary>
+    public static string? ValidateHexColor(string? value) => HexColorValidation.Validate(value);
 
-        if (value.Equals("Transparent", StringComparison.OrdinalIgnoreCase))
-            return null;
-
-        var hex = value.TrimStart('#');
-        if (hex.Length is not (6 or 8))
-            return "Цвет должен быть в формате #RRGGBB или #AARRGGBB.";
-
-        return System.Text.RegularExpressions.Regex.IsMatch(hex, @"^[0-9A-Fa-f]{6,8}$")
-            ? null
-            : "Цвет должен содержать только HEX-символы (0-9, A-F).";
-    }
-
-    private sealed class ValidationServiceInstance : IValidationService
-    {
-        public string? ValidateHexColor(string? value) => ValidationService.ValidateHexColor(value);
-    }
-
-    public static readonly IValidationService Default = new ValidationServiceInstance();
+    /// <summary>
+    /// Запасной поставщик проверки цвета (документная библиотека).
+    /// </summary>
+    public static readonly IValidationService Default = HexColorValidation.Default;
 }

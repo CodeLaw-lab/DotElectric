@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 public interface IDateTimeProvider
 {

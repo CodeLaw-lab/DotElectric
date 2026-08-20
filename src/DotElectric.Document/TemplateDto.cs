@@ -1,7 +1,7 @@
 using System.Xml.Serialization;
-using DotElectric.TemplateEditor.Models;
+using DotElectric.Sheets;
 
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 /// <summary>
 /// DTO для сериализации шаблона в XML.

@@ -1,14 +1,12 @@
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models;
+using DotElectric.Sheets;
 
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 public sealed class TemplateValidator : ITemplateValidator
 {
     private readonly IValidationService _validation;
 
-    public TemplateValidator() : this(ValidationService.Default) { }
+    public TemplateValidator() : this(HexColorValidation.Default) { }
 
     public TemplateValidator(IValidationService validation)
     {

@@ -2,12 +2,10 @@ using System.IO;
 using System.IO.Compression;
 using System.Xml;
 using System.Xml.Serialization;
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models;
+using DotElectric.Sheets;
 using Microsoft.Extensions.Logging;
 
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Реализация ITemplateService.

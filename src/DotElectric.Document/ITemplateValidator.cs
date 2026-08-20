@@ -1,7 +1,6 @@
-using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models;
+using DotElectric.Sheets;
 
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 public interface ITemplateValidator
 {

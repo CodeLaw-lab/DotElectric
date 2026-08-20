@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Helpers;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Уровень серьёзности ошибки валидации.

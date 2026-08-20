@@ -1,6 +1,6 @@
-using DotElectric.TemplateEditor.Models;
+using DotElectric.Sheets;
 
-namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Сервис управления шаблонами: создание, загрузка, сохранение, валидация.
