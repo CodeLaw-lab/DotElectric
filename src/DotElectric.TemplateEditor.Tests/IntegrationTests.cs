@@ -688,51 +688,6 @@ public sealed class IntegrationTests
     }
 
     [Fact]
-    public void SnapHelper_SnapObject_MovesToNearestGridPoint()
-    {
-        var rect = new Rectangle(7300, 12800, 50_000, 40_000);
-        SnapHelper.SnapObject(rect, 5000);
-
-        Assert.Equal(0, rect.MicronsX % 5000);
-        Assert.Equal(0, rect.MicronsY % 5000);
-    }
-
-    [Fact]
-    public void ValidationService_ValidateObjectCoordinates_OutOfBounds()
-    {
-        var sheet = Sheet.FromFormat("A3"); // 420_000 x 297_000
-        var rect = new Rectangle(500_000, 0, 10_000, 10_000);
-
-        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
-        Assert.NotEmpty(errors);
-        Assert.Contains(errors, e => e.RuleId == "V-003");
-    }
-
-    [Fact]
-    public void ValidationService_ValidateObjectPositiveSizes_ZeroWidth()
-    {
-        var sheet = Sheet.FromFormat("A3");
-        var rect = new Rectangle(10_000, 10_000, 0, 10_000);
-
-        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
-        Assert.NotEmpty(errors);
-        Assert.Contains(errors, e => e.RuleId == "V-004");
-    }
-
-    [Fact]
-    public void ValidationService_ValidateObjectLineType_InvalidType()
-    {
-        var sheet = Sheet.FromFormat("A3");
-        // LineType is an enum, all values are valid by construction.
-        // This test verifies the validation doesn't crash on valid types.
-        var line = new Line(0, 0, 10_000, 10_000, LineType.DashDotDot);
-
-        var errors = new TemplateValidator().ValidateObject(line, sheet).ToList();
-        var v007Errors = errors.Where(e => e.RuleId == "V-007").ToList();
-        Assert.Empty(v007Errors);
-    }
-
-    [Fact]
     public void BatchCommand_MultipleOperations_SingleUndo()
     {
         var template = CreateDefaultTemplate();
@@ -768,7 +723,6 @@ public sealed class IntegrationTests
                 ShowGrid = false,
                 SnapToGrid = false,
                 GridStepMm = 10.0,
-                DefaultZoom = 2.0,
                 DefaultSheetFormat = "A4"
             };
 
@@ -781,7 +735,6 @@ public sealed class IntegrationTests
             Assert.False(loaded.ShowGrid);
             Assert.False(loaded.SnapToGrid);
             Assert.Equal(10.0, loaded.GridStepMm);
-            Assert.Equal(2.0, loaded.DefaultZoom);
             Assert.Equal("A4", loaded.DefaultSheetFormat);
         }
         finally

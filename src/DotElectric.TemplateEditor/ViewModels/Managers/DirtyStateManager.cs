@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DotElectric.TemplateEditor.Constants;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
@@ -51,7 +52,7 @@ public sealed partial class DirtyStateManager : ObservableObject
     /// </summary>
     public void UpdateDisplayName()
     {
-        var orientLabel = _template.Sheet.Orientation == SheetOrientation.Portrait ? "кн." : "алб.";
+        var orientLabel = OrientationLabels.For(_template.Sheet.Orientation);
         var baseName = string.IsNullOrEmpty(FilePath)
             ? $"{_template.Sheet.Format} ({orientLabel}) — Без имени"
             : System.IO.Path.GetFileName(FilePath);

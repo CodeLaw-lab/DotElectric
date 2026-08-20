@@ -150,17 +150,6 @@
                               SelectedItem="{Binding DefaultSheetFormat}"
                               Padding="4,2"/>
                 </Grid>
-                <Grid Margin="0,2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="140"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="Масштаб:" Style="{StaticResource FieldLabelStyle}"/>
-                    <ComboBox Grid.Column="1"
-                              ItemsSource="{Binding ZoomOptions}"
-                              SelectedItem="{Binding DefaultZoom}"
-                              Padding="4,2"/>
-                </Grid>
             </StackPanel>
         </ScrollViewer>
 

@@ -873,4 +873,41 @@ public class TemplateValidatorTests
         var errors = new TemplateValidator().Validate(template);
         Assert.DoesNotContain(errors, e => e.RuleId == "V-007");
     }
+
+    // ===== Перенесено из IntegrationTests (приложение) =====
+
+    [Fact]
+    public void ValidateObject_CoordinatesOutOfBounds_ReturnsV003()
+    {
+        var sheet = Sheet.FromFormat("A3"); // 420_000 x 297_000
+        var rect = new Rectangle(500_000, 0, 10_000, 10_000);
+
+        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
+        Assert.NotEmpty(errors);
+        Assert.Contains(errors, e => e.RuleId == "V-003");
+    }
+
+    [Fact]
+    public void ValidateObject_ZeroWidthRectangle_ReturnsV004()
+    {
+        var sheet = Sheet.FromFormat("A3");
+        var rect = new Rectangle(10_000, 10_000, 0, 10_000);
+
+        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
+        Assert.NotEmpty(errors);
+        Assert.Contains(errors, e => e.RuleId == "V-004");
+    }
+
+    [Fact]
+    public void ValidateObject_ValidLineType_NoV007Error()
+    {
+        var sheet = Sheet.FromFormat("A3");
+        // LineType is an enum, all values are valid by construction.
+        // This test verifies the validation doesn't crash on valid types.
+        var line = new Line(0, 0, 10_000, 10_000, LineType.DashDotDot);
+
+        var errors = new TemplateValidator().ValidateObject(line, sheet).ToList();
+        var v007Errors = errors.Where(e => e.RuleId == "V-007").ToList();
+        Assert.Empty(v007Errors);
+    }
 }

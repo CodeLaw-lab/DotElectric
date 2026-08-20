@@ -22,7 +22,7 @@ public sealed class GridSettings
 
     /// <summary>
     /// Шаг сетки в микронах (500, 1000, 5000, 10000).
-    /// По умолчанию — 5 мм (Grid.Default).
+    /// По умолчанию — 5 мм.
     /// </summary>
     public long StepMicrons { get; set; } = EditorSettings.DefaultGridStepMicrons;
 
@@ -52,14 +52,14 @@ public sealed class GridSettings
     public GridSettings() { }
 
     /// <summary>
-    /// Создать настройки из Grid.Default (шаг 5 мм).
+    /// Создать настройки по умолчанию (шаг 5 мм).
     /// </summary>
     public static GridSettings FromDefaultGrid()
         => new()
         {
             Enabled = true,
             SnapEnabled = true,
-            StepMicrons = Grid.Default.StepMicrons,
+            StepMicrons = EditorSettings.DefaultGridStepMicrons,
             Visible = true,
             MaxGridNodes = EditorSettings.MaxGridNodes,
             NodeColor = null,
@@ -75,7 +75,7 @@ public sealed class GridSettings
 
         var stepMicrons = (long)(settings.GridStepMm * Coordinate.MicronsPerMm);
         if (stepMicrons < MinStepMicrons) // < 1 мкм
-            stepMicrons = Grid.Default.StepMicrons; // fallback 5 мм
+            stepMicrons = EditorSettings.DefaultGridStepMicrons; // запасной шаг 5 мм
 
         var maxNodes = settings.GridMaxNodes < 1 ? EditorSettings.MaxGridNodes : settings.GridMaxNodes;
 

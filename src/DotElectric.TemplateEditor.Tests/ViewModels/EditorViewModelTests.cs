@@ -1,6 +1,7 @@
 using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Commands;
+using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
@@ -613,7 +614,7 @@ public class EditorViewModelTests
     {
         var vm = CreateViewModel();
         var sheetH = vm.Template.Sheet.HeightMicrons;
-        var line = new Line(0, sheetH - Grid.Default.StepMicrons, 1000, sheetH);
+        var line = new Line(0, sheetH - EditorSettings.DefaultGridStepMicrons, 1000, sheetH);
         vm.Template.Objects.Add(line);
         vm.SelectSingle(line);
 

@@ -1025,45 +1025,6 @@ public class TextToolTests
         Assert.Empty(vm.Template.Objects);
     }
 
-    [Fact]
-    public void SetFontSize_UpdatesFontSize()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        tool.SetFontSize(5000);
-        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-
-        var text = (Text)vm.Template.Objects[0];
-        Assert.Equal(5000, text.FontSizeMicrons);
-    }
-
-    [Fact]
-    public void SetDefaultContent_UpdatesContent()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        tool.SetDefaultContent("My Custom Text");
-        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-
-        var text = (Text)vm.Template.Objects[0];
-        Assert.Equal("My Custom Text", text.Content);
-    }
-
-    [Fact]
-    public void SetTextType_UpdatesType()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        tool.SetTextType(TextType.Dimension);
-        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-
-        var text = (Text)vm.Template.Objects[0];
-        Assert.Equal(TextType.Dimension, text.TextType);
-    }
-
     // ============= Reset =============
 
     [Fact]
@@ -1186,36 +1147,6 @@ public class TextToolTests
         var text = (Text)vm.Template.Objects[0];
         Assert.Equal(10000, text.MicronsX);
         Assert.Equal(15000, text.MicronsY);
-    }
-
-    // ============= SetFontSize / SetDefaultContent no-op =============
-
-    [Fact]
-    public void SetFontSize_NonPositive_DoesNotChangeFontSize()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        tool.SetFontSize(0);
-
-        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-
-        var text = (Text)vm.Template.Objects[0];
-        Assert.Equal(DocumentDefaults.DefaultFontSizeMicrons, text.FontSizeMicrons);
-    }
-
-    [Fact]
-    public void SetDefaultContent_Whitespace_DoesNotChangeContent()
-    {
-        var vm = CreateViewModel();
-        var tool = new TextTool(vm);
-        tool.SetDefaultContent("   ");
-
-        tool.OnMouseDown(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-        tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
-
-        var text = (Text)vm.Template.Objects[0];
-        Assert.Equal("Текст", text.Content);
     }
 
     // ============= MouseUp / Escape guards =============

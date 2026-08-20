@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -12,8 +12,8 @@ using Microsoft.Extensions.Logging;
 namespace DotElectric.TemplateEditor.ViewModels;
 
 /// <summary>
-/// Р“Р»Р°РІРЅС‹Р№ ViewModel РїСЂРёР»РѕР¶РµРЅРёСЏ.
-/// РЈРїСЂР°РІР»СЏРµС‚ РІРєР»Р°РґРєР°РјРё, РіР»РѕР±Р°Р»СЊРЅС‹РјРё РєРѕРјР°РЅРґР°РјРё, DI.
+/// Главный ViewModel приложения.
+/// Управляет вкладками, глобальными командами, DI.
 /// </summary>
 public partial class MainViewModel : ObservableObject, IDisposable
 {
@@ -42,23 +42,23 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РћС‚РєСЂС‹С‚С‹Рµ РІРєР»Р°РґРєРё.
+    /// Открытые вкладки.
     /// </summary>
     public ObservableCollection<EditorViewModel> OpenedTabs { get; } = new();
 
     /// <summary>
-    /// ViewModel Р±РёР±Р»РёРѕС‚РµРєРё С€Р°Р±Р»РѕРЅРѕРІ.
+    /// ViewModel библиотеки шаблонов.
     /// </summary>
     public TemplateLibraryViewModel TemplateLibraryVm { get; }
 
     /// <summary>
-    /// РђРєС‚РёРІРЅР°СЏ РІРєР»Р°РґРєР°.
+    /// Активная вкладка.
     /// </summary>
     [ObservableProperty]
     private EditorViewModel? _selectedTab;
 
     /// <summary>
-    /// РўРµРјР° РѕС„РѕСЂРјР»РµРЅРёСЏ.
+    /// Тема оформления.
     /// </summary>
     [ObservableProperty]
     private string _theme = "Light";
@@ -69,7 +69,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     public IReadOnlyList<NewSheetMenuEntry> NewSheetMenu { get; } = BuildNewSheetMenu();
 
-    // === РљРѕРЅСЃС‚СЂСѓРєС‚РѕСЂ ===
+    // === Конструктор ===
 
     public MainViewModel(
         ITabOperationsService tabOperations,
@@ -98,7 +98,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
             templateLibraryService,
             OnTemplateDoubleClicked);
 
-        // РџРѕРґРїРёСЃРєР° РЅР° СЃРѕРѕР±С‰РµРЅРёСЏ Рѕ Р·Р°РєСЂС‹С‚РёРё РІРєР»Р°РґРѕРє (РѕС‚ EditorViewModel)
+        // Подписка на сообщения о закрытии вкладок (от EditorViewModel)
         WeakReferenceMessenger.Default.Register<CloseTabRequestMessage>(this, (r, m) =>
         {
             _ = CloseTab(m.Tab);
@@ -112,18 +112,18 @@ public partial class MainViewModel : ObservableObject, IDisposable
             _ = CloseAllTabsAsync();
         });
 
-        // РџРѕРґРїРёСЃРєР° РЅР° Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёРµ
+        // Подписка на автосохранение
         _autosaveService.AutosaveTick += OnAutosaveTickHandler;
         _autosaveService.Start();
 
-        // Р—Р°РіСЂСѓР·РєР° РЅР°СЃС‚СЂРѕРµРє
+        // Загрузка настроек
         var settings = _settingsService.Load();
         Theme = settings.Theme;
     }
 
     /// <summary>
-    /// РћР±СЂР°Р±РѕС‚С‡РёРє РґРІРѕР№РЅРѕРіРѕ РєР»РёРєР° РїРѕ С€Р°Р±Р»РѕРЅСѓ РІ Р±РёР±Р»РёРѕС‚РµРєРµ.
-    /// РћС‚РєСЂС‹РІР°РµС‚ С€Р°Р±Р»РѕРЅ РІ РЅРѕРІРѕР№ РІРєР»Р°РґРєРµ.
+    /// Обработчик двойного клика по шаблону в библиотеке.
+    /// Открывает шаблон в новой вкладке.
     /// </summary>
     private void OnTemplateDoubleClicked(TemplateInfo templateInfo)
     {
@@ -135,12 +135,12 @@ public partial class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    // === РљРѕРјР°РЅРґС‹ ===
+    // === Команды ===
 
     /// <summary>
-    /// РЎРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ РІРєР»Р°РґРєСѓ (РїСѓСЃС‚РѕР№ С€Р°Р±Р»РѕРЅ Р·Р°РґР°РЅРЅРѕРіРѕ С„РѕСЂРјР°С‚Р°).
-    /// РџРѕРґРґРµСЂР¶РёРІР°РµРјС‹Рµ С„РѕСЂРјР°С‚С‹: "A0", "A1", "A2", "A3", "A4" РёР»Рё СЃ СЃСѓС„С„РёРєСЃРѕРј РѕСЂРёРµРЅС‚Р°С†РёРё: "A4P", "A4L", "A3P", "A3L" Рё С‚.Рґ.
-    /// Р•СЃР»Рё format = null, РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РїРѕСЃР»РµРґРЅРёР№ СЃРѕС…СЂР°РЅС‘РЅРЅС‹Р№ С„РѕСЂРјР°С‚.
+    /// Создать новую вкладку (пустой шаблон заданного формата).
+    /// Поддерживаемые форматы: "A0", "A1", "A2", "A3", "A4" или с суффиксом ориентации: "A4P", "A4L", "A3P", "A3L" и т.д.
+    /// Если format = null, используется последний сохранённый формат.
     /// </summary>
     [RelayCommand]
     private void NewTab(string? format = null)
@@ -154,7 +154,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РЎРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ РІРєР»Р°РґРєСѓ СЃ РїРѕСЃР»РµРґРЅРёРј РёСЃРїРѕР»СЊР·РѕРІР°РЅРЅС‹Рј С„РѕСЂРјР°С‚РѕРј (РґР»СЏ Ctrl+N Рё Toolbar).
+    /// Создать новую вкладку с последним использованным форматом (для Ctrl+N и Toolbar).
     /// </summary>
     [RelayCommand]
     private void NewTabWithLastFormat()
@@ -168,7 +168,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РЎРѕР·РґР°С‚СЊ РЅРѕРІСѓСЋ РІРєР»Р°РґРєСѓ СЃ РїРѕР»СЊР·РѕРІР°С‚РµР»СЊСЃРєРёРј С„РѕСЂРјР°С‚РѕРј (РґРёР°Р»РѕРі РІРІРѕРґР° СЂР°Р·РјРµСЂРѕРІ).
+    /// Создать новую вкладку с пользовательским форматом (диалог ввода размеров).
     /// </summary>
     [RelayCommand]
     private void OpenSettings()
@@ -234,7 +234,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РћС‚РєСЂС‹С‚СЊ С„Р°Р№Р» РІ РЅРѕРІРѕР№ РІРєР»Р°РґРєРµ.
+    /// Открыть файл в новой вкладке.
     /// </summary>
     [RelayCommand]
     private async Task OpenFileAsync()
@@ -248,7 +248,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РЎРѕС…СЂР°РЅРёС‚СЊ Р°РєС‚РёРІРЅСѓСЋ РІРєР»Р°РґРєСѓ.
+    /// Сохранить активную вкладку.
     /// </summary>
     [RelayCommand]
     private async Task SaveAsync()
@@ -258,7 +258,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РЎРѕС…СЂР°РЅРёС‚СЊ РІСЃРµ РІРєР»Р°РґРєРё.
+    /// Сохранить все вкладки.
     /// </summary>
     [RelayCommand]
     private async Task SaveAllAsync()
@@ -268,7 +268,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РЎРѕС…СЂР°РЅРёС‚СЊ РєР°Рє.
+    /// Сохранить как.
     /// </summary>
     [RelayCommand]
     private async Task SaveAsAsync()
@@ -278,7 +278,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Р—Р°РєСЂС‹С‚СЊ РІРєР»Р°РґРєСѓ.
+    /// Закрыть вкладку.
     /// </summary>
     [RelayCommand]
     private async Task CloseTab(EditorViewModel tab)
@@ -291,13 +291,13 @@ public partial class MainViewModel : ObservableObject, IDisposable
         OpenedTabs.Remove(tab);
         tab.Dispose();
 
-        // Р•СЃР»Рё Р·Р°РєСЂС‹Р»Рё Р°РєС‚РёРІРЅСѓСЋ РІРєР»Р°РґРєСѓ вЂ” РІС‹Р±СЂР°С‚СЊ РґСЂСѓРіСѓСЋ
+        // Если закрыли активную вкладку — выбрать другую
         if (SelectedTab == tab)
             SelectedTab = OpenedTabs.LastOrDefault();
     }
 
     /// <summary>
-    /// Р—Р°РєСЂС‹С‚СЊ РІСЃРµ РІРєР»Р°РґРєРё.
+    /// Закрыть все вкладки.
     /// </summary>
     [RelayCommand]
     private async Task CloseAllTabsAsync()
@@ -307,7 +307,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Р—Р°РєСЂС‹С‚СЊ РІСЃРµ РІРєР»Р°РґРєРё, РєСЂРѕРјРµ СѓРєР°Р·Р°РЅРЅРѕР№.
+    /// Закрыть все вкладки, кроме указанной.
     /// </summary>
     [RelayCommand]
     private async Task CloseOtherTabs(EditorViewModel tab)
@@ -320,7 +320,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РџРµСЂРµРєР»СЋС‡РёС‚СЊ С‚РµРјСѓ РѕС„РѕСЂРјР»РµРЅРёСЏ.
+    /// Переключить тему оформления.
     /// </summary>
     [RelayCommand]
     private void ToggleTheme()
@@ -330,7 +330,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РџРµС‡Р°С‚СЊ Р°РєС‚РёРІРЅРѕР№ РІРєР»Р°РґРєРё.
+    /// Печать активной вкладки.
     /// </summary>
     [RelayCommand]
     private void Print()
@@ -340,7 +340,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// РџСЂРµРґРїСЂРѕСЃРјРѕС‚СЂ РїРµС‡Р°С‚Рё Р°РєС‚РёРІРЅРѕР№ РІРєР»Р°РґРєРё.
+    /// Предпросмотр печати активной вкладки.
     /// </summary>
     [RelayCommand]
     private void PreviewPrint()
@@ -361,7 +361,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Р’С‹С…РѕРґ РёР· РїСЂРёР»РѕР¶РµРЅРёСЏ.
+    /// Выход из приложения.
     /// </summary>
     [RelayCommand]
     private void Exit()
@@ -369,20 +369,20 @@ public partial class MainViewModel : ObservableObject, IDisposable
         _applicationLifecycle.Shutdown();
     }
 
-    // === Р’СЃРїРѕРјРѕРіР°С‚РµР»СЊРЅС‹Рµ ===
+    // === Вспомогательные ===
 
     /// <summary>
-    /// РњРѕР¶РЅРѕ Р»Рё Р·Р°РєСЂС‹С‚СЊ С…РѕС‚СЏ Р±С‹ РѕРґРЅСѓ РІРєР»Р°РґРєСѓ.
+    /// Можно ли закрыть хотя бы одну вкладку.
     /// </summary>
     public bool CanCloseAnyTab() => OpenedTabs.Count > 0;
 
     /// <summary>
-    /// РњРѕР¶РЅРѕ Р»Рё СЃРѕС…СЂР°РЅРёС‚СЊ.
+    /// Можно ли сохранить.
     /// </summary>
     public bool CanSave() => SelectedTab != null;
 
     /// <summary>
-    /// РћСЃРІРѕР±РѕР¶РґР°РµС‚ СЂРµСЃСѓСЂСЃС‹ (РѕС‚РїРёСЃРєР° РѕС‚ WeakReferenceMessenger).
+    /// Освобождает ресурсы (отписка от WeakReferenceMessenger).
     /// </summary>
     public void Dispose()
     {

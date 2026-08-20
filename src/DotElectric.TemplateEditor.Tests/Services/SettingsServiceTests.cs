@@ -50,7 +50,6 @@ public class SettingsServiceTests : IDisposable
             ShowGrid = false,
             SnapToGrid = false,
             GridStepMm = 10.0,
-            DefaultZoom = 2.0,
             DefaultSheetFormat = "A4"
         };
 
@@ -159,7 +158,6 @@ public class SettingsServiceTests : IDisposable
             ShowGrid = true,
             SnapToGrid = true,
             GridStepMm = 1.0,
-            DefaultZoom = 1.5,
             DefaultSheetFormat = "A2",
             LastUsedSheetFormat = "A2",
             LastUsedSheetOrientation = "Portrait"
@@ -173,7 +171,6 @@ public class SettingsServiceTests : IDisposable
         Assert.True(loaded.ShowGrid);
         Assert.True(loaded.SnapToGrid);
         Assert.Equal(1.0, loaded.GridStepMm);
-        Assert.Equal(1.5, loaded.DefaultZoom);
         Assert.Equal("A2", loaded.DefaultSheetFormat);
         Assert.Equal("A2", loaded.LastUsedSheetFormat);
         Assert.Equal("Portrait", loaded.LastUsedSheetOrientation);
