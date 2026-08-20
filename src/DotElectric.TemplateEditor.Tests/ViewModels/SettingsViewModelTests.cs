@@ -19,8 +19,7 @@ public class SettingsViewModelTests
             SnapToGrid = true,
             GridStepMm = 5.0,
             AutosaveIntervalMinutes = 5,
-            DefaultSheetFormat = "A3",
-            DefaultZoom = 1.0
+            DefaultSheetFormat = "A3"
         };
 
         _settingsMock = new Mock<ISettingsService>();
@@ -38,7 +37,6 @@ public class SettingsViewModelTests
         Assert.Equal(5.0, vm.GridStepMm);
         Assert.Equal(5, vm.AutosaveIntervalMinutes);
         Assert.Equal("A3", vm.DefaultSheetFormat);
-        Assert.Equal(1.0, vm.DefaultZoom);
     }
 
     [Fact]
@@ -50,7 +48,6 @@ public class SettingsViewModelTests
         Assert.Contains("Dark", vm.ThemeOptions);
         Assert.Contains("A3", vm.FormatOptions);
         Assert.Contains("A4×2", vm.FormatOptions);
-        Assert.Contains(1.0, vm.ZoomOptions);
     }
 
     [Fact]
@@ -168,7 +165,6 @@ public class SettingsViewModelTests
         vm.SnapToGrid = false;
         vm.AutosaveIntervalMinutes = 10;
         vm.DefaultSheetFormat = "A4";
-        vm.DefaultZoom = 2.0;
 
         vm.ConfirmCommand.Execute(null);
 
@@ -176,8 +172,7 @@ public class SettingsViewModelTests
             a.ShowGrid == false &&
             a.SnapToGrid == false &&
             a.AutosaveIntervalMinutes == 10 &&
-            a.DefaultSheetFormat == "A4" &&
-            a.DefaultZoom == 2.0)), Times.Once);
+            a.DefaultSheetFormat == "A4")), Times.Once);
     }
 
     [Fact]

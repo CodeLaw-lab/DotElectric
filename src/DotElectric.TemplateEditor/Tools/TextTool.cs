@@ -11,8 +11,9 @@ namespace DotElectric.TemplateEditor.Tools;
 /// </summary>
 public sealed class TextTool : ITool
 {
+    private const string DefaultContent = "Текст";
+
     private readonly IEditorContext _context;
-    private readonly TextToolSettings _settings;
     private TextType _textType;
     private long _fontSizeMicrons;
     private string _font;
@@ -22,11 +23,10 @@ public sealed class TextTool : ITool
     public TextTool(IEditorContext context)
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
-        _settings = new TextToolSettings();
-        _textType = _settings.DefaultTextType;
-        _fontSizeMicrons = _settings.DefaultFontSizeMicrons;
-        _font = _settings.DefaultFont;
-        _content = _settings.DefaultContent;
+        _textType = TextType.Text;
+        _fontSizeMicrons = DocumentDefaults.DefaultFontSizeMicrons;
+        _font = DocumentDefaults.DefaultFontName;
+        _content = DefaultContent;
     }
 
     public void OnMouseDown(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -99,12 +99,6 @@ public sealed class TextTool : ITool
     {
         return ToolCursor.IBeam;
     }
-
-    // === Настройки текста ===
-
-    public void SetTextType(TextType type) => _textType = type;
-    public void SetFontSize(long fontSizeMicrons) { if (fontSizeMicrons > 0) _fontSizeMicrons = fontSizeMicrons; }
-    public void SetDefaultContent(string content) { if (!string.IsNullOrWhiteSpace(content)) _content = content; }
 
     public void Reset()
     {

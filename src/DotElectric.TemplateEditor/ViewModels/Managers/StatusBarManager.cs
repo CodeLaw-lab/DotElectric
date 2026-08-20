@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using DotElectric.TemplateEditor.Constants;
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
@@ -33,13 +34,7 @@ public sealed partial class StatusBarManager : ObservableObject
     /// <summary>
     /// Метка ориентации для отображения (кн./алб.).
     /// </summary>
-    private string OrientationLabel =>
-        _template.Sheet.Orientation switch
-        {
-            SheetOrientation.Portrait => "кн.",
-            SheetOrientation.Landscape => "алб.",
-            _ => ""
-        };
+    private string OrientationLabel => OrientationLabels.For(_template.Sheet.Orientation);
 
     /// <summary>
     /// Включена ли сетка (для binding в StatusBar). Делегирует GridManager.

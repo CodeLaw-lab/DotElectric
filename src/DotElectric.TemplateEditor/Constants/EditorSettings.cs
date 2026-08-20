@@ -7,7 +7,6 @@ public static class EditorSettings
     public const double ZoomMax = 10.0;
     public const double ZoomIncrement = 0.1;
     public const double MouseWheelZoomFactor = 1.1;
-    public const double DefaultSheetOffsetMm = 10.0;
     public const double FitToScreenPadding = 0.95;
 
     // Grid
@@ -17,14 +16,11 @@ public static class EditorSettings
     public const double DefaultGridNodeSize = 2.0;
 
     // Nudge
-    public const long NudgeStepMicrons = 1000;
+    public const long NudgeStepMicrons = 100;
     public const long BigNudgeStepMicrons = 10000;
 
     // Undo/Redo
     public const int CommandHistoryMaxLevels = 50;
-
-    // Timing
-    public const int DoubleClickThresholdMs = 500;
 
     // Autosave
     public const int AutosaveCleanupDays = 7;

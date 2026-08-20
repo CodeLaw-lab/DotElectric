@@ -56,27 +56,6 @@ public class SnapHelperTests
         Assert.Equal(0, SnapHelper.SnapSize(0, 5000));
     }
 
-    [Fact]
-    public void SnapObject_Line_MovesStartToEnd()
-    {
-        var line = new Line(7500, 7400, 12000, 12000);
-        SnapHelper.SnapObject(line, 5000);
-        Assert.Equal(10000, line.StartMicronsX);
-        Assert.Equal(5000, line.StartMicronsY);
-        // End = старый End + дельта: 12000 + (10000-7500) = 14500, 12000 + (5000-7400) = 9600
-        Assert.Equal(14500, line.EndMicronsX);
-        Assert.Equal(9600, line.EndMicronsY);
-    }
-
-    [Fact]
-    public void SnapObject_Rectangle_MovesPosition()
-    {
-        var rect = new Rectangle(7500, 7400, 1000, 1000);
-        SnapHelper.SnapObject(rect, 5000);
-        Assert.Equal(10000, rect.MicronsX);
-        Assert.Equal(5000, rect.MicronsY);
-    }
-
     // ===== Формула привязки (перенесено из тестов документной библиотеки) =====
 
     [Fact]

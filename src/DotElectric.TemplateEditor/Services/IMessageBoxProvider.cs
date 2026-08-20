@@ -1,30 +1,30 @@
-﻿namespace DotElectric.TemplateEditor.Services;
+namespace DotElectric.TemplateEditor.Services;
 
 /// <summary>
-/// РђР±СЃС‚СЂР°РєС†РёСЏ РґР»СЏ РїРѕРєР°Р·Р° MessageBox. РџРѕР·РІРѕР»СЏРµС‚ РјРѕРєР°С‚СЊ РґРёР°Р»РѕРіРё РІ unit-С‚РµСЃС‚Р°С….
-/// Р’ С‚РµСЃС‚Р°С… РјРѕР¶РЅРѕ РјРѕРєР°С‚СЊ, РІ РїСЂРѕРґРµ вЂ” WPF СЂРµР°Р»РёР·Р°С†РёСЏ СЃ Dispatcher.
+/// Абстракция для показа MessageBox. Позволяет мокать диалоги в unit-тестах.
+/// В тестах можно мокать, в проде — WPF реализация с Dispatcher.
 /// </summary>
 public interface IMessageBoxProvider
 {
     /// <summary>
-    /// РџРѕРєР°Р·Р°С‚СЊ MessageBox СЃ Р·Р°РґР°РЅРЅС‹РјРё РїР°СЂР°РјРµС‚СЂР°РјРё.
-    /// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· UI-РїРѕС‚РѕРєР° (РёР»Рё Dispatcher.Invoke РІ WPF СЂРµР°Р»РёР·Р°С†РёРё).
+    /// Показать MessageBox с заданными параметрами.
+    /// Вызывается из UI-потока (или Dispatcher.Invoke в WPF реализации).
     /// </summary>
     MsgrResult Show(string message, string caption, MsgrButtons buttons, MsgrIcon icon);
 }
 
 /// <summary>
-/// РђР±СЃС‚СЂР°РєС†РёСЏ РґР»СЏ IDispatcher. РџРѕР·РІРѕР»СЏРµС‚ С‚РµСЃС‚РёСЂРѕРІР°С‚СЊ Р±РµР· WPF Application.
+/// Абстракция для IDispatcher. Позволяет тестировать без WPF Application.
 /// </summary>
 public interface IDispatcherService
 {
     /// <summary>
-    /// Р’С‹РїРѕР»РЅРёС‚СЊ РґРµР№СЃС‚РІРёРµ РІ UI-РїРѕС‚РѕРєРµ.
+    /// Выполнить действие в UI-потоке.
 /// </summary>
     T Invoke<T>(Func<T> action);
 
     /// <summary>
-    /// Р’С‹РїРѕР»РЅРёС‚СЊ РґРµР№СЃС‚РІРёРµ РІ UI-РїРѕС‚РѕРєРµ (Р±РµР· РІРѕР·РІСЂР°С‚Р° СЂРµР·СѓР»СЊС‚Р°С‚Р°).
+    /// Выполнить действие в UI-потоке (без возврата результата).
     /// </summary>
     void Invoke(Action action);
 
@@ -35,7 +35,7 @@ public interface IDispatcherService
 }
 
 /// <summary>
-/// Р РµР·СѓР»СЊС‚Р°С‚ MessageBox.
+/// Результат MessageBox.
 /// </summary>
 public enum MsgrResult
 {
@@ -47,7 +47,7 @@ public enum MsgrResult
 }
 
 /// <summary>
-/// РљРЅРѕРїРєРё MessageBox.
+/// Кнопки MessageBox.
 /// </summary>
 public enum MsgrButtons
 {
@@ -58,7 +58,7 @@ public enum MsgrButtons
 }
 
 /// <summary>
-/// РРєРѕРЅРєР° MessageBox.
+/// Иконка MessageBox.
 /// </summary>
 public enum MsgrIcon
 {

@@ -47,11 +47,6 @@ public sealed class AppSettings
     public double GridNodeSize { get; set; } = 2.0;
 
     /// <summary>
-    /// Масштаб по умолчанию (1.0 = 100%).
-    /// </summary>
-    public double DefaultZoom { get; set; } = 1.0;
-
-    /// <summary>
     /// Формат листа по умолчанию (A3).
     /// </summary>
     public string DefaultSheetFormat { get; set; } = SheetFormatCatalog.DefaultName;

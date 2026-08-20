@@ -5,29 +5,12 @@ using DotElectric.TemplateEditor.Services;
 
 namespace DotElectric.TemplateEditor.Tests.Models;
 
-public class GridTests
-{
-    [Fact]
-    public void Default_Has5mmStep()
-    {
-        Assert.Equal(5000, Grid.Default.StepMicrons);
-    }
-
-    [Fact]
-    public void Default_IsSingleton()
-    {
-        var instance1 = Grid.Default;
-        var instance2 = Grid.Default;
-        Assert.Same(instance1, instance2);
-    }
-}
-
 public class GridSettingsTests
 {
     [Fact]
-    public void FromDefaultGrid_CopiesStepAndEnablesAll()
+    public void CreateDefault_CopiesStepAndEnablesAll()
     {
-        var settings = GridSettings.FromDefaultGrid();
+        var settings = GridSettings.CreateDefault();
 
         Assert.True(settings.Enabled);
         Assert.True(settings.SnapEnabled);
@@ -38,7 +21,7 @@ public class GridSettingsTests
     [Fact]
     public void Properties_CanBeModified()
     {
-        var settings = GridSettings.FromDefaultGrid();
+        var settings = GridSettings.CreateDefault();
 
         settings.Enabled = false;
         settings.SnapEnabled = false;
@@ -113,7 +96,7 @@ public class GridSettingsTests
     {
         var settings = GridSettings.FromAppSettings(new AppSettings { GridStepMm = 0.0 });
 
-        Assert.Equal(Grid.Default.StepMicrons, settings.StepMicrons);
+        Assert.Equal(EditorSettings.DefaultGridStepMicrons, settings.StepMicrons);
     }
 
     [Fact]
@@ -121,7 +104,7 @@ public class GridSettingsTests
     {
         var settings = GridSettings.FromAppSettings(new AppSettings { GridStepMm = -5.0 });
 
-        Assert.Equal(Grid.Default.StepMicrons, settings.StepMicrons);
+        Assert.Equal(EditorSettings.DefaultGridStepMicrons, settings.StepMicrons);
     }
 
     [Fact]

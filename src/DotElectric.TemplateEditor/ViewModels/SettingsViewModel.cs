@@ -39,17 +39,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty]
     private string _defaultSheetFormat;
 
-    [ObservableProperty]
-    private double _defaultZoom;
-
     public string Title => "Настройки";
 
     public string[] ThemeOptions { get; } = ["Light", "Dark"];
 
     public string[] FormatOptions { get; } =
         SheetFormatCatalog.All.Select(f => f.Name).ToArray();
-
-    public double[] ZoomOptions { get; } = [0.25, 0.5, 0.75, 1.0, 1.5, 2.0];
 
     public SettingsViewModel(ISettingsService settingsService)
     {
@@ -66,7 +61,6 @@ public partial class SettingsViewModel : ObservableObject
         GridNodeSize = settings.GridNodeSize;
         AutosaveIntervalMinutes = settings.AutosaveIntervalMinutes;
         DefaultSheetFormat = settings.DefaultSheetFormat;
-        DefaultZoom = settings.DefaultZoom;
     }
 
     public event Action? ConfirmRequested;
@@ -85,7 +79,6 @@ public partial class SettingsViewModel : ObservableObject
         settings.GridNodeSize = GridNodeSize;
         settings.AutosaveIntervalMinutes = AutosaveIntervalMinutes;
         settings.DefaultSheetFormat = DefaultSheetFormat;
-        settings.DefaultZoom = DefaultZoom;
         _settingsService.Save(settings);
         ConfirmRequested?.Invoke();
     }

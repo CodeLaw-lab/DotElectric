@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
 using DotElectric.TemplateEditor.Abstractions;
 using DotElectric.TemplateEditor.Constants;
@@ -7,61 +7,61 @@ using Microsoft.Extensions.Logging;
 namespace DotElectric.TemplateEditor.Services;
 
 /// <summary>
-/// РРЅС„РѕСЂРјР°С†РёСЏ РѕР± Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёРё РѕРґРЅРѕР№ РІРєР»Р°РґРєРё.
+/// Информация об автосохранении одной вкладки.
 /// </summary>
 public sealed class AutosaveTabInfo
 {
     /// <summary>
-    /// РЈРЅРёРєР°Р»СЊРЅС‹Р№ ID РІРєР»Р°РґРєРё (РґР»СЏ СЃРѕРїРѕСЃС‚Р°РІР»РµРЅРёСЏ Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹С… С„Р°Р№Р»РѕРІ).
+    /// Уникальный ID вкладки (для сопоставления автосохранённых файлов).
     /// </summary>
     public string? TabId { get; set; }
 
     /// <summary>
-    /// РћС‚РѕР±СЂР°Р¶Р°РµРјРѕРµ РёРјСЏ РІРєР»Р°РґРєРё.
+    /// Отображаемое имя вкладки.
     /// </summary>
     public string? DisplayName { get; set; }
 
     /// <summary>
-    /// РћСЂРёРіРёРЅР°Р»СЊРЅС‹Р№ РїСѓС‚СЊ Рє С„Р°Р№Р»Сѓ (РµСЃР»Рё Р±С‹Р» СЃРѕС…СЂР°РЅС‘РЅ).
+    /// Оригинальный путь к файлу (если был сохранён).
     /// </summary>
     public string? OriginalFilePath { get; set; }
 
     /// <summary>
-    /// РРјСЏ Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅРѕРіРѕ С„Р°Р№Р»Р°.
+    /// Имя автосохранённого файла.
     /// </summary>
     public string? AutosaveFile { get; set; }
 
     /// <summary>
-    /// Р‘С‹Р»Р° Р»Рё РІРєР»Р°РґРєР° В«РіСЂСЏР·РЅРѕР№В» РЅР° РјРѕРјРµРЅС‚ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ.
+    /// Была ли вкладка «грязной» на момент автосохранения.
     /// </summary>
     public bool WasDirty { get; set; }
 }
 
 /// <summary>
-/// РЎРµСЃСЃРёСЏ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ.
+/// Сессия автосохранения.
 /// </summary>
 public sealed class AutosaveSession
 {
     /// <summary>
-    /// Р’СЂРµРјСЏ РЅР°С‡Р°Р»Р° СЃРµСЃСЃРёРё.
+    /// Время начала сессии.
     /// </summary>
     public DateTime SessionStart { get; set; }
 
     /// <summary>
-    /// Р’СЂРµРјСЏ РїРѕСЃР»РµРґРЅРµРіРѕ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ.
+    /// Время последнего автосохранения.
     /// </summary>
     public DateTime LastAutosave { get; set; }
 
     /// <summary>
-    /// РРЅС„РѕСЂРјР°С†РёСЏ РѕР± Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹С… РІРєР»Р°РґРєР°С….
+    /// Информация об автосохранённых вкладках.
     /// </summary>
     public List<AutosaveTabInfo> Tabs { get; set; } = new();
 }
 
 /// <summary>
-/// РЎРµСЂРІРёСЃ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ РѕС‚РєСЂС‹С‚С‹С… С€Р°Р±Р»РѕРЅРѕРІ.
-/// РЎРѕС…СЂР°РЅСЏРµС‚ РІСЃРµ В«РіСЂСЏР·РЅС‹РµВ» РІРєР»Р°РґРєРё РєР°Р¶РґС‹Рµ N РјРёРЅСѓС‚.
-/// РџР°РїРєР°: %APPDATA%\DotElectric\autosave\
+/// Сервис автосохранения открытых шаблонов.
+/// Сохраняет все «грязные» вкладки каждые N минут.
+/// Папка: %APPDATA%\DotElectric\autosave\
 /// </summary>
 public sealed class AutosaveService : IDisposable
 {
@@ -77,7 +77,7 @@ public sealed class AutosaveService : IDisposable
     private bool _isDisposed;
 
     /// <summary>
-    /// РЎРѕР±С‹С‚РёРµ С‚РёРєР° С‚Р°Р№РјРµСЂР°. РџРѕРґРїРёСЃС‹РІР°РµС‚СЃСЏ MainViewModel.
+    /// Событие тика таймера. Подписывается MainViewModel.
     /// </summary>
     public event Func<Task>? AutosaveTick;
 
@@ -105,7 +105,7 @@ public sealed class AutosaveService : IDisposable
     }
 
     /// <summary>
-    /// Р—Р°РїСѓСЃС‚РёС‚СЊ С‚Р°Р№РјРµСЂ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ.
+    /// Запустить таймер автосохранения.
     /// </summary>
     public void Start()
     {
@@ -121,17 +121,17 @@ public sealed class AutosaveService : IDisposable
             TimeSpan.FromMinutes(intervalMinutes));
 
         _logger?.LogInformation(
-            "AutosaveService Р·Р°РїСѓС‰РµРЅ. РРЅС‚РµСЂРІР°Р»: {IntervalMinutes} РјРёРЅ.", intervalMinutes);
+            "AutosaveService запущен. Интервал: {IntervalMinutes} мин.", intervalMinutes);
     }
 
     /// <summary>
-    /// РћСЃС‚Р°РЅРѕРІРёС‚СЊ С‚Р°Р№РјРµСЂ.
+    /// Остановить таймер.
     /// </summary>
     public void Stop()
     {
         _timer?.Dispose();
         _timer = null;
-        _logger?.LogInformation("AutosaveService РѕСЃС‚Р°РЅРѕРІР»РµРЅ.");
+        _logger?.LogInformation("AutosaveService остановлен.");
     }
 
     private void OnAutosaveTick(object? state)
@@ -143,13 +143,13 @@ public sealed class AutosaveService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger?.LogError(ex, "РћС€РёР±РєР° РІ РѕР±СЂР°Р±РѕС‚С‡РёРєРµ СЃРѕР±С‹С‚РёСЏ AutosaveTick");
+            _logger?.LogError(ex, "Ошибка в обработчике события AutosaveTick");
         }
     }
 
     /// <summary>
-    /// РЎРѕС…СЂР°РЅРёС‚СЊ РІСЃРµ В«РіСЂСЏР·РЅС‹РµВ» РІРєР»Р°РґРєРё.
-    /// Р’С‹Р·С‹РІР°РµС‚СЃСЏ РёР· MainViewModel РїРѕ СЃРѕР±С‹С‚РёСЋ AutosaveTick.
+    /// Сохранить все «грязные» вкладки.
+    /// Вызывается из MainViewModel по событию AutosaveTick.
     /// </summary>
     public async Task AutosaveAllTabsAsync(
         IEnumerable<IAutosaveTab> openedTabs,
@@ -176,14 +176,14 @@ public sealed class AutosaveService : IDisposable
                 catch (Exception ex)
                 {
                     _logger?.LogError(ex,
-                        "Autosave РЅРµ СѓРґР°Р»СЃСЏ РґР»СЏ РІРєР»Р°РґРєРё: {TabName}", tab.DisplayName);
+                        "Autosave не удался для вкладки: {TabName}", tab.DisplayName);
                 }
             }
 
-            // РЎРѕС…СЂР°РЅСЏРµРј session.json
+            // Сохраняем session.json
             SaveSession(session);
 
-            // РћС‡РёСЃС‚РєР° СЃС‚Р°СЂС‹С… С„Р°Р№Р»РѕРІ (СЃС‚Р°СЂС€Рµ 7 РґРЅРµР№)
+            // Очистка старых файлов (старше 7 дней)
             CleanupOldAutosaveFiles();
         }
         finally
@@ -193,9 +193,9 @@ public sealed class AutosaveService : IDisposable
     }
 
     /// <summary>
-    /// Р—Р°РіСЂСѓР·РёС‚СЊ СЃРµСЃСЃРёСЋ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ (РґР»СЏ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РїРѕСЃР»Рµ СЃР±РѕСЏ).
+    /// Загрузить сессию автосохранения (для восстановления после сбоя).
     /// </summary>
-    /// <returns>РЎРµСЃСЃРёСЏ РёР»Рё null, РµСЃР»Рё session.json РЅРµ РЅР°Р№РґРµРЅ.</returns>
+    /// <returns>Сессия или null, если session.json не найден.</returns>
     public AutosaveSession? LoadSession()
     {
         try
@@ -209,13 +209,13 @@ public sealed class AutosaveService : IDisposable
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "РќРµ СѓРґР°Р»РѕСЃСЊ Р·Р°РіСЂСѓР·РёС‚СЊ СЃРµСЃСЃРёСЋ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ");
+            _logger?.LogWarning(ex, "Не удалось загрузить сессию автосохранения");
             return null;
         }
     }
 
     /// <summary>
-    /// РџРѕР»СѓС‡РёС‚СЊ РїРѕР»РЅС‹Р№ РїСѓС‚СЊ Рє Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅРѕРјСѓ С„Р°Р№Р»Сѓ.
+    /// Получить полный путь к автосохранённому файлу.
     /// </summary>
     public string GetAutosaveFilePath(string autosaveFileName)
     {
@@ -223,7 +223,7 @@ public sealed class AutosaveService : IDisposable
     }
 
     /// <summary>
-    /// РћС‡РёСЃС‚РёС‚СЊ РїР°РїРєСѓ Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ (РїРѕСЃР»Рµ СѓСЃРїРµС€РЅРѕРіРѕ РІРѕСЃСЃС‚Р°РЅРѕРІР»РµРЅРёСЏ РёР»Рё РїРѕ Р·Р°РїСЂРѕСЃСѓ).
+    /// Очистить папку автосохранения (после успешного восстановления или по запросу).
     /// </summary>
     public void ClearAutosaveFolder()
     {
@@ -238,11 +238,11 @@ public sealed class AutosaveService : IDisposable
             }
             catch (Exception ex)
             {
-                _logger?.LogWarning(ex, "РќРµ СѓРґР°Р»РѕСЃСЊ СѓРґР°Р»РёС‚СЊ С„Р°Р№Р» Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ: {File}", file);
+                _logger?.LogWarning(ex, "Не удалось удалить файл автосохранения: {File}", file);
             }
         }
 
-        _logger?.LogInformation("РџР°РїРєР° Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ РѕС‡РёС‰РµРЅР°: {Folder}", _autosaveFolder);
+        _logger?.LogInformation("Папка автосохранения очищена: {Folder}", _autosaveFolder);
     }
 
     #region Private Methods
@@ -253,10 +253,10 @@ public sealed class AutosaveService : IDisposable
         var fileName = $"autosave_{tabId}_{_dateTimeProvider.UtcNow:yyyyMMdd_HHmmss}.tdel";
         var filePath = Path.Combine(_autosaveFolder, fileName);
 
-        // РЎРѕС…СЂР°РЅСЏРµРј С€Р°Р±Р»РѕРЅ
+        // Сохраняем шаблон
         _templateService.Save(tab.Template, filePath);
 
-        // РЈРґР°Р»СЏРµРј РїСЂРµРґС‹РґСѓС‰РёР№ С„Р°Р№Р» Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ РґР»СЏ СЌС‚РѕР№ РІРєР»Р°РґРєРё
+        // Удаляем предыдущий файл автосохранения для этой вкладки
         CleanupOldAutosaveForTab(tabId);
 
         session.Tabs.Add(new AutosaveTabInfo
@@ -269,7 +269,7 @@ public sealed class AutosaveService : IDisposable
         });
 
         _logger?.LogDebug(
-            "РђРІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёРµ РІРєР»Р°РґРєРё: {TabName} в†’ {FileName}", tab.DisplayName, fileName);
+            "Автосохранение вкладки: {TabName} → {FileName}", tab.DisplayName, fileName);
     }
 
     private void SaveSession(AutosaveSession session)
@@ -285,14 +285,14 @@ public sealed class AutosaveService : IDisposable
         }
         else
         {
-            // РќРµС‚ В«РіСЂСЏР·РЅС‹С…В» РІРєР»Р°РґРѕРє вЂ” СѓРґР°Р»СЏРµРј session.json
+            // Нет «грязных» вкладок — удаляем session.json
             if (File.Exists(_sessionFile))
                 File.Delete(_sessionFile);
         }
     }
 
     /// <summary>
-    /// РџРѕР»СѓС‡РёС‚СЊ СѓРЅРёРєР°Р»СЊРЅС‹Р№ ID Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёСЏ РґР»СЏ РІРєР»Р°РґРєРё.
+    /// Получить уникальный ID автосохранения для вкладки.
     /// </summary>
     private static string GetTabAutosaveId(IAutosaveTab tab)
     {
@@ -303,8 +303,8 @@ public sealed class AutosaveService : IDisposable
     }
 
     /// <summary>
-    /// РЈРґР°Р»РёС‚СЊ СЃС‚Р°СЂС‹Рµ Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹ РґР»СЏ РєРѕРЅРєСЂРµС‚РЅРѕР№ РІРєР»Р°РґРєРё.
-    /// РћСЃС‚Р°РІР»СЏРµРј С‚РѕР»СЊРєРѕ РїРѕСЃР»РµРґРЅРёР№ С„Р°Р№Р».
+    /// Удалить старые автосохранённые файлы для конкретной вкладки.
+    /// Оставляем только последний файл.
     /// </summary>
     private void CleanupOldAutosaveForTab(string tabId)
     {
@@ -324,12 +324,12 @@ public sealed class AutosaveService : IDisposable
         catch (Exception ex)
         {
             _logger?.LogWarning(ex,
-                "РћС€РёР±РєР° РѕС‡РёСЃС‚РєРё СЃС‚Р°СЂС‹С… Р°РІС‚РѕСЃРѕС…СЂР°РЅРµРЅРёР№ РґР»СЏ РІРєР»Р°РґРєРё {TabId}", tabId);
+                "Ошибка очистки старых автосохранений для вкладки {TabId}", tabId);
         }
     }
 
     /// <summary>
-    /// РЈРґР°Р»РёС‚СЊ Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹Рµ С„Р°Р№Р»С‹ СЃС‚Р°СЂС€Рµ 7 РґРЅРµР№.
+    /// Удалить автосохранённые файлы старше 7 дней.
     /// </summary>
     private void CleanupOldAutosaveFiles()
     {
@@ -344,13 +344,13 @@ public sealed class AutosaveService : IDisposable
                 if (fileInfo.LastWriteTime < cutoffDate)
                 {
                     File.Delete(file);
-                    _logger?.LogDebug("РЈРґР°Р»С‘РЅ СЃС‚Р°СЂС‹Р№ Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹Р№ С„Р°Р№Р»: {File}", file);
+                    _logger?.LogDebug("Удалён старый автосохранённый файл: {File}", file);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger?.LogWarning(ex, "РћС€РёР±РєР° РѕС‡РёСЃС‚РєРё СЃС‚Р°СЂС‹С… Р°РІС‚РѕСЃРѕС…СЂР°РЅС‘РЅРЅС‹С… С„Р°Р№Р»РѕРІ");
+            _logger?.LogWarning(ex, "Ошибка очистки старых автосохранённых файлов");
         }
     }
 

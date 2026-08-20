@@ -275,7 +275,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// </summary>
     private long NudgeStep => GridSettings.SnapEnabled
         ? GridSettings.StepMicrons
-        : 100; // 0.1 мм
+        : EditorSettings.NudgeStepMicrons; // 0.1 мм
 
     /// <summary>
     /// Большой шаг (Shift+стрелка): 10 мм (snap on) или шаг сетки (snap off).
@@ -320,30 +320,15 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
     /// Вращать выделенные текстовые объекты на +90°.
     /// </summary>
     [RelayCommand]
-    private void RotateSelectedClockwise()
-    {
-        var texts = _selectionManager.SelectedObjects.OfType<Text>().ToList();
-        if (texts.Count == 0) return;
-
-        var commands = texts
-            .Select(t => (IUndoCommand)new ChangePropertyCommand<int>(
-                () => t.RotationAngle,
-                v => t.RotationAngle = NormalizeAngle(v),
-                NormalizeAngle(t.RotationAngle + 90),
-                "Повернуть текст"))
-            .ToList();
-
-        if (commands.Count == 1)
-            CommandHistory.Push(commands[0]);
-        else
-            CommandHistory.Push(new BatchCommand(commands, "Повернуть текст"));
-    }
+    private void RotateSelectedClockwise() => RotateSelected(+90);
 
     /// <summary>
     /// Вращать выделенные текстовые объекты на -90°.
     /// </summary>
     [RelayCommand]
-    private void RotateSelectedCounterClockwise()
+    private void RotateSelectedCounterClockwise() => RotateSelected(-90);
+
+    private void RotateSelected(int deltaDegrees)
     {
         var texts = _selectionManager.SelectedObjects.OfType<Text>().ToList();
         if (texts.Count == 0) return;
@@ -352,7 +337,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
             .Select(t => (IUndoCommand)new ChangePropertyCommand<int>(
                 () => t.RotationAngle,
                 v => t.RotationAngle = NormalizeAngle(v),
-                NormalizeAngle(t.RotationAngle - 90),
+                NormalizeAngle(t.RotationAngle + deltaDegrees),
                 "Повернуть текст"))
             .ToList();
 
@@ -448,7 +433,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         Template = template ?? throw new ArgumentNullException(nameof(template));
         _commandHistory = new CommandHistory(maxLevels: EditorSettings.CommandHistoryMaxLevels, markDirty: MarkDirty);
         TabId = Guid.NewGuid().ToString("N")[..12];
-        GridSettings = gridSettings ?? GridSettings.FromDefaultGrid();
+        GridSettings = gridSettings ?? GridSettings.CreateDefault();
         var resolvedGridNodeGenerator = gridNodeGenerator ?? new GridNodeGenerator();
         _themeService = themeService;
 
@@ -476,7 +461,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         // т.к. XAML биндится напрямую к DirtyStateManager.*, а AutosaveService читает значения синхронно.
 
         PropertiesVm = new PropertiesViewModel(_selectionManager.SelectedObjects, _commandHistory);
-        var orientLabel = template.Sheet.Orientation == SheetOrientation.Portrait ? "кн." : "алб.";
+        var orientLabel = OrientationLabels.For(template.Sheet.Orientation);
         _dirtyStateManager.DisplayName = $"{template.Sheet.Format} ({orientLabel}) — Без имени";
 
         _gridManager.RefreshGridNodes();

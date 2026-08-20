@@ -184,7 +184,7 @@ public class EditorViewModelFactoryTests
 
         Assert.NotNull(vm);
         Assert.True(vm.GridSettings.Enabled);
-        Assert.Equal(Grid.Default.StepMicrons, vm.GridSettings.StepMicrons);
+        Assert.Equal(EditorSettings.DefaultGridStepMicrons, vm.GridSettings.StepMicrons);
         Assert.Equal(EditorSettings.MaxGridNodes, vm.GridSettings.MaxGridNodes);
         Assert.Null(vm.GridSettings.NodeColor);
         Assert.Equal(2.0, vm.GridSettings.NodeSize);
@@ -249,7 +249,7 @@ public class EditorViewModelFactoryTests
 
         Assert.NotNull(vm);
         Assert.True(vm.GridSettings.Enabled);
-        Assert.Equal(Grid.Default.StepMicrons, vm.GridSettings.StepMicrons);
+        Assert.Equal(EditorSettings.DefaultGridStepMicrons, vm.GridSettings.StepMicrons);
     }
 
     [Fact]

@@ -59,18 +59,6 @@ public static class SnapHelper
     }
 
     /// <summary>
-    /// Привязать объект TemplateObjectBase к сетке (перемещает опорную точку).
-    /// </summary>
-    /// <param name="obj">Объект для привязки.</param>
-    /// <param name="stepMicrons">Шаг сетки в микронах.</param>
-    public static void SnapObject(TemplateObjectBase obj, long stepMicrons)
-    {
-        var snappedX = Snap(obj.MicronsX, stepMicrons);
-        var snappedY = Snap(obj.MicronsY, stepMicrons);
-        obj.Move(snappedX, snappedY);
-    }
-
-    /// <summary>
     /// Привязать точку к сетке если привязка включена в настройках.
     /// </summary>
     /// <param name="point">Исходная точка.</param>
