@@ -1,7 +1,5 @@
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Models;
 
-namespace DotElectric.TemplateEditor.Tests.Models.Objects;
+namespace DotElectric.Document.Tests;
 
 [Collection("FontMetrics")]
 public class TextTests : IDisposable
@@ -388,7 +386,7 @@ public class TextTests : IDisposable
     [Fact]
     public void HeightMicrons_CorrectedMetrics_SingleLine()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hello", 3500, "ГОСТ Б");
 
         var expected = (long)(3500 * 1.1719);
@@ -398,7 +396,7 @@ public class TextTests : IDisposable
     [Fact]
     public void HeightMicrons_CorrectedMetrics_MultiLine()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hello\nWorld", 3500, "ГОСТ Б");
 
         var expected = (long)(3500 * 1.1719 * (1 + 1 * 1.3));
@@ -408,7 +406,7 @@ public class TextTests : IDisposable
     [Fact]
     public void WidthMicrons_CorrectedMetrics()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hello", 10000, "ГОСТ Б");
 
         var expected = (long)(10000 * 5 * 0.55);
@@ -418,7 +416,7 @@ public class TextTests : IDisposable
     [Fact]
     public void WidthMicrons_CorrectedMetrics_UsesMaxLine()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "A\nLongLine!", 10000, "ГОСТ Б");
 
         var expected = (long)(10000 * 9 * 0.55); // max line = "LongLine!" (9 chars)
@@ -448,7 +446,7 @@ public class TextTests : IDisposable
     [InlineData(270)]
     public void RotatedCorners_AllLieOnBoundingBoxEdges(int angle)
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
         var bb = text.GetBoundingBox();
 

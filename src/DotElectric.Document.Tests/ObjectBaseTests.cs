@@ -1,7 +1,5 @@
-using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models;
 
-namespace DotElectric.TemplateEditor.Tests.Models;
+namespace DotElectric.Document.Tests;
 
 public class ObjectBaseTests
 {

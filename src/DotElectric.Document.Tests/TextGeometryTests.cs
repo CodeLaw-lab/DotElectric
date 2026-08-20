@@ -1,7 +1,5 @@
-using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models;
 
-namespace DotElectric.TemplateEditor.Tests.Helpers;
+namespace DotElectric.Document.Tests;
 
 [Collection("FontMetrics")]
 public class TextGeometryTests : IDisposable
@@ -21,7 +19,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void LayoutOffset_0Deg_IsZero()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: 0);
 
         // At 0°: offset = (0, 0). Corner0 = (MicronsX, MicronsY+H) — unchanged.
@@ -40,7 +38,7 @@ public class TextGeometryTests : IDisposable
     [InlineData(270)]
     public void LayoutOffset_MatchesVisualLayoutTransformPosition(int angle)
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -59,7 +57,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Corner_NoRotation_UsesCorrectedHeight()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б");
         var expectedH = (long)(10000 * 1.1719);
 
@@ -71,7 +69,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Corner_90Deg_UsesCorrectedDimensions()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -102,7 +100,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Corner_180Deg_UsesCorrectedDimensions()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 180);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -124,7 +122,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Corner_270Deg_UsesCorrectedDimensions()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 270);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -147,7 +145,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Corner_45Deg_MatchesCwRotation()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(1000, 2000, "Hi", 10000, "ГОСТ Б", rotationAngle: 45);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -189,7 +187,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Contains_CorrectedMetrics_RotatedText()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 0);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -206,7 +204,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void Contains_Rotated90Deg_HitsVisualCorner()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -239,7 +237,7 @@ public class TextGeometryTests : IDisposable
     [InlineData(270)]
     public void Contains_Rotated_HitsVisualCenter(int angle)
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: angle);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -263,7 +261,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void BoundingBox_Rotated90Deg_CorrectBounds()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;
@@ -288,7 +286,7 @@ public class TextGeometryTests : IDisposable
     [Fact]
     public void BoundingBox_Rotated90Deg_IncludesLayoutTransformOffset()
     {
-        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
+        FontMetricsProvider.SetCurrent(new FixedFontMetrics(1.1719, 0.55));
         var text = new Text(10000, 20000, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
         var w = text.WidthMicrons;
         var h = text.HeightMicrons;

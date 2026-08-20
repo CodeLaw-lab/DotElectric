@@ -1,6 +1,5 @@
-using DotElectric.TemplateEditor.Models;
 
-namespace DotElectric.TemplateEditor.Tests.Models;
+namespace DotElectric.Document.Tests;
 
 public class CoordinateTests
 {

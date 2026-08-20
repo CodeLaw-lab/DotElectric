@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="DotElectric.Document/DotElectric.Document.csproj" />
+  <Project Path="DotElectric.Document.Tests/DotElectric.Document.Tests.csproj" />
   <Project Path="DotElectric.Sheets/DotElectric.Sheets.csproj" />
   <Project Path="DotElectric.Sheets.Tests/DotElectric.Sheets.Tests.csproj" />
   <Project Path="DotElectric.TemplateEditor.Tests/DotElectric.TemplateEditor.Tests.csproj" />
