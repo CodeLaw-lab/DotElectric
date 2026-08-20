@@ -9,7 +9,7 @@ namespace DotElectric.Document;
 
 /// <summary>
 /// Реализация ITemplateService.
-/// Отвечает за создание, загрузку, сохранение и валидацию шаблонов.
+/// Отвечает за создание, загрузку и сохранение шаблонов.
 /// Формат .tdel = XML, упакованный в ZIP.
 /// </summary>
 public sealed class TemplateService : ITemplateService
@@ -34,14 +34,11 @@ public sealed class TemplateService : ITemplateService
     }
 
     private readonly IDateTimeProvider _dateTimeProvider;
-    private readonly ITemplateValidator? _templateValidator;
 
-    public TemplateService(ILogger<TemplateService>? logger = null, IDateTimeProvider? dateTimeProvider = null,
-        ITemplateValidator? templateValidator = null)
+    public TemplateService(ILogger<TemplateService>? logger = null, IDateTimeProvider? dateTimeProvider = null)
     {
         _logger = logger;
         _dateTimeProvider = dateTimeProvider ?? new DateTimeProvider();
-        _templateValidator = templateValidator ?? new TemplateValidator();
     }
 
     public Template CreateNew(string format = SheetFormatCatalog.DefaultName, SheetOrientation? orientation = null)
@@ -156,31 +153,6 @@ public sealed class TemplateService : ITemplateService
         }
 
         _logger?.LogInformation("Сохранён шаблон: filePath={FilePath}, objects={ObjectCount}", filePath, template.Objects.Count);
-    }
-
-    public IEnumerable<string> Validate(Template template)
-    {
-        var errors = new List<string>();
-
-        if (template == null)
-        {
-            errors.Add("Шаблон не может быть null.");
-            return errors;
-        }
-
-        // Валидация через ITemplateValidator
-        var validator = _templateValidator;
-        if (validator != null)
-        {
-            var validationErrors = validator.Validate(template);
-            foreach (var error in validationErrors)
-            {
-                if (error.Severity == ValidationSeverity.Error)
-                    errors.Add($"[{error.RuleId}] {error.Message}");
-            }
-        }
-
-        return errors;
     }
 
     #region Mapping

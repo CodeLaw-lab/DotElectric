@@ -6,7 +6,8 @@ namespace DotElectric.Document;
 public enum ValidationSeverity
 {
     /// <summary>
-    /// Ошибка — блокирует сохранение.
+    /// Ошибка — при сохранении спрашивается подтверждение пользователя
+    /// (сохранение при ошибках возможно).
     /// </summary>
     Error,
 

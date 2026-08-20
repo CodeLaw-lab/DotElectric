@@ -98,7 +98,7 @@ public partial class RectanglePropertiesViewModel : ObjectPropertiesViewModel<Re
         var rect = CurrentObject;
         if (rect is null) return;
         SetProperty(value, () => rect.StrokeColor, v => rect.StrokeColor = v,
-            ValidationService.ValidateHexColor, nameof(StrokeColor), "Цвет обводки");
+            HexColorValidation.Validate, nameof(StrokeColor), "Цвет обводки");
     }
 
     [RelayCommand]
@@ -107,7 +107,7 @@ public partial class RectanglePropertiesViewModel : ObjectPropertiesViewModel<Re
         var rect = CurrentObject;
         if (rect is null) return;
         SetProperty(value, () => rect.FillColor, v => rect.FillColor = v,
-            ValidationService.ValidateHexColor, nameof(FillColor), "Цвет заливки");
+            HexColorValidation.Validate, nameof(FillColor), "Цвет заливки");
     }
 
     [RelayCommand]
