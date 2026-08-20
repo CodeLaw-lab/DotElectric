@@ -51,6 +51,9 @@ A3 (���.) - �� �������.tdel
 A3 (���.) - �� �������.pdf
 1.tdel
 
+## Template files (.tdel)
+*.tdel
+
 ## Legacy directories
 openspec/
 docs/archive/
