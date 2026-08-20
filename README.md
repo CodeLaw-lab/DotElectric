@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2613, 0 сбоев, 0 пропусков
+**Тестов:** 2603, 0 сбоев, 0 пропусков
 **Сборка:** 0 errors, 0 warnings
 **Покрытие:** 91.13% line-rate (CI gate 80%)
-**Последнее обновление:** 20.08.2026 — Кандидат 4 обзора №5 (#147, тикет #148, PR #150): добить миграцию — тесты библиоточных типов перенесены из app-проекта в `Document.Tests`/`Sheets.Tests` (V-правила в один `TemplateValidatorTests`, общая фикстура `TestTemplates`, 5 файлов-источников и 3 реликта удалены); ни один тест не добавлен и не удалён (2613, распределение: приложение 2085 + Document 401 + Sheets 127), production-код и XAML — ноль изменений, coverage 91.13%
+**Последнее обновление:** 20.08.2026 — Кандидат 5 обзора №5 (#152, тикет #153, PR #155): deletion sweep №2 — мёртвое знание приложения удалено одним проходом (`TextToolSettings`, класс `Grid`, настройка-призрак `DefaultZoom`, мёртвые константы + расхождение nudge, метки ориентации ×3, дубль Rotate ±90, mojibake в трёх файлах, осиротевшие методы); поведение байт-в-байт (единственное видимое изменение — восстановленные строки логов), тесты 2603 (2613 − 10 тестов удалённого кода; распределение: приложение 2072 + Document 404 + Sheets 127), coverage 91.13% без изменений
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-91%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2613 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2603 теста, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -248,9 +248,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2613 тестов**, 0 сбоев, 0 пропусков
+- ✅ **2603 теста**, 0 сбоев, 0 пропусков
 - ✅ **Покрытие:** 91.13% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#152–#153:** Кандидат 5 обзора №5 — deletion sweep №2 (мёртвое знание приложения): `TextToolSettings` удалён (дефолты инлайнены в `TextTool`), класс `Grid` удалён (шаг сетки — одна константа), настройка-призрак `DefaultZoom` удалена целиком (settings.json байт-совместим), мёртвые константы удалены + `NudgeStepMicrons` → 100 подключён в `NudgeStep` (расхождение устранено, поведение сохранено), метки ориентации «кн.»/«алб.» — одна точка `OrientationLabels.For`, Rotate ±90 — приватное ядро со знаком, mojibake восстановлен (86 строк в трёх файлах), `SnapHelper.SnapObject` удалён с 3 тестами, три теста-реликта перенесены в `Document.Tests`; поведение байт-в-байт (видимое изменение — только строки логов), тесты 2603 (2613 − 10 тестов удалённого кода), coverage 91.13% без изменений
 - ✅ **#147–#148:** Кандидат 4 обзора №5 — добить миграцию тестов библиотек: тесты библиоточных типов перенесены из app-проекта в `Document.Tests`/`Sheets.Tests` (V-правила тремя источниками в один `TemplateValidatorTests` + `HexColorValidationTests`, новые `TemplateTests`/`MetadataTests`/`RectMicronsTests`/`SheetTests`, слияния в `CoordinateTests`/`PointMicronsTests`/`TemplateServiceTests`), общая фикстура `TestTemplates`, 5 файлов-источников и 3 реликта удалены; 2613 тестов без добавлений и удалений, production-код и XAML — ноль изменений
 - ✅ **#142–#143:** Кандидат 3 обзора №5 — один шов проверки документа: обёртка `ITemplateService.Validate` удалена (интерфейс 5→4 члена), `TabOperationsService` инжектит `ITemplateValidator` напрямую (фильтр «только Error» + формат в потребителе, побайтно), цепочка цвета сокращена (`HexColorValidation` напрямую, `IValidationService` сохранён), поведение байт-в-байт
 - ✅ **#137–#138:** Кандидат 1 обзора №5 — документ без редактора: `PhysicalConstants` → `DocumentConstants` (только допуск хита тела), 6 констант взаимодействия в `EditorSettings`, привязка к сетке вне библиотеки (только `SnapHelper`), дубль `MicronsPerMm` устранён, поведение байт-в-байт
@@ -422,7 +423,7 @@ src/
 
 ---
 
-**Последнее обновление:** 20.08.2026 — Кандидат 4 обзора №5 (#147, тикет #148, PR #150): добить миграцию — тесты библиотек застряли в приложении. Тесты библиотечных типов перенесены из `DotElectric.TemplateEditor.Tests` в родные проекты библиотек: V-правила тремя источниками (`ValidationServiceTests` 48 — имя-реликт устранено, `AdditionalValidationServiceTests` 10, `ExtendedValidationServiceTests` 17) слиты в один `Document.Tests/TemplateValidatorTests.cs` + `HexColorValidationTests.cs` (4); новые `TemplateTests.cs` (11), `MetadataTests.cs` (2), `RectMicronsTests.cs` (16: 9 по карте спеки + 7 из секции RectMicrons `SelectionBoxHelperTests` — по deletion-чеклисту) в `Document.Tests` и `SheetTests.cs` (10) в `Sheets.Tests`; влито в существующие `CoordinateTests` (+8), `PointMicronsTests` (+7), `TemplateServiceTests` (+4); четыре локальные фабрики шаблона переехавших тестов слиты в общую фикстуру `TestTemplates`; app-остатки смешанных файлов влиты в родительские (конвенция R4.4), `Models/TemplateTests.cs` переименован в `GridSettingsTests.cs`; 5 файлов-источников и 3 реликтовых отчёта удалены; `FixedFontMetrics`/`FontMetricsTestCollection` ×2 — осознанные копии (коллекция xUnit обязана жить в сборке тестов); ни один тест не добавлен и не удалён — 2613 (распределение: приложение 2085 + Document.Tests 401 + Sheets.Tests 127); production-код и XAML — ноль изменений (чистый перенос); coverage 91.13% — точно как базовая линия
+**Последнее обновление:** 20.08.2026 — Кандидат 5 обзора №5 (#152, тикет #153, PR #155): deletion sweep №2 — мёртвое знание приложения. Мёртвое и расходящееся знание удалено одним проходом: `TextToolSettings` удалён (четыре дефолта инлайнены в `TextTool`, осиротевшие сеттеры удалены с тестами); класс `Grid` удалён — шаг сетки живёт одной константой `EditorSettings.DefaultGridStepMicrons` (`GridSettings.FromDefaultGrid` переименован в `CreateDefault`); настройка-призрак `DefaultZoom` удалена целиком (модель + VM + ComboBox «Масштаб:» + тесты; settings.json байт-совместим); мёртвые константы `DoubleClickThresholdMs`/`DefaultSheetOffsetMm` удалены, `NudgeStepMicrons` переиспользован со значением 100 и подключён в `EditorViewModel.NudgeStep` (расхождение «константа 1 мм vs хардкод 0.1 мм» устранено, поведение сохранено); метки ориентации «кн.»/«алб.» — одна статическая точка `Helpers/OrientationLabels.For` (три делегата, неизвестная ориентация — явный throw); Rotate ±90 — приватное ядро со знаком, команды-делегаты; mojibake восстановлен (86 строк в `AutosaveService`/`MainViewModel`/`IMessageBoxProvider`, включая 11 строковых литералов логов); `SnapHelper.SnapObject` удалён с 3 тестами; три теста-реликта `ValidationService_ValidateObject*` перенесены в `Document.Tests`; поведение байт-в-байт (единственное видимое изменение — восстановленные строки логов); тесты 2603 (2613 − 10 тестов удалённого кода; распределение: приложение 2072 + Document.Tests 404 + Sheets.Tests 127); coverage 91.13% — без изменений
 
 
 

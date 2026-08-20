@@ -54,8 +54,8 @@ src/
 │   └── Messages/                        # WeakReferenceMessenger сообщения
 ├── DotElectric.Document/                # Document model library (objects, metadata, .tdel serialization, validation, DocumentConstants) — no editor knowledge
 ├── DotElectric.Sheets/                  # Sheet formats library (SheetFormatCatalog, isolated, no dependencies)
-├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2085 tests)
-├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document (401 tests)
+├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2072 tests)
+├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document (404 tests)
 └── DotElectric.Sheets.Tests/            # xUnit v3 tests for DotElectric.Sheets (127 tests)
 ```
 
