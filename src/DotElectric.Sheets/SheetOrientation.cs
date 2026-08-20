@@ -1,4 +1,4 @@
-﻿namespace DotElectric.TemplateEditor.Models;
+﻿namespace DotElectric.Sheets;
 
 /// <summary>
 /// Ориентация листа: книжная (Portrait) или альбомная (Landscape).

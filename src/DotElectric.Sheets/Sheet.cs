@@ -1,10 +1,16 @@
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Sheets;
 
 /// <summary>
 /// Параметры листа шаблона (формат, размеры).
 /// </summary>
 public class Sheet
 {
+    /// <summary>
+    /// Количество микрон в 1 мм. Библиотека листа не зависит от документной библиотеки,
+    /// поэтому конвертация инлайнится (формулы байт-в-байт совпадают с Coordinate).
+    /// </summary>
+    private const long MicronsPerMm = 1000;
+
     /// <summary>
     /// Имя пользовательского формата (произвольные размеры, вне каталога).
     /// </summary>
@@ -38,12 +44,12 @@ public class Sheet
     /// <summary>
     /// Ширина в миллиметрах (только для чтения).
     /// </summary>
-    public double WidthMm => Coordinate.ToMm(WidthMicrons);
+    public double WidthMm => WidthMicrons / (double)MicronsPerMm;
 
     /// <summary>
     /// Высота в миллиметрах (только для чтения).
     /// </summary>
-    public double HeightMm => Coordinate.ToMm(HeightMicrons);
+    public double HeightMm => HeightMicrons / (double)MicronsPerMm;
 
     /// <summary>
     /// Создать лист стандартного формата ГОСТ с ориентацией по умолчанию.
@@ -107,8 +113,8 @@ public class Sheet
         => new()
         {
             Format = CustomName,
-            WidthMicrons = Coordinate.ToMicrons(widthMm),
-            HeightMicrons = Coordinate.ToMicrons(heightMm),
+            WidthMicrons = (long)Math.Round(widthMm * MicronsPerMm),
+            HeightMicrons = (long)Math.Round(heightMm * MicronsPerMm),
             Orientation = widthMm >= heightMm
                 ? SheetOrientation.Landscape
                 : SheetOrientation.Portrait

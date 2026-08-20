@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Sheets;
 
 /// <summary>
 /// Стандартный формат листа — запись каталога.

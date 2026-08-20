@@ -1,6 +1,4 @@
-using DotElectric.TemplateEditor.Models;
-
-namespace DotElectric.TemplateEditor.Tests.Models;
+namespace DotElectric.Sheets.Tests;
 
 /// <summary>
 /// Тесты каталога стандартных форматов листа (шов №1 кандидата 5 обзора №4).

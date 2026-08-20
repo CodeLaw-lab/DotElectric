@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Sheets;
 
 /// <summary>
 /// Каталог стандартных форматов листа — единственный источник фиксированного набора

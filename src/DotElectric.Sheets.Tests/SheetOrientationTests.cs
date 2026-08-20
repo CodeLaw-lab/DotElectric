@@ -1,6 +1,4 @@
-using DotElectric.TemplateEditor.Models;
-
-namespace DotElectric.TemplateEditor.Tests.Models;
+namespace DotElectric.Sheets.Tests;
 
 /// <summary>
 /// Тесты для SheetOrientation enum и Sheet.FromFormat с ориентацией.
