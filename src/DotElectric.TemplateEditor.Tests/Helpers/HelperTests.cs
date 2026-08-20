@@ -144,7 +144,7 @@ public class AdditionalSnapHelperTests
     public void SnapToGrid_SnapsToNearestGridPoint(long x, long y, long step, long expectedX, long expectedY)
     {
         var point = new PointMicrons(x, y);
-        var snapped = point.SnapToGrid(step);
+        var snapped = SnapHelper.SnapToGrid(point, step);
 
         Assert.Equal(expectedX, snapped.MicronsX);
         Assert.Equal(expectedY, snapped.MicronsY);
@@ -154,14 +154,14 @@ public class AdditionalSnapHelperTests
     public void SnapToGrid_ZeroStep_ThrowsException()
     {
         var point = new PointMicrons(1234, 5678);
-        Assert.Throws<ArgumentOutOfRangeException>(() => point.SnapToGrid(0));
+        Assert.Throws<ArgumentOutOfRangeException>(() => SnapHelper.SnapToGrid(point, 0));
     }
 
     [Fact]
     public void SnapToGrid_NegativeStep_ThrowsException()
     {
         var point = new PointMicrons(1234, 5678);
-        Assert.Throws<ArgumentOutOfRangeException>(() => point.SnapToGrid(-5000));
+        Assert.Throws<ArgumentOutOfRangeException>(() => SnapHelper.SnapToGrid(point, -5000));
     }
 
     [Fact]

@@ -64,10 +64,10 @@ public sealed partial class GridManager : ObservableObject, IDisposable
 
     public double GridStepMm
     {
-        get => _gridSettings.StepMicrons / (double)PhysicalConstants.MicronsPerMm;
+        get => _gridSettings.StepMicrons / (double)Coordinate.MicronsPerMm;
         set
         {
-            _gridSettings.StepMicrons = (long)(value * PhysicalConstants.MicronsPerMm);
+            _gridSettings.StepMicrons = (long)(value * Coordinate.MicronsPerMm);
             RefreshGridNodes();
             OnPropertyChanged();
         }

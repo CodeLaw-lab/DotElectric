@@ -76,4 +76,54 @@ public class SnapHelperTests
         Assert.Equal(10000, rect.MicronsX);
         Assert.Equal(5000, rect.MicronsY);
     }
+
+    // ===== Формула привязки (перенесено из тестов документной библиотеки) =====
+
+    [Fact]
+    public void SnapX_ExactMultiple_ReturnsSame()
+    {
+        var result = SnapHelper.SnapX(10000, 5000);
+        Assert.Equal(10000, result);
+    }
+
+    [Fact]
+    public void SnapX_Halfway_RoundsUp()
+    {
+        var result = SnapHelper.SnapX(7500, 5000);
+        Assert.Equal(10000, result);
+    }
+
+    [Fact]
+    public void SnapX_BelowHalfway_RoundsDown()
+    {
+        var result = SnapHelper.SnapX(7400, 5000);
+        Assert.Equal(5000, result);
+    }
+
+    [Fact]
+    public void SnapX_Zero_ReturnsZero()
+    {
+        var result = SnapHelper.SnapX(0, 5000);
+        Assert.Equal(0, result);
+    }
+
+    [Fact]
+    public void SnapX_Negative_RoundsCorrectly()
+    {
+        // -2600 + 2500 = -100 / 5000 = 0 → 0
+        var result = SnapHelper.SnapX(-2600, 5000);
+        Assert.Equal(0, result);
+        // -7600 + 2500 = -5100 / 5000 = -1 → -5000
+        var result2 = SnapHelper.SnapX(-7600, 5000);
+        Assert.Equal(-5000, result2);
+    }
+
+    [Fact]
+    public void SnapToGrid_SnapsBothCoordinates()
+    {
+        var point = new PointMicrons(7500, 7400);
+        var snapped = SnapHelper.SnapToGrid(point, 5000);
+        Assert.Equal(10000, snapped.MicronsX);
+        Assert.Equal(5000, snapped.MicronsY);
+    }
 }

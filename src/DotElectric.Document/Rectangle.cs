@@ -105,7 +105,7 @@ public partial class Rectangle : TemplateObjectBase
 
     public override bool ContainsPoint(PointMicrons point)
     {
-        long tol = PhysicalConstants.LineHitToleranceMicrons;
+        long tol = DocumentConstants.LineHitToleranceMicrons;
 
         bool insideExpanded = point.MicronsX >= MicronsX - tol &&
                               point.MicronsX <= RightMicronsX + tol &&

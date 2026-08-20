@@ -34,15 +34,6 @@ public class PointMicronsTests
     }
 
     [Fact]
-    public void SnapToGrid_SnapsBothCoordinates()
-    {
-        var point = new PointMicrons(7500, 7400);
-        var snapped = point.SnapToGrid(5000);
-        Assert.Equal(10000, snapped.MicronsX);
-        Assert.Equal(5000, snapped.MicronsY);
-    }
-
-    [Fact]
     public void DistanceTo_SamePoint_ReturnsZero()
     {
         var a = new PointMicrons(1000, 2000);

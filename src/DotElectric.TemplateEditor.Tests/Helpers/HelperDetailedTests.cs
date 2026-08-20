@@ -61,7 +61,7 @@ public class SnapHelperAdditionalTests
     public void SnapToGrid_SnapsToNearest(long value, long step, long expected)
     {
         var point = new PointMicrons(value, 0);
-        var snapped = point.SnapToGrid(step);
+        var snapped = SnapHelper.SnapToGrid(point, step);
         Assert.Equal(expected, snapped.MicronsX);
     }
 
@@ -69,7 +69,7 @@ public class SnapHelperAdditionalTests
     public void SnapToGrid_NegativeCoordinates_SnapsCorrectly()
     {
         var point = new PointMicrons(-1000, -3000);
-        var snapped = point.SnapToGrid(5000);
+        var snapped = SnapHelper.SnapToGrid(point, 5000);
         Assert.Equal(0, snapped.MicronsX);
         Assert.True(snapped.MicronsY <= 0);
     }

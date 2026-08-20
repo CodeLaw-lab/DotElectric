@@ -1,3 +1,4 @@
+using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
 
 namespace DotElectric.TemplateEditor.Tests.Models;
@@ -118,7 +119,7 @@ public class PointMicronsExtendedTests
     public void SnapToGrid_ReturnsSnappedPoint()
     {
         var point = new PointMicrons(7500, 12500);
-        var snapped = point.SnapToGrid(5000);
+        var snapped = SnapHelper.SnapToGrid(point, 5000);
 
         Assert.Equal(10000, snapped.MicronsX);
         Assert.True(snapped.MicronsY >= 10000 && snapped.MicronsY <= 15000);

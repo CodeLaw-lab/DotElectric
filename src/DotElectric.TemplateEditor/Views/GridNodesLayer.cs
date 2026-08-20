@@ -106,7 +106,7 @@ public sealed class GridNodesLayer : FrameworkElement
 
         var brush = NodeColor ?? _themeBrush;
         var radius = Math.Max(0.5, NodeSize / 2.0);
-        var invMicronsPerMm = 1.0 / 1000.0;
+        var invMicronsPerMm = 1.0 / Coordinate.MicronsPerMm;
         var heightMm = SheetHeightMm;
 
         foreach (var node in _nodes)

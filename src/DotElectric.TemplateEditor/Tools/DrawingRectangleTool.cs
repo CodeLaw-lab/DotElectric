@@ -65,8 +65,8 @@ public sealed class DrawingRectangleTool : ITool
             var sheetH = _context.Template.Sheet.HeightMicrons;
             var x = Math.Clamp(rect.MicronsX, 0, sheetW);
             var y = Math.Clamp(rect.MicronsY, 0, sheetH);
-            var w = Math.Max(PhysicalConstants.MinResizeSizeMicrons, Math.Min(rect.WidthMicrons, sheetW - x));
-            var h = Math.Max(PhysicalConstants.MinResizeSizeMicrons, Math.Min(rect.HeightMicrons, sheetH - y));
+            var w = Math.Max(EditorSettings.MinResizeSizeMicrons, Math.Min(rect.WidthMicrons, sheetW - x));
+            var h = Math.Max(EditorSettings.MinResizeSizeMicrons, Math.Min(rect.HeightMicrons, sheetH - y));
 
             // Если minSize вытолкнул правый/верхний край за границу — сдвинуть позицию
             if (x + w > sheetW) x = sheetW - w;

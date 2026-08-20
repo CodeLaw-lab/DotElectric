@@ -1,3 +1,5 @@
+using DotElectric.TemplateEditor.Constants;
+
 namespace DotElectric.TemplateEditor.Helpers;
 
 /// <summary>
@@ -18,8 +20,8 @@ public static class ValidationService
     {
         if (value <= 0)
             return $"Размер должен быть положительным (текущий: {Coordinate.FormatMm(value)}).";
-        if (value < PhysicalConstants.MinDimensionMicrons)
-            return $"Минимальный размер — 0.4 мм ({PhysicalConstants.MinDimensionMicrons} микрон).";
+        if (value < EditorSettings.MinDimensionMicrons)
+            return $"Минимальный размер — 0.4 мм ({EditorSettings.MinDimensionMicrons} микрон).";
         return null;
     }
 
@@ -34,8 +36,8 @@ public static class ValidationService
     {
         if (fontSizeMicrons <= 0)
             return $"Размер шрифта должен быть положительным (текущий: {Coordinate.FormatMm(fontSizeMicrons)}).";
-        if (fontSizeMicrons < PhysicalConstants.MinFontSizeMicrons)
-            return $"Минимальный размер шрифта — 1 мм ({PhysicalConstants.MinFontSizeMicrons} микрон).";
+        if (fontSizeMicrons < EditorSettings.MinFontSizeMicrons)
+            return $"Минимальный размер шрифта — 1 мм ({EditorSettings.MinFontSizeMicrons} микрон).";
         return null;
     }
 

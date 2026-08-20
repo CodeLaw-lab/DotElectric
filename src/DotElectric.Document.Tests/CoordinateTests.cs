@@ -80,47 +80,6 @@ public class CoordinateTests
         Assert.Equal(original, back);
     }
 
-    // ===== SnapToGrid =====
-
-    [Fact]
-    public void SnapToGrid_ExactMultiple_ReturnsSame()
-    {
-        var result = Coordinate.SnapToGrid(10000, 5000);
-        Assert.Equal(10000, result);
-    }
-
-    [Fact]
-    public void SnapToGrid_Halfway_RoundsUp()
-    {
-        var result = Coordinate.SnapToGrid(7500, 5000);
-        Assert.Equal(10000, result);
-    }
-
-    [Fact]
-    public void SnapToGrid_BelowHalfway_RoundsDown()
-    {
-        var result = Coordinate.SnapToGrid(7400, 5000);
-        Assert.Equal(5000, result);
-    }
-
-    [Fact]
-    public void SnapToGrid_Zero_ReturnsZero()
-    {
-        var result = Coordinate.SnapToGrid(0, 5000);
-        Assert.Equal(0, result);
-    }
-
-    [Fact]
-    public void SnapToGrid_Negative_RoundsCorrectly()
-    {
-        // -2600 + 2500 = -100 / 5000 = 0 → 0
-        var result = Coordinate.SnapToGrid(-2600, 5000);
-        Assert.Equal(0, result);
-        // -7600 + 2500 = -5100 / 5000 = -1 → -5000
-        var result2 = Coordinate.SnapToGrid(-7600, 5000);
-        Assert.Equal(-5000, result2);
-    }
-
     // ===== FormatMm =====
 
     [Fact]

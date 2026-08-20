@@ -47,16 +47,6 @@ public readonly struct PointMicrons
         => new(Coordinate.ToMicrons(mmX), Coordinate.ToMicrons(mmY));
 
     /// <summary>
-    /// Привязка точки к сетке.
-    /// </summary>
-    /// <param name="stepMicrons">Шаг сетки в микронах.</param>
-    /// <returns>Новая точка, привязанная к сетке.</returns>
-    public PointMicrons SnapToGrid(long stepMicrons)
-        => new(
-            Coordinate.SnapToGrid(MicronsX, stepMicrons),
-            Coordinate.SnapToGrid(MicronsY, stepMicrons));
-
-    /// <summary>
     /// Расстояние до другой точки (в микронах).
     /// </summary>
     public long DistanceTo(PointMicrons other)
