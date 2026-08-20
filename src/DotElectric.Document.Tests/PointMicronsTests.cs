@@ -153,4 +153,63 @@ public class PointMicronsTests
         var copy = point;
         Assert.Equal(point.MicronsX, copy.MicronsX);
     }
+
+    // ===== Перенесено из PointMicronsExtendedTests (приложение) =====
+
+    [Fact]
+    public void Constructor_SetsCoordinates()
+    {
+        var point = new PointMicrons(1000, 2000);
+        Assert.Equal(1000, point.MicronsX);
+        Assert.Equal(2000, point.MicronsY);
+    }
+
+    [Fact]
+    public void FromMm_CreatesFromMillimeters()
+    {
+        var point = PointMicrons.FromMm(5.0, 3.5);
+        Assert.Equal(5000, point.MicronsX);
+        Assert.Equal(3500, point.MicronsY);
+    }
+
+    [Fact]
+    public void FromMm_Negative_CreatesCorrectly()
+    {
+        var point = PointMicrons.FromMm(-1.0, -2.5);
+        Assert.Equal(-1000, point.MicronsX);
+        Assert.Equal(-2500, point.MicronsY);
+    }
+
+    [Fact]
+    public void DistanceTo_CalculatesCorrectly()
+    {
+        var p1 = new PointMicrons(0, 0);
+        var p2 = new PointMicrons(3000, 4000);
+
+        var distance = p1.DistanceTo(p2);
+        Assert.Equal(5000.0, distance, 1); // 3-4-5 triangle
+    }
+
+    [Fact]
+    public void DistanceTo_SamePoint_ReturnsZero_WithTolerance()
+    {
+        var p1 = new PointMicrons(1000, 2000);
+        var p2 = new PointMicrons(1000, 2000);
+
+        Assert.Equal(0.0, p1.DistanceTo(p2), 0.001);
+    }
+
+    [Fact]
+    public void X_ReturnsMmValue_FiveMm()
+    {
+        var point = new PointMicrons(5000, 0);
+        Assert.Equal(5.0, point.X, 0.001);
+    }
+
+    [Fact]
+    public void Y_ReturnsMmValue_ThreePointFiveMm()
+    {
+        var point = new PointMicrons(0, 3500);
+        Assert.Equal(3.5, point.Y, 0.001);
+    }
 }

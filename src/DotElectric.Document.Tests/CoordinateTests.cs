@@ -181,4 +181,70 @@ public class CoordinateTests
         var deserialized = Coordinate.DeserializeMicrons(serialized);
         Assert.Equal(original, deserialized);
     }
+
+    // ===== Перенесено из CoordinateExtendedTests (приложение) =====
+
+    [Theory]
+    [InlineData(0L)]
+    [InlineData(1000L)]
+    [InlineData(5500L)]
+    [InlineData(-2500L)]
+    public void FormatMm_FormatsValue(long microns)
+    {
+        var result = Coordinate.FormatMm(microns);
+        Assert.NotEmpty(result);
+        // Should be parseable back
+        var parsed = Coordinate.ParseMm(result);
+        Assert.Equal(microns, parsed);
+    }
+
+    [Theory]
+    [InlineData("0.0", 0L)]
+    [InlineData("1.0", 1000L)]
+    [InlineData("5.5", 5500L)]
+    [InlineData("-2.5", -2500L)]
+    public void ParseMm_ParsesCorrectly(string input, long expected)
+    {
+        var result = Coordinate.ParseMm(input);
+        Assert.Equal(expected, result);
+    }
+
+    [Theory]
+    [InlineData(1.234, 1234L)]
+    [InlineData(10.5, 10500L)]
+    [InlineData(-0.5, -500L)]
+    public void ToMicrons_FromMmValue_ReturnsMicrons(double mmValue, long expected)
+    {
+        var result = Coordinate.ToMicrons(mmValue);
+        Assert.Equal(expected, result);
+    }
+
+    [Fact]
+    public void ToMicrons_ZeroDouble_ReturnsZero()
+    {
+        var result = Coordinate.ToMicrons(0.0);
+        Assert.Equal(0L, result);
+    }
+
+    [Fact]
+    public void SerializeMicrons_ReturnsString()
+    {
+        var result = Coordinate.SerializeMicrons(5000);
+        Assert.Equal("5000", result);
+    }
+
+    [Fact]
+    public void DeserializeMicrons_ParsesLong()
+    {
+        var result = Coordinate.DeserializeMicrons("5000");
+        Assert.Equal(5000L, result);
+    }
+
+    [Fact]
+    public void ToMm_ConvertsCorrectly()
+    {
+        Assert.Equal(1.0, Coordinate.ToMm(1000), 10);
+        Assert.Equal(5.5, Coordinate.ToMm(5500), 10);
+        Assert.Equal(0.001, Coordinate.ToMm(1), 10);
+    }
 }
