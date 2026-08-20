@@ -1,13 +1,13 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2630, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2617, 0 сбоев, 1 предопределённый skip
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 90.34% line-rate (CI gate 80%)
-**Последнее обновление:** 19.08.2026 — Кандидат 6 обзора №4 (#118, тикет #119, PR #121): TextGeometry — геометрия повёрнутого текста из модели; WPF-знание (~60% класса `Text`) вынесено в статический модуль `TextGeometry` (Helpers); модель — тонкие делегации (XAML маркеров 0 изменений); мёртвые `Visual*`×4 и `RotationAngleValid` удалены; print-дефект обзора проверен и не подтвердился; поведение байт-в-байт, coverage 90.34%
+**Покрытие:** 91.11% line-rate (CI gate 80%)
+**Последнее обновление:** 20.08.2026 — Кандидат 1 обзора №5 (#137, тикет #138, PR #140): документ без редактора — библиотека `DotElectric.Document` перестала нести знание редактора: `PhysicalConstants` → `DocumentConstants` (только допуск хита тела), 6 констант взаимодействия в `EditorSettings`, привязка к сетке — только `SnapHelper` (приватное ядро), дубль `MicronsPerMm` устранён; поведение байт-в-байт, coverage 91.11%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
-[![Coverage](https://img.shields.io/badge/coverage-90%25-green)](https://github.com/anomalyco/dotelectric/actions)
+[![Coverage](https://img.shields.io/badge/coverage-91%25-green)](https://github.com/anomalyco/dotelectric/actions)
 
 ---
 
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2630 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2617 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -245,9 +245,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2630 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 90.34% line-rate (CI gate 80%)
+- ✅ **2617 тестов**, 0 сбоев, 1 предопределённый skip
+- ✅ **Покрытие:** 91.11% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#137–#138:** Кандидат 1 обзора №5 — документ без редактора: `PhysicalConstants` → `DocumentConstants` (только допуск хита тела), 6 констант взаимодействия в `EditorSettings`, привязка к сетке вне библиотеки (только `SnapHelper`), дубль `MicronsPerMm` устранён, поведение байт-в-байт
 - ✅ **#108–#109:** Кандидат 8 обзора №4 — мёртвые швы deletion sweep: удалены callback-параметры ZoomPanManager, мёртвые зависимости EditorViewModel (`_templateService`, `_gridNodeGenerator`-поле), ITextToolSettings, DI-регистрация IFontMetrics, 4 конвертера без биндингов, ValidateRotation; ресурсы конвертеров — каждый класс ровно один раз в корневом словаре; контракт Автосохранения типизирован (механизм сохранён), поведение байт-в-байт
 - ✅ **#103–#104:** Кандидат 4 обзора №4 — раскладка маркеров один модуль MarkerLayout: каталог/позиции/hit с допуском #82/классификация/курсоры; HitTestHelper — хит по телу, ResizeMath — чистая математика, ResizeTool — единственный ResizeState, IEditorContext 26→25, поведение байт-в-байт
 - ✅ **#98–#99:** Кандидат 3 обзора №4 — CommandHistory единолично владеет грязностью: Push/Undo/Redo стреляют markDirty, команды делегат не носят, компенсация в VM удалена, IEditorContext 27→26, поведение байт-в-байт
@@ -416,7 +417,7 @@ src/
 
 ---
 
-**Последнее обновление:** 19.08.2026 — Кандидат 6 обзора №4 (#118, тикет #119, PR #121): TextGeometry — геометрия повёрнутого текста из модели. WPF-знание о геометрии повёрнутого текста (~60% класса `Text`: LayoutTransform-offset, повёрнутые углы, contains/bounding box при повороте) вынесено в статический модуль `TextGeometry` (Helpers: `LayoutOffset`/`Corner`/`Contains`/`BoundingBox`) — единственный носитель формул поворота; модель `Text` — тонкие делегации (8 свойств углов для XAML маркеров + полиморфные contains/bounding box; INPC-проводка на модели; 393 → 217 строк); мёртвые швы удалены (`Visual*`×4 с INPC-обвязкой — 0 потребителей, `RotationAngleValid` — тавтология); 12 геометрических тестов мигрированы в `TextGeometryTests` (offset-тесты — прямым вызовом `LayoutOffset`), `RotatedCorners_AllLieOnBoundingBoxEdges` остался пином XAML-поверхности; print-дефект обзора («повёрнутый текст смещён в print preview») проверен на коде и не подтвердился — печать и канвас компенсируются WPF-раскладкой одинаково (фикс кандидата 1); XAML и все потребители — 0 изменений; поведение байт-в-байт; coverage 90.34% (2630 тестов)
+**Последнее обновление:** 20.08.2026 — Кандидат 1 обзора №5 (#137, тикет #138, PR #140): документ без редактора. Библиотека `DotElectric.Document` перестала нести знание редактора: `PhysicalConstants` переименован в `DocumentConstants` и несёт только `LineHitToleranceMicrons` (единственная константа, которую читает сам документ — попадание в тело линии/прямоугольника); шесть констант взаимодействия (`HandleHitToleranceMicrons`, `SelectionBoxThresholdMicrons`, `MinResizeSizeMicrons`, `MinFontSizeMicrons`, `MinDimensionMicrons`, `MaxCustomSheetSizeMm`) перенесены в `EditorSettings` (секция Interaction, имена и значения сохранены); привязка к сетке удалена из библиотеки целиком (`Coordinate.SnapToGrid`, `PointMicrons.SnapToGrid`) — формула живёт приватным скалярным ядром в `SnapHelper` (публичная поверхность без изменений, семантика исключения побайтно); дубль `MicronsPerMm` устранён (потребители на `Coordinate.MicronsPerMm`); комментарий `Template.Sheet` без имени потребителя из приложения; 6 тестов формулы переехали из `DotElectric.Document.Tests` в `SnapHelperTests`; поведение байт-в-байт (XAML — 0 изменений); coverage 91.11% (2617 тестов)
 
 
 

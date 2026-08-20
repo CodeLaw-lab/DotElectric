@@ -42,31 +42,34 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 src/
 ├── DotElectric.TemplateEditor/          # Main WPF application
 │   ├── Commands/                        # Undo/Redo commands
-│   ├── Constants/                       # PhysicalConstants, EditorSettings
+│   ├── Constants/                       # EditorSettings (interaction constants included)
 │   ├── Converters/                      # Value converters (26 files)
 │   ├── Helpers/                         # Utility classes
-│   ├── Models/                          # Domain models (microns)
-│   │   └── Objects/                     # TemplateObjectBase, Rectangle, Line, Text
+│   ├── Models/                          # App models (GridSettings, AppSettings, Grid)
 │   ├── Services/                        # File, Settings, Autosave, Print
 │   ├── Tools/                           # State pattern tools
 │   ├── ViewModels/                      # MVVM ViewModels
 │   │   └── Managers/                    # 9 managers (ZoomPan, Selection, Clipboard, ToolRegistry, Preview, InlineEdit, StatusBar, Grid, DirtyState)
 │   ├── Behaviors/                       # Attached behaviors (EditorCanvas, PreviewLine, TabItem, TextBox, ComboBox, ZoomCombo)
 │   └── Messages/                        # WeakReferenceMessenger сообщения
-└── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2630 tests, 1 pre-existing skip)
+├── DotElectric.Document/                # Document model library (objects, metadata, .tdel serialization, validation, DocumentConstants) — no editor knowledge
+├── DotElectric.Sheets/                  # Sheet formats library (SheetFormatCatalog, isolated, no dependencies)
+├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2617 tests, 1 pre-existing skip)
+├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document
+└── DotElectric.Sheets.Tests/            # xUnit v3 tests for DotElectric.Sheets
 ```
 
 ### Coding Standards
 - Use `long` for all coordinates (microns), never `double`
 - Follow C# naming conventions (`TemplateObjectBase`, not `ITemplateObject`)
-- Use `PhysicalConstants` and `EditorSettings` for all thresholds and limits
+- Use `DocumentConstants` (DotElectric.Document) and `EditorSettings` for all thresholds and limits (criterion: constants live in the assembly that reads them)
 - MVVM: ViewModels should not know about WPF types
 - Commands implement `DotElectric.TemplateEditor.Commands.IUndoCommand` (NOT `System.Windows.Input.ICommand`)
 - All DI services are Singleton; use `IEditorViewModelFactory` for EditorViewModel
 
 ### Testing
 - xUnit v3 with Moq
-- Target coverage: ≥80% line-rate (CI gate, actual 90.34%)
+- Target coverage: ≥80% line-rate (CI gate, actual 91.11%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
@@ -84,7 +87,7 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/):
 ```
 feat: add symbol editor panel
 fix: correct line hit-testing tolerance
-refactor: extract magic numbers to PhysicalConstants/EditorSettings
+refactor: extract magic numbers to DocumentConstants/EditorSettings
 docs: update AGENTS.md with Sprint 29 metrics
 test: add ChangePropertyCommand tests
 ```
