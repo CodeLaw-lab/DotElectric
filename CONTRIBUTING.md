@@ -18,14 +18,14 @@ dotnet build src/DotElectric.TemplateEditor.slnx
 # Run application
 dotnet run --project src/DotElectric.TemplateEditor
 
-# Run all tests
-dotnet test src/DotElectric.TemplateEditor.Tests
+# Run all tests (все три тестовых проекта)
+dotnet test src/DotElectric.TemplateEditor.slnx
 
 # Run single test
-dotnet test src/DotElectric.TemplateEditor.Tests --filter "FullyQualifiedName~YourTestName"
+dotnet test src/DotElectric.TemplateEditor.slnx --filter "FullyQualifiedName~YourTestName"
 
 # Run tests with coverage
-dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
+dotnet test src/DotElectric.TemplateEditor.slnx --collect:"XPlat Code Coverage"
 ```
 
 ## Architecture
@@ -54,9 +54,9 @@ src/
 │   └── Messages/                        # WeakReferenceMessenger сообщения
 ├── DotElectric.Document/                # Document model library (objects, metadata, .tdel serialization, validation, DocumentConstants) — no editor knowledge
 ├── DotElectric.Sheets/                  # Sheet formats library (SheetFormatCatalog, isolated, no dependencies)
-├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2252 tests)
-├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document (268 tests, 1 pre-existing skip)
-└── DotElectric.Sheets.Tests/            # xUnit v3 tests for DotElectric.Sheets (97 tests)
+├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2085 tests)
+├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document (401 tests)
+└── DotElectric.Sheets.Tests/            # xUnit v3 tests for DotElectric.Sheets (127 tests)
 ```
 
 ### Coding Standards
@@ -69,6 +69,7 @@ src/
 
 ### Testing
 - xUnit v3 with Moq
+- Tests live with the code: библиотечные типы (`DotElectric.Document`, `DotElectric.Sheets`) тестируются в проектах библиотек, поведение редактора — в app-проекте (единственное пересечение — `IntegrationTests.cs`)
 - Target coverage: ≥80% line-rate (CI gate, actual 91.13%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)

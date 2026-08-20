@@ -2,5 +2,5 @@ line-rate: 0.9113
 branch-rate: 0.8524
 date: 2026-08-20
 tests: 2613
-commit: e9c56ee
+commit: d212ce9
 threshold: 80.0
