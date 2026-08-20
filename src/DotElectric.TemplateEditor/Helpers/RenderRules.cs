@@ -1,7 +1,6 @@
 using System.Windows;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Helpers;
 

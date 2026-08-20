@@ -21,6 +21,7 @@ TestResults/
 coverage/
 *.cobertura.xml
 *.trx
+.reporttools/
 
 ## opencode (dependencies and pipeline temp files)
 .opencode/node_modules/

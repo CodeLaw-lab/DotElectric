@@ -1,7 +1,6 @@
 using System.IO;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 
 namespace DotElectric.TemplateEditor.Tests.Models;
@@ -17,7 +16,6 @@ public class TemplateTests
         Assert.NotNull(template.Sheet);
         Assert.NotNull(template.Objects);
         Assert.Equal("1.0", template.Version);
-        Assert.NotNull(template.DefaultGrid);
     }
 
     [Fact]
@@ -30,13 +28,6 @@ public class TemplateTests
         Assert.Same(metadata, template.Metadata);
         Assert.Same(sheet, template.Sheet);
         Assert.NotNull(template.Objects);
-    }
-
-    [Fact]
-    public void DefaultGrid_IsSingleton5mm()
-    {
-        var template = new Template();
-        Assert.Equal(5000, template.DefaultGrid.StepMicrons);
     }
 
     [Fact]
@@ -68,7 +59,6 @@ public class TemplateTests
         Assert.Equal("A3", template.Sheet.Format);
         Assert.NotNull(template.Metadata);
         Assert.NotNull(template.Objects);
-        Assert.NotNull(template.DefaultGrid);
     }
 
     [Fact]
@@ -81,21 +71,6 @@ public class TemplateTests
         Assert.Same(metadata, template.Metadata);
         Assert.Same(sheet, template.Sheet);
         Assert.Equal("1.0", template.Version);
-    }
-
-    [Fact]
-    public void DefaultGrid_IsSingleton()
-    {
-        var t1 = new Template();
-        var t2 = new Template();
-        Assert.Same(t1.DefaultGrid, t2.DefaultGrid);
-    }
-
-    [Fact]
-    public void DefaultGrid_Has5mmStep()
-    {
-        var template = new Template();
-        Assert.Equal(5000, template.DefaultGrid.StepMicrons);
     }
 
     [Fact]
@@ -192,10 +167,10 @@ public class TemplateTests
         Assert.NotSame(template.Sheet, clone.Sheet);
         Assert.NotSame(template.Objects, clone.Objects);
 
-        // Reflection: all public readable properties except DefaultGrid (singleton), Objects (checked separately),
+        // Reflection: all public readable properties except Objects (checked separately),
         // Metadata and Sheet (reference types without value equality — checked in detail below)
         var props = typeof(Template).GetProperties()
-            .Where(p => p.CanRead && p.Name != "DefaultGrid" && p.Name != "Objects" && p.Name != "Metadata" && p.Name != "Sheet");
+            .Where(p => p.CanRead && p.Name != "Objects" && p.Name != "Metadata" && p.Name != "Sheet");
         foreach (var prop in props)
         {
             var originalValue = prop.GetValue(template);
@@ -223,9 +198,6 @@ public class TemplateTests
         Assert.Equal(template.Sheet.WidthMicrons, clone.Sheet.WidthMicrons);
         Assert.Equal(template.Sheet.HeightMicrons, clone.Sheet.HeightMicrons);
         Assert.Equal(template.Sheet.Orientation, clone.Sheet.Orientation);
-
-        // DefaultGrid is singleton
-        Assert.Same(template.DefaultGrid, clone.DefaultGrid);
     }
 }
 

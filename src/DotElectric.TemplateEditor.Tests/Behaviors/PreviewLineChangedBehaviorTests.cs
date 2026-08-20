@@ -3,7 +3,6 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Behaviors;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tests.Helpers;
 using DotElectric.TemplateEditor.ViewModels;
@@ -90,7 +89,7 @@ public class PreviewLineChangedBehaviorTests
             double sheetHeightMm = 297.0;
 
             // Set up a valid preview line
-            editor.PreviewManager.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 1000,
+            editor.PreviewManager.PreviewLine = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 1000,
                 endMicronsX: 10000, endMicronsY: 2000,
                 strokeThicknessMicrons: 500);
 
@@ -343,7 +342,7 @@ public class PreviewLineChangedBehaviorTests
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
 
             // Set a preview line - this triggers PropertyChanged
-            editor.PreviewManager.PreviewLine = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            editor.PreviewManager.PreviewLine = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000,
                 strokeThicknessMicrons: 500);
 
@@ -364,7 +363,7 @@ public class PreviewLineChangedBehaviorTests
             var zoom = editor.ZoomPanManager.Zoom;
 
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
-            var preview = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            var preview = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000,
                 strokeThicknessMicrons: 500);
             editor.PreviewManager.PreviewLine = preview;
@@ -428,7 +427,7 @@ public class PreviewLineChangedBehaviorTests
             var editor = CreateEditorViewModel();
 
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
-            var preview = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            var preview = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000,
                 strokeThicknessMicrons: 500);
             editor.PreviewManager.PreviewLine = preview;
@@ -453,13 +452,13 @@ public class PreviewLineChangedBehaviorTests
             var editor = CreateEditorViewModel();
 
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
-            var first = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            var first = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000, strokeThicknessMicrons: 500);
             editor.PreviewManager.PreviewLine = first;
             Assert.Equal(Visibility.Visible, elements.LineElement.Visibility);
 
             // Swap на живой объект: старый отписывается, новый управляет элементом
-            var second = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            var second = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 20_000, endMicronsY: 20_000, strokeThicknessMicrons: 500);
             editor.PreviewManager.PreviewLine = second;
 
@@ -480,7 +479,7 @@ public class PreviewLineChangedBehaviorTests
             var editor = CreateEditorViewModel();
 
             PreviewLineChangedBehavior.RegisterCanvas(canvas, editor);
-            var line = new DotElectric.TemplateEditor.Models.Objects.Line(startMicronsX: 0, startMicronsY: 0,
+            var line = new DotElectric.Document.Line(startMicronsX: 0, startMicronsY: 0,
                 endMicronsX: 5000, endMicronsY: 5000, strokeThicknessMicrons: 500);
             var rect = new Rectangle(micronsX: 0, micronsY: 0, widthMicrons: 10_000, heightMicrons: 5_000, strokeThicknessMicrons: 500);
             var text = new Text(micronsX: 0, micronsY: 0, content: "До", fontSizeMicrons: 5000);

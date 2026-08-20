@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;

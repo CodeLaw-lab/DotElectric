@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using DotElectric.TemplateEditor.Commands;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tests.ViewModels;

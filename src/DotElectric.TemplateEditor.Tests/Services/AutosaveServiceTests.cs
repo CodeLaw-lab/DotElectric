@@ -1,7 +1,6 @@
 using System.IO;
 using DotElectric.TemplateEditor.Abstractions;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using Microsoft.Extensions.Logging;
 using Moq;

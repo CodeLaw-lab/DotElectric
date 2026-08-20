@@ -1,7 +1,6 @@
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using Xunit;
 
 namespace DotElectric.TemplateEditor.Tests.Helpers;

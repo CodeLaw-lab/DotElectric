@@ -1,6 +1,5 @@
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels.Managers;
 
 namespace DotElectric.TemplateEditor.Tests.ViewModels.Managers;

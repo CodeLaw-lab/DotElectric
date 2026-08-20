@@ -192,9 +192,9 @@ All agents MUST read this file before any code operation.
 - Нет циклических зависимостей
 
 ### 6.3 NO Static Services
-- `ValidationService` — injectable `IValidationService`/`ITemplateValidator` (через DI)
-- `FontMetrics` — `IFontMetrics` + `FontMetrics.Default` static instance
-- `EditorConstants` → `PhysicalConstants` + `EditorSettings`
+- `ValidationService` — проверки полей редактора; проверка цвета делегируется `HexColorValidation` (Document); контракты `IValidationService`/`ITemplateValidator` в Document
+- Метрики шрифта — read-only `IFontMetrics` (Document) + эмбиентный слот `FontMetricsProvider.Current` (ADR-0003); WPF-реализация `WpfFontMetrics` (Services) пишется в слот при старте
+- `EditorConstants` → `PhysicalConstants` + `EditorSettings` (редактор) и `DocumentDefaults` (Document)
 - WPF-диалоги: `IDialogFileService`/`WpfDialogFileService` для CI/testability
 
 ### 6.4 Dual-Write Prohibited

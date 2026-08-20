@@ -4,7 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:DotElectric.TemplateEditor.Views"
-             xmlns:models="clr-namespace:DotElectric.TemplateEditor.Models.Objects"
+             xmlns:models="clr-namespace:DotElectric.Document;assembly=DotElectric.Document"
              xmlns:coreModels="clr-namespace:DotElectric.TemplateEditor.Models"
              xmlns:behaviors="clr-namespace:DotElectric.TemplateEditor.Behaviors"
              xmlns:converters="clr-namespace:DotElectric.TemplateEditor.Converters"

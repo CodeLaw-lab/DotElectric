@@ -101,9 +101,12 @@ public partial class App : Application
 
             await _host.StartAsync();
 
-            // FontMetrics: загрузка метрик шрифтов GOST из TTF-ресурсов
-            FontMetrics.Default.Initialize();
-            Log.Information("FontMetrics инициализирована: {Initialized}", FontMetrics.Default.IsInitialized);
+            // WpfFontMetrics: загрузка метрик шрифтов GOST из TTF-ресурсов.
+            // WPF-реализация записывается в эмбиентный слот документной библиотеки (ADR-0003),
+            // чтобы модель текста читала метрики без зависимости от WPF.
+            WpfFontMetrics.Default.Initialize();
+            FontMetricsProvider.SetCurrent(WpfFontMetrics.Default);
+            Log.Information("WpfFontMetrics инициализирована: {Initialized}", WpfFontMetrics.Default.IsInitialized);
 
             // Глобальные обработчики исключений
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;

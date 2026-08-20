@@ -1,7 +1,6 @@
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tools;
@@ -44,7 +43,7 @@ public sealed class TextTool : ITool
             _fontSizeMicrons,
             _font,
             _textType,
-            foreground: EditorSettings.DefaultTextForeground);
+            foreground: DocumentDefaults.DefaultTextForeground);
     }
 
     public void OnMouseMove(PointMicrons modelPoint, ToolMouseButton button, ToolModifiers modifiers)
@@ -73,7 +72,7 @@ public sealed class TextTool : ITool
                 preview.FontSizeMicrons,
                 preview.FontName,
                 preview.TextType,
-                foreground: EditorSettings.DefaultTextForeground);
+                foreground: DocumentDefaults.DefaultTextForeground);
 
             var cmd = new Commands.AddObjectCommand(_context.Template.Objects, text);
             _context.CommandHistory.Push(cmd);

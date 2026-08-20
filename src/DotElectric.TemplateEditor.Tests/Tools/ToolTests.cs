@@ -3,7 +3,6 @@ using System.Windows.Input;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tools;
 using DotElectric.TemplateEditor.ViewModels;
@@ -1202,7 +1201,7 @@ public class TextToolTests
         tool.OnMouseUp(new PointMicrons(0, 0), ToolMouseButton.Left, ToolModifiers.None);
 
         var text = (Text)vm.Template.Objects[0];
-        Assert.Equal(DotElectric.TemplateEditor.Constants.EditorSettings.DefaultFontSizeMicrons, text.FontSizeMicrons);
+        Assert.Equal(DocumentDefaults.DefaultFontSizeMicrons, text.FontSizeMicrons);
     }
 
     [Fact]
@@ -1443,7 +1442,7 @@ public class SelectToolDragTests
         // Текст перемещён на 10мм, размер не изменён
         Assert.Equal(placePoint.MicronsX + 10_000, textObj.MicronsX);
         Assert.Equal(placePoint.MicronsY, textObj.MicronsY);
-        Assert.Equal(EditorSettings.DefaultFontSizeMicrons, textObj.FontSizeMicrons);
+        Assert.Equal(DocumentDefaults.DefaultFontSizeMicrons, textObj.FontSizeMicrons);
     }
 
     [Fact]
@@ -1481,7 +1480,7 @@ public class SelectToolDragTests
     {
         var vm = CreateViewModel();
 
-        var text = new Text(100_000, 100_000, "Текст", EditorSettings.DefaultFontSizeMicrons, "ГОСТ А");
+        var text = new Text(100_000, 100_000, "Текст", DocumentDefaults.DefaultFontSizeMicrons, "ГОСТ А");
         vm.Template.Objects.Add(text);
         vm.SelectSingle(text);
 

@@ -1,7 +1,6 @@
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Tools;
@@ -34,7 +33,7 @@ public sealed class DrawingLineTool : ITool
         _previewLine = new Line(
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY,
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY,
-            _lineType, strokeColor: EditorSettings.DefaultStrokeColor);
+            _lineType, strokeColor: DocumentDefaults.DefaultStrokeColor);
         _context.PreviewManager.PreviewLine = _previewLine;
     }
 
@@ -67,7 +66,7 @@ public sealed class DrawingLineTool : ITool
             var endX = _context.ClampX(end.MicronsX);
             var endY = _context.ClampY(end.MicronsY);
 
-            var line = new Line(startX, startY, endX, endY, _lineType, strokeColor: EditorSettings.DefaultStrokeColor);
+            var line = new Line(startX, startY, endX, endY, _lineType, strokeColor: DocumentDefaults.DefaultStrokeColor);
 
             var cmd = new Commands.AddObjectCommand(_context.Template.Objects, line);
             _context.CommandHistory.Push(cmd);

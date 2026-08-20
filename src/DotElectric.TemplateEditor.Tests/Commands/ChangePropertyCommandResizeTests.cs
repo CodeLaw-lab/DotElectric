@@ -1,5 +1,4 @@
 using DotElectric.TemplateEditor.Commands;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Tests.Commands;
 

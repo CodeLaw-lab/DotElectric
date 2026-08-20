@@ -1,7 +1,6 @@
 using CommunityToolkit.Mvvm.Input;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.ViewModels;
 

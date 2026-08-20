@@ -5,7 +5,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Behaviors;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tests.Helpers;
 using DotElectric.TemplateEditor.Tools;

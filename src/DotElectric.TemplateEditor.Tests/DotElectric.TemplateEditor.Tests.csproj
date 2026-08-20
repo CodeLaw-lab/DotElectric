@@ -20,6 +20,8 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="DotElectric.Document" />
+    <Using Include="DotElectric.Sheets" />
   </ItemGroup>
 
   <ItemGroup>

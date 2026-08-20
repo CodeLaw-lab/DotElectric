@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Commands;
 

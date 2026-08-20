@@ -3,7 +3,6 @@ using System.Windows;
 using System.Windows.Data;
 using DotElectric.TemplateEditor.Converters;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Tests.Converters;
 
