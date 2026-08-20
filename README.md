@@ -1,10 +1,10 @@
 # DotElectric Template Editor
 
 **Статус:** ✅ Этап 1 ЗАВЕРШЁН (все 44 FR выполнены)
-**Тестов:** 2617, 0 сбоев, 1 предопределённый skip
+**Тестов:** 2613, 0 сбоев, 0 пропусков
 **Сборка:** 0 errors, 0 warnings
-**Покрытие:** 91.11% line-rate (CI gate 80%)
-**Последнее обновление:** 20.08.2026 — Кандидат 1 обзора №5 (#137, тикет #138, PR #140): документ без редактора — библиотека `DotElectric.Document` перестала нести знание редактора: `PhysicalConstants` → `DocumentConstants` (только допуск хита тела), 6 констант взаимодействия в `EditorSettings`, привязка к сетке — только `SnapHelper` (приватное ядро), дубль `MicronsPerMm` устранён; поведение байт-в-байт, coverage 91.11%
+**Покрытие:** 91.13% line-rate (CI gate 80%)
+**Последнее обновление:** 20.08.2026 — Кандидат 3 обзора №5 (#142, тикет #143, PR #145): один шов проверки документа — обёртка `ITemplateService.Validate` удалена (интерфейс 5→4 члена), `TabOperationsService` инжектит `ITemplateValidator` напрямую (фильтр «только Error» + формат в потребителе, побайтно), цепочка цвета сокращена (`HexColorValidation` напрямую, `IValidationService` сохранён); поведение байт-в-байт, coverage 91.13%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
 [![Coverage](https://img.shields.io/badge/coverage-91%25-green)](https://github.com/anomalyco/dotelectric/actions)
@@ -28,7 +28,7 @@ DotElectric — собственная CAD-система для электри�
 
 | Этап | Название | Статус | Срок |
 |------|----------|--------|------|
-| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2617 тестов, 100%) | Q2 2026 |
+| **1** | Редактор шаблонов листов | ✅ ЗАВЕРШЁН (2613 тестов, 100%) | Q2 2026 |
 | **2** | Редактор УГО | ⚪ Запланирован | Q3 2026 |
 | **3** | Работа с БД компонентов | ⚪ Запланирован | Q4 2026 |
 | **4** | Главный редактор схем | ⚪ Запланирован | Q1 2027 |
@@ -248,9 +248,10 @@ dotnet test src/DotElectric.TemplateEditor.Tests --collect:"XPlat Code Coverage"
 
 ### Тестирование
 
-- ✅ **2617 тестов**, 0 сбоев, 1 предопределённый skip
-- ✅ **Покрытие:** 91.11% line-rate (CI gate 80%)
+- ✅ **2613 тестов**, 0 сбоев, 0 пропусков
+- ✅ **Покрытие:** 91.13% line-rate (CI gate 80%)
 - ✅ **Сборка:** 0 errors, 0 warnings
+- ✅ **#142–#143:** Кандидат 3 обзора №5 — один шов проверки документа: обёртка `ITemplateService.Validate` удалена (интерфейс 5→4 члена), `TabOperationsService` инжектит `ITemplateValidator` напрямую (фильтр «только Error» + формат в потребителе, побайтно), цепочка цвета сокращена (`HexColorValidation` напрямую, `IValidationService` сохранён), поведение байт-в-байт
 - ✅ **#137–#138:** Кандидат 1 обзора №5 — документ без редактора: `PhysicalConstants` → `DocumentConstants` (только допуск хита тела), 6 констант взаимодействия в `EditorSettings`, привязка к сетке вне библиотеки (только `SnapHelper`), дубль `MicronsPerMm` устранён, поведение байт-в-байт
 - ✅ **#108–#109:** Кандидат 8 обзора №4 — мёртвые швы deletion sweep: удалены callback-параметры ZoomPanManager, мёртвые зависимости EditorViewModel (`_templateService`, `_gridNodeGenerator`-поле), ITextToolSettings, DI-регистрация IFontMetrics, 4 конвертера без биндингов, ValidateRotation; ресурсы конвертеров — каждый класс ровно один раз в корневом словаре; контракт Автосохранения типизирован (механизм сохранён), поведение байт-в-байт
 - ✅ **#103–#104:** Кандидат 4 обзора №4 — раскладка маркеров один модуль MarkerLayout: каталог/позиции/hit с допуском #82/классификация/курсоры; HitTestHelper — хит по телу, ResizeMath — чистая математика, ResizeTool — единственный ResizeState, IEditorContext 26→25, поведение байт-в-байт
@@ -420,7 +421,7 @@ src/
 
 ---
 
-**Последнее обновление:** 20.08.2026 — Кандидат 1 обзора №5 (#137, тикет #138, PR #140): документ без редактора. Библиотека `DotElectric.Document` перестала нести знание редактора: `PhysicalConstants` переименован в `DocumentConstants` и несёт только `LineHitToleranceMicrons` (единственная константа, которую читает сам документ — попадание в тело линии/прямоугольника); шесть констант взаимодействия (`HandleHitToleranceMicrons`, `SelectionBoxThresholdMicrons`, `MinResizeSizeMicrons`, `MinFontSizeMicrons`, `MinDimensionMicrons`, `MaxCustomSheetSizeMm`) перенесены в `EditorSettings` (секция Interaction, имена и значения сохранены); привязка к сетке удалена из библиотеки целиком (`Coordinate.SnapToGrid`, `PointMicrons.SnapToGrid`) — формула живёт приватным скалярным ядром в `SnapHelper` (публичная поверхность без изменений, семантика исключения побайтно); дубль `MicronsPerMm` устранён (потребители на `Coordinate.MicronsPerMm`); комментарий `Template.Sheet` без имени потребителя из приложения; 6 тестов формулы переехали из `DotElectric.Document.Tests` в `SnapHelperTests`; поведение байт-в-байт (XAML — 0 изменений); coverage 91.11% (2617 тестов)
+**Последнее обновление:** 20.08.2026 — Кандидат 3 обзора №5 (#142, тикет #143, PR #145): один шов проверки документа. Проверка документа выставлена одним швом: обёртка `ITemplateService.Validate(Template) → IEnumerable<string>` (побайтный дубль `ValidationError.ToString()`, спрятанный фильтр серьёзности, мёртвая null-ветка) удалена из интерфейса (5 → 4 члена) и из `TemplateService`; единственный потребитель `TabOperationsService` инжектит `ITemplateValidator` напрямую — фильтр «в диалог только `Error`» и склейка сообщений (`ToString()` через `\n`) в потребителе побайтно; цепочка цвета сокращена: поле-посредник `ValidationService.Default` и обёртка `ValidationService.ValidateHexColor` удалены (DI регистрирует `HexColorValidation.Default` напрямую, три панели свойств вызывают `HexColorValidation.Validate`), `IValidationService` сохранён (шов конструктора `TemplateValidator`); документация приведена к поведению (XML-комментарий `ValidationSeverity.Error`, статья «Правила проверки документа» в CONTEXT.md); 6 тестов удалённой обёртки удалены (включая единственный пропуск набора), путь сохранения на моке валидатора + пин-тест «предупреждения не показывают диалог»; поведение байт-в-байт (XAML — 0 изменений); coverage 91.13% (2613 тестов)
 
 
 
