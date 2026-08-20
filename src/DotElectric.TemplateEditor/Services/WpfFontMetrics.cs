@@ -1,11 +1,11 @@
 using System.Windows.Media;
 using Serilog;
 
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.TemplateEditor.Services;
 
-public sealed class FontMetrics : IFontMetrics
+public sealed class WpfFontMetrics : IFontMetrics
 {
-    public static readonly FontMetrics Default = new();
+    public static readonly WpfFontMetrics Default = new();
 
     private static readonly IReadOnlyList<int> SampleChars = Enumerable.Range('A', 26)
         .Concat(Enumerable.Range('a', 26))

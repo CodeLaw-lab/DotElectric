@@ -1,20 +1,20 @@
-using DotElectric.TemplateEditor.Models;
+using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tests.Helpers;
 using Moq;
 
-namespace DotElectric.TemplateEditor.Tests.Models;
+namespace DotElectric.TemplateEditor.Tests.Services;
 
 [Collection("FontMetrics")]
 public class FontMetricsTests : IDisposable
 {
     public FontMetricsTests()
     {
-        FontMetrics.Default.Reset();
+        WpfFontMetrics.Default.Reset();
     }
 
     public void Dispose()
     {
-        FontMetrics.Default.Reset();
+        WpfFontMetrics.Default.Reset();
     }
 
     // ---- Default state (no initialization) ----
@@ -22,32 +22,32 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void IsInitialized_Default_False()
     {
-        Assert.False(FontMetrics.Default.IsInitialized);
+        Assert.False(WpfFontMetrics.Default.IsInitialized);
     }
 
     [Fact]
     public void GetHeightRatio_Default_ReturnsFallbackOne()
     {
-        Assert.Equal(1.0, FontMetrics.Default.GetHeightRatio("ГОСТ А"));
-        Assert.Equal(1.0, FontMetrics.Default.GetHeightRatio("ГОСТ Б"));
+        Assert.Equal(1.0, WpfFontMetrics.Default.GetHeightRatio("ГОСТ А"));
+        Assert.Equal(1.0, WpfFontMetrics.Default.GetHeightRatio("ГОСТ Б"));
     }
 
     [Fact]
     public void GetAdvWidthRatio_Default_GostA_ReturnsHeuristic()
     {
-        Assert.Equal(0.5, FontMetrics.Default.GetAdvWidthRatio("ГОСТ А"));
+        Assert.Equal(0.5, WpfFontMetrics.Default.GetAdvWidthRatio("ГОСТ А"));
     }
 
     [Fact]
     public void GetAdvWidthRatio_Default_GostB_ReturnsHeuristic()
     {
-        Assert.Equal(0.65, FontMetrics.Default.GetAdvWidthRatio("ГОСТ Б"));
+        Assert.Equal(0.65, WpfFontMetrics.Default.GetAdvWidthRatio("ГОСТ Б"));
     }
 
     [Fact]
     public void GetAdvWidthRatio_Default_Unknown_ReturnsDefaultFallback()
     {
-        Assert.Equal(0.6, FontMetrics.Default.GetAdvWidthRatio("Unknown"));
+        Assert.Equal(0.6, WpfFontMetrics.Default.GetAdvWidthRatio("Unknown"));
     }
 
     // ---- IFontMetrics contract (read-only) via mock ----
@@ -75,7 +75,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void FreshInstance_IsInitialized_False()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.False(fm.IsInitialized);
     }
@@ -83,7 +83,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void FreshInstance_GetHeightRatio_ReturnsFallbackOne()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ А"));
         Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ Б"));
@@ -92,7 +92,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void FreshInstance_GetAdvWidthRatio_GostA_ReturnsHeuristic()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"));
     }
@@ -100,7 +100,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void FreshInstance_GetAdvWidthRatio_GostB_ReturnsHeuristic()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(0.65, fm.GetAdvWidthRatio("ГОСТ Б"));
     }
@@ -108,7 +108,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void FreshInstance_GetAdvWidthRatio_Unknown_ReturnsDefaultFallback()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(0.6, fm.GetAdvWidthRatio("Unknown"));
     }
@@ -122,7 +122,7 @@ public class FontMetricsTests : IDisposable
     {
         WpfContext.Execute(() =>
         {
-            var fm = new FontMetrics();
+            var fm = new WpfFontMetrics();
             fm.Initialize();
 
             Assert.True(fm.IsInitialized);
@@ -137,7 +137,7 @@ public class FontMetricsTests : IDisposable
     {
         WpfContext.Execute(() =>
         {
-            var fm = new FontMetrics();
+            var fm = new WpfFontMetrics();
 
             fm.Initialize();
             fm.Initialize();
@@ -154,7 +154,7 @@ public class FontMetricsTests : IDisposable
     {
         WpfContext.Execute(() =>
         {
-            var fm = new FontMetrics();
+            var fm = new WpfFontMetrics();
             fm.Initialize();
             Assert.True(fm.IsInitialized);
 
@@ -169,7 +169,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void Reset_FreshInstance_NoOp()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
         Assert.False(fm.IsInitialized);
 
         fm.Reset();
@@ -182,8 +182,8 @@ public class FontMetricsTests : IDisposable
     {
         WpfContext.Execute(() =>
         {
-            var fm = new FontMetrics();
-            var method = typeof(FontMetrics).GetMethod(
+            var fm = new WpfFontMetrics();
+            var method = typeof(WpfFontMetrics).GetMethod(
                 "LoadFont", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
             method!.Invoke(fm, new object[] { "Тест", "NonExistentFamily", 0.7, 0.4 });
@@ -198,7 +198,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetHeightRatio_UnknownFontName_ReturnsFallbackOne()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(1.0, fm.GetHeightRatio("NonExistentFont"));
         Assert.Equal(1.0, fm.GetHeightRatio("SomeRandomFont"));
@@ -207,7 +207,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetAdvWidthRatio_UnknownFontName_ReturnsDefaultFallback()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(0.6, fm.GetAdvWidthRatio("SomeRandomFont"));
     }
@@ -217,7 +217,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetHeightRatio_Null_ThrowsArgumentNullException()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Throws<ArgumentNullException>(() => fm.GetHeightRatio(null!));
     }
@@ -225,7 +225,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetHeightRatio_EmptyString_ReturnsFallbackOne()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(1.0, fm.GetHeightRatio(""));
     }
@@ -233,7 +233,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetAdvWidthRatio_Null_ThrowsArgumentNullException()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Throws<ArgumentNullException>(() => fm.GetAdvWidthRatio(null!));
     }
@@ -241,7 +241,7 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void GetAdvWidthRatio_EmptyString_ReturnsDefaultFallback()
     {
-        var fm = new FontMetrics();
+        var fm = new WpfFontMetrics();
 
         Assert.Equal(0.6, fm.GetAdvWidthRatio(""));
     }
@@ -262,7 +262,7 @@ public class FontMetricsTests : IDisposable
             [2] = 400
         };
 
-        var result = FontMetrics.ComputeAverageAdvanceWidth(
+        var result = WpfFontMetrics.ComputeAverageAdvanceWidth(
             charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
 
         Assert.Equal(300.0, result);
@@ -281,7 +281,7 @@ public class FontMetricsTests : IDisposable
             [2] = 400
         };
 
-        var result = FontMetrics.ComputeAverageAdvanceWidth(
+        var result = WpfFontMetrics.ComputeAverageAdvanceWidth(
             charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
 
         Assert.Equal(200.0, result);
@@ -300,7 +300,7 @@ public class FontMetricsTests : IDisposable
             [1] = 200 // для glyph 2 ширины нет
         };
 
-        var result = FontMetrics.ComputeAverageAdvanceWidth(
+        var result = WpfFontMetrics.ComputeAverageAdvanceWidth(
             charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
 
         Assert.Equal(200.0, result);
@@ -316,7 +316,7 @@ public class FontMetricsTests : IDisposable
             [2] = 400
         };
 
-        var result = FontMetrics.ComputeAverageAdvanceWidth(
+        var result = WpfFontMetrics.ComputeAverageAdvanceWidth(
             charToGlyphMap, advanceWidths, new[] { 65, 66 }, fallbackWidth: 100.0);
 
         Assert.Equal(100.0, result);
@@ -325,8 +325,8 @@ public class FontMetricsTests : IDisposable
     [Fact]
     public void HandleFallbackWithLog_AppliesDefaultRatios_NoThrow()
     {
-        var fm = new FontMetrics();
-        var method = typeof(FontMetrics).GetMethod(
+        var fm = new WpfFontMetrics();
+        var method = typeof(WpfFontMetrics).GetMethod(
             "HandleFallbackWithLog",
             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
 
