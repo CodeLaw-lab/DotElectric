@@ -1,8 +1,6 @@
-using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Services;
 using Moq;
 
-namespace DotElectric.TemplateEditor.Tests.Services;
+namespace DotElectric.Document.Tests;
 
 public class TemplateServiceTests
 {
