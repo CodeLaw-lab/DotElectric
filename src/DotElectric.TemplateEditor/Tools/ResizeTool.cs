@@ -116,7 +116,7 @@ public sealed class ResizeTool : ITool
             snapEnabled, stepMicrons,
             _context.Template.Sheet.WidthMicrons,
             _context.Template.Sheet.HeightMicrons,
-            PhysicalConstants.MinResizeSizeMicrons);
+            EditorSettings.MinResizeSizeMicrons);
 
         rect.MicronsX = newX;
         rect.MicronsY = newY;
@@ -135,7 +135,7 @@ public sealed class ResizeTool : ITool
             snapEnabled, stepMicrons,
             _context.Template.Sheet.WidthMicrons,
             _context.Template.Sheet.HeightMicrons,
-            PhysicalConstants.MinFontSizeMicrons,
+            EditorSettings.MinFontSizeMicrons,
             text.RotationAngle);
 
         text.MicronsX = newX;

@@ -28,4 +28,12 @@ public static class EditorSettings
 
     // Autosave
     public const int AutosaveCleanupDays = 7;
+
+    // Interaction
+    public const long HandleHitToleranceMicrons = 8000;
+    public const long SelectionBoxThresholdMicrons = 3000;
+    public const long MinResizeSizeMicrons = 1000;
+    public const long MinFontSizeMicrons = 1000;
+    public const long MinDimensionMicrons = 400;
+    public const long MaxCustomSheetSizeMm = 2000;
 }

@@ -36,20 +36,6 @@ public static class Coordinate
         => microns / (double)MicronsPerMm;
 
     /// <summary>
-    /// Привязка значения к ближайшему шагу сетки.
-    /// </summary>
-    /// <param name="microns">Значение в микронах.</param>
-    /// <param name="stepMicrons">Шаг сетки в микронах.</param>
-    /// <returns>Ближайшее кратное шагу сетки.</returns>
-    public static long SnapToGrid(long microns, long stepMicrons)
-    {
-        if (stepMicrons <= 0)
-            throw new ArgumentOutOfRangeException(nameof(stepMicrons), "Шаг сетки должен быть положительным.");
-
-        return ((microns + stepMicrons / 2) / stepMicrons) * stepMicrons;
-    }
-
-    /// <summary>
     /// Форматирование значения в мм для отображения (без лишних нулей).
     /// </summary>
     /// <param name="microns">Значение в микронах.</param>

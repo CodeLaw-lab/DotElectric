@@ -81,7 +81,7 @@ public partial class Line : TemplateObjectBase
             point,
             new PointMicrons(StartMicronsX, StartMicronsY),
             new PointMicrons(EndMicronsX, EndMicronsY));
-        return distance <= PhysicalConstants.LineHitToleranceMicrons;
+        return distance <= DocumentConstants.LineHitToleranceMicrons;
     }
 
     public override RectMicrons GetBoundingBox()

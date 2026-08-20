@@ -6,6 +6,8 @@ namespace DotElectric.TemplateEditor.Helpers;
 /// <summary>
 /// Утилиты для привязки точек и размеров к сетке.
 /// Все операции работают с микронными координатами (long).
+/// Привязка к сетке — понятие редактора, а не документа:
+/// формула округления живёт только здесь.
 /// </summary>
 public static class SnapHelper
 {
@@ -18,8 +20,8 @@ public static class SnapHelper
     public static PointMicrons SnapToGrid(PointMicrons point, long stepMicrons)
     {
         return new PointMicrons(
-            Coordinate.SnapToGrid(point.MicronsX, stepMicrons),
-            Coordinate.SnapToGrid(point.MicronsY, stepMicrons));
+            Snap(point.MicronsX, stepMicrons),
+            Snap(point.MicronsY, stepMicrons));
     }
 
     /// <summary>
@@ -30,7 +32,7 @@ public static class SnapHelper
     /// <returns>Привязанная координата X.</returns>
     public static long SnapX(long micronsX, long stepMicrons)
     {
-        return Coordinate.SnapToGrid(micronsX, stepMicrons);
+        return Snap(micronsX, stepMicrons);
     }
 
     /// <summary>
@@ -38,10 +40,10 @@ public static class SnapHelper
     /// </summary>
     /// <param name="micronsY">Координата Y в микронах.</param>
     /// <param name="stepMicrons">Шаг сетки в микронах.</param>
-    /// <returns>Привязанная координата Y.</param>
+    /// <returns>Привязанная координата Y.</returns>
     public static long SnapY(long micronsY, long stepMicrons)
     {
-        return Coordinate.SnapToGrid(micronsY, stepMicrons);
+        return Snap(micronsY, stepMicrons);
     }
 
     /// <summary>
@@ -52,7 +54,7 @@ public static class SnapHelper
     /// <returns>Привязанный размер (неотрицательный).</returns>
     public static long SnapSize(long sizeMicrons, long stepMicrons)
     {
-        var snapped = Coordinate.SnapToGrid(sizeMicrons, stepMicrons);
+        var snapped = Snap(sizeMicrons, stepMicrons);
         return Math.Max(0, snapped);
     }
 
@@ -63,8 +65,8 @@ public static class SnapHelper
     /// <param name="stepMicrons">Шаг сетки в микронах.</param>
     public static void SnapObject(TemplateObjectBase obj, long stepMicrons)
     {
-        var snappedX = Coordinate.SnapToGrid(obj.MicronsX, stepMicrons);
-        var snappedY = Coordinate.SnapToGrid(obj.MicronsY, stepMicrons);
+        var snappedX = Snap(obj.MicronsX, stepMicrons);
+        var snappedY = Snap(obj.MicronsY, stepMicrons);
         obj.Move(snappedX, snappedY);
     }
 
@@ -78,8 +80,22 @@ public static class SnapHelper
     {
         if (gridSettings.Enabled && gridSettings.SnapEnabled)
         {
-            return point.SnapToGrid(gridSettings.StepMicrons);
+            return SnapToGrid(point, gridSettings.StepMicrons);
         }
         return point;
+    }
+
+    /// <summary>
+    /// Привязка значения к ближайшему шагу сетки.
+    /// </summary>
+    /// <param name="microns">Значение в микронах.</param>
+    /// <param name="stepMicrons">Шаг сетки в микронах.</param>
+    /// <returns>Ближайшее кратное шагу сетки.</returns>
+    private static long Snap(long microns, long stepMicrons)
+    {
+        if (stepMicrons <= 0)
+            throw new ArgumentOutOfRangeException(nameof(stepMicrons), "Шаг сетки должен быть положительным.");
+
+        return ((microns + stepMicrons / 2) / stepMicrons) * stepMicrons;
     }
 }

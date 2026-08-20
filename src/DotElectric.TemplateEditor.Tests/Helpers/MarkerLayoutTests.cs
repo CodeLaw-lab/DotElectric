@@ -256,7 +256,7 @@ public class MarkerLayoutTests : IDisposable
     {
         var rect = new Rectangle(0, 0, 50000, 50000); // minDim/3 = 16.7мм > 8мм
 
-        Assert.Equal(PhysicalConstants.HandleHitToleranceMicrons, MarkerLayout.GetTolerance(rect));
+        Assert.Equal(EditorSettings.HandleHitToleranceMicrons, MarkerLayout.GetTolerance(rect));
     }
 
     [Fact]
@@ -265,7 +265,7 @@ public class MarkerLayoutTests : IDisposable
         var text = new Text(0, 0, "Текст", 2500, "ГОСТ А");
         var expected = Math.Min(text.WidthMicrons, text.HeightMicrons) / 3;
 
-        Assert.True(expected < PhysicalConstants.HandleHitToleranceMicrons);
+        Assert.True(expected < EditorSettings.HandleHitToleranceMicrons);
         Assert.Equal(expected, MarkerLayout.GetTolerance(text));
     }
 

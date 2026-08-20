@@ -157,7 +157,7 @@ public sealed class SelectTool : ITool
             var distance = Math.Sqrt(dx * dx + dy * dy);
 
             // Показываем рамку только если отрисовали хотя бы 3мм
-            if (distance >= PhysicalConstants.SelectionBoxThresholdMicrons)
+            if (distance >= EditorSettings.SelectionBoxThresholdMicrons)
             {
                 var left = Math.Min(_selectionBoxStart.MicronsX, modelPoint.MicronsX);
                 var bottom = Math.Min(_selectionBoxStart.MicronsY, modelPoint.MicronsY);
@@ -180,7 +180,7 @@ public sealed class SelectTool : ITool
         var dragDistance = Math.Sqrt(deltaDragX * deltaDragX + deltaDragY * deltaDragY);
 
         // Threshold: 3мм модели, но не меньше 1мм на экране
-        var thresholdMicrons = Math.Max(PhysicalConstants.SelectionBoxThresholdMicrons, (long)(PhysicalConstants.SelectionBoxThresholdMicrons / _context.Zoom));
+        var thresholdMicrons = Math.Max(EditorSettings.SelectionBoxThresholdMicrons, (long)(EditorSettings.SelectionBoxThresholdMicrons / _context.Zoom));
 
         if (dragDistance < thresholdMicrons)
             return;
@@ -226,7 +226,7 @@ public sealed class SelectTool : ITool
             var distance = Math.Sqrt(dx * dx + dy * dy);
 
             // Если рамка была достаточно большой — выделяем объекты
-            if (distance >= PhysicalConstants.SelectionBoxThresholdMicrons)
+            if (distance >= EditorSettings.SelectionBoxThresholdMicrons)
             {
                 var selectionBox = new RectMicrons(
                     Math.Min(_selectionBoxStart.MicronsX, modelPoint.MicronsX),

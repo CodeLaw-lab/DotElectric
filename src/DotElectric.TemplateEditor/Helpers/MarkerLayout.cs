@@ -142,7 +142,7 @@ public static class MarkerLayout
             Text text => Math.Min(text.WidthMicrons, text.HeightMicrons),
             _ => throw UnknownObject(obj)
         };
-        return Math.Min(PhysicalConstants.HandleHitToleranceMicrons, minDim / 3);
+        return Math.Min(EditorSettings.HandleHitToleranceMicrons, minDim / 3);
     }
 
     /// <summary>Маркер на левой стороне объекта (левое ребро или угол при ней).</summary>

@@ -73,7 +73,7 @@ public sealed class GridSettings
     {
         if (settings == null) throw new ArgumentNullException(nameof(settings));
 
-        var stepMicrons = (long)(settings.GridStepMm * PhysicalConstants.MicronsPerMm);
+        var stepMicrons = (long)(settings.GridStepMm * Coordinate.MicronsPerMm);
         if (stepMicrons < MinStepMicrons) // < 1 мкм
             stepMicrons = Grid.Default.StepMicrons; // fallback 5 мм
 

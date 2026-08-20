@@ -25,7 +25,7 @@ public partial class CustomSheetDialogViewModel : ObservableObject, ICustomSheet
     /// <summary>
     /// Можно ли подтвердить (ширина и высота > 0).
     /// </summary>
-    public bool CanConfirm => WidthMm > 0 && HeightMm > 0 && WidthMm <= PhysicalConstants.MaxCustomSheetSizeMm && HeightMm <= PhysicalConstants.MaxCustomSheetSizeMm;
+    public bool CanConfirm => WidthMm > 0 && HeightMm > 0 && WidthMm <= EditorSettings.MaxCustomSheetSizeMm && HeightMm <= EditorSettings.MaxCustomSheetSizeMm;
 
     /// <summary>
     /// Заголовок окна.
