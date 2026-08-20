@@ -1,7 +1,6 @@
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 
 
@@ -34,8 +33,8 @@ public sealed class DrawingRectangleTool : ITool
         _startPoint = SnapHelper.SnapIfEnabled(modelPoint, _context.GridSettings);
         _previewRect = new Rectangle(
             _startPoint.Value.MicronsX, _startPoint.Value.MicronsY, 0, 0, _lineType,
-            strokeColor: EditorSettings.DefaultStrokeColor,
-            fillColor: EditorSettings.DefaultFillColor);
+            strokeColor: DocumentDefaults.DefaultStrokeColor,
+            fillColor: DocumentDefaults.DefaultFillColor);
         _context.PreviewManager.PreviewRectangle = _previewRect;
     }
 
@@ -173,7 +172,7 @@ public sealed class DrawingRectangleTool : ITool
         }
 
         return new Rectangle(x, y, w, h, lineType,
-            strokeColor: EditorSettings.DefaultStrokeColor,
-            fillColor: EditorSettings.DefaultFillColor);
+            strokeColor: DocumentDefaults.DefaultStrokeColor,
+            fillColor: DocumentDefaults.DefaultFillColor);
     }
 }

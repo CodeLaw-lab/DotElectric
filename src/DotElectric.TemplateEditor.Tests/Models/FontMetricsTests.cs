@@ -50,33 +50,7 @@ public class FontMetricsTests : IDisposable
         Assert.Equal(0.6, FontMetrics.Default.GetAdvWidthRatio("Unknown"));
     }
 
-    // ---- After InitializeWithTestValues ----
-
-    [Fact]
-    public void GetHeightRatio_AfterInit_ReturnsSetValue()
-    {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
-
-        Assert.Equal(1.1719, FontMetrics.Default.GetHeightRatio("ГОСТ Б"), precision: 4);
-    }
-
-    [Fact]
-    public void GetAdvWidthRatio_AfterInit_ReturnsSetValue()
-    {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
-
-        Assert.Equal(0.55, FontMetrics.Default.GetAdvWidthRatio("ГОСТ Б"), precision: 4);
-    }
-
-    [Fact]
-    public void GetHeightRatio_AfterInit_UnknownFont_ReturnsFallback()
-    {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
-
-        Assert.Equal(1.0, FontMetrics.Default.GetHeightRatio("NonExistent"));
-    }
-
-    // ---- IFontMetrics interface via mock ----
+    // ---- IFontMetrics contract (read-only) via mock ----
 
     [Fact]
     public void IFontMetrics_Mock_CanSetupGetHeightRatio()
@@ -94,45 +68,6 @@ public class FontMetricsTests : IDisposable
         mock.Setup(m => m.GetAdvWidthRatio("ГОСТ Б")).Returns(0.75);
 
         Assert.Equal(0.75, mock.Object.GetAdvWidthRatio("ГОСТ Б"));
-    }
-
-    [Fact]
-    public void IFontMetrics_Mock_IsInitialized_DefaultFalse()
-    {
-        var mock = new Mock<IFontMetrics>();
-        mock.Setup(m => m.IsInitialized).Returns(false);
-
-        Assert.False(mock.Object.IsInitialized);
-    }
-
-    [Fact]
-    public void IFontMetrics_Mock_CanVerifyInitializeCalled()
-    {
-        var mock = new Mock<IFontMetrics>(MockBehavior.Loose);
-
-        mock.Object.Initialize();
-
-        mock.Verify(m => m.Initialize(), Times.Once);
-    }
-
-    [Fact]
-    public void IFontMetrics_Mock_CanVerifyResetCalled()
-    {
-        var mock = new Mock<IFontMetrics>(MockBehavior.Loose);
-
-        mock.Object.Reset();
-
-        mock.Verify(m => m.Reset(), Times.Once);
-    }
-
-    [Fact]
-    public void IFontMetrics_Mock_CanVerifyInitializeWithTestValuesCalled()
-    {
-        var mock = new Mock<IFontMetrics>(MockBehavior.Loose);
-
-        mock.Object.InitializeWithTestValues(1.0, 0.5, "ГОСТ А");
-
-        mock.Verify(m => m.InitializeWithTestValues(1.0, 0.5, "ГОСТ А"), Times.Once);
     }
 
     // ---- Fresh instance (non-Default singleton) ----
@@ -176,70 +111,6 @@ public class FontMetricsTests : IDisposable
         var fm = new FontMetrics();
 
         Assert.Equal(0.6, fm.GetAdvWidthRatio("Unknown"));
-    }
-
-    // ---- Multiple font types with InitializeWithTestValues ----
-
-    [Fact]
-    public void InitializeWithTestValues_MultipleFonts_BothAccessible()
-    {
-        var fm = new FontMetrics();
-        fm.InitializeWithTestValues(1.1, 0.5, "ГОСТ А");
-        fm.InitializeWithTestValues(1.2, 0.65, "ГОСТ Б");
-
-        Assert.Equal(1.1, fm.GetHeightRatio("ГОСТ А"), precision: 4);
-        Assert.Equal(1.2, fm.GetHeightRatio("ГОСТ Б"), precision: 4);
-        Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"), precision: 4);
-        Assert.Equal(0.65, fm.GetAdvWidthRatio("ГОСТ Б"), precision: 4);
-    }
-
-    [Fact]
-    public void InitializeWithTestValues_Reinitialize_OverwritesValues()
-    {
-        var fm = new FontMetrics();
-        fm.InitializeWithTestValues(1.1, 0.5, "ГОСТ А");
-        fm.InitializeWithTestValues(2.2, 0.75, "ГОСТ А");
-
-        Assert.Equal(2.2, fm.GetHeightRatio("ГОСТ А"), precision: 4);
-        Assert.Equal(0.75, fm.GetAdvWidthRatio("ГОСТ А"), precision: 4);
-    }
-
-    // ---- IsInitialized after InitializeWithTestValues ----
-
-    [Fact]
-    public void IsInitialized_AfterInitializeWithTestValues_True()
-    {
-        var fm = new FontMetrics();
-        fm.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
-
-        Assert.True(fm.IsInitialized);
-    }
-
-    // ---- Reset after initialization ----
-
-    [Fact]
-    public void Reset_AfterInitialize_ClearsState()
-    {
-        var fm = new FontMetrics();
-        fm.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
-        Assert.True(fm.IsInitialized);
-
-        fm.Reset();
-
-        Assert.False(fm.IsInitialized);
-        Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ Б"));
-        Assert.Equal(0.65, fm.GetAdvWidthRatio("ГОСТ Б"));
-    }
-
-    [Fact]
-    public void Reset_FreshInstance_NoOp()
-    {
-        var fm = new FontMetrics();
-        Assert.False(fm.IsInitialized);
-
-        fm.Reset();
-
-        Assert.False(fm.IsInitialized);
     }
 
     // ---- Initialize() real path (fallbacks in testhost; real TTF loading is
@@ -293,6 +164,17 @@ public class FontMetricsTests : IDisposable
             Assert.Equal(1.0, fm.GetHeightRatio("ГОСТ А"));
             Assert.Equal(0.5, fm.GetAdvWidthRatio("ГОСТ А"));
         });
+    }
+
+    [Fact]
+    public void Reset_FreshInstance_NoOp()
+    {
+        var fm = new FontMetrics();
+        Assert.False(fm.IsInitialized);
+
+        fm.Reset();
+
+        Assert.False(fm.IsInitialized);
     }
 
     [Fact]

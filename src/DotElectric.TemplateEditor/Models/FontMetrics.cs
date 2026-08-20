@@ -104,13 +104,6 @@ public sealed class FontMetrics : IFontMetrics
         }
     }
 
-    public void InitializeWithTestValues(double heightRatio, double advWidthRatio, string fontName)
-    {
-        _heightRatios[fontName] = heightRatio;
-        _widthRatios[fontName] = advWidthRatio;
-        _initialized = true;
-    }
-
     public double GetHeightRatio(string fontName)
     {
         if (_heightRatios.TryGetValue(fontName, out var ratio))

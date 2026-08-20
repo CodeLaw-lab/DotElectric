@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Models.Objects;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Тип текста в шаблоне.

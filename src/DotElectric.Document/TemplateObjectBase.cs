@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
 
-namespace DotElectric.TemplateEditor.Models.Objects;
+namespace DotElectric.Document;
 
 public abstract partial class TemplateObjectBase : ObservableObject
 {

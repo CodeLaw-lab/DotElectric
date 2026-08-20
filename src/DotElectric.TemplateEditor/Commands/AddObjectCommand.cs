@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Commands;
 

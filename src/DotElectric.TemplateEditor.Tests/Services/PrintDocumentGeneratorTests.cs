@@ -3,11 +3,10 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Tests.Helpers;
-using ModelLine = DotElectric.TemplateEditor.Models.Objects.Line;
-using ModelRect = DotElectric.TemplateEditor.Models.Objects.Rectangle;
+using ModelLine = DotElectric.Document.Line;
+using ModelRect = DotElectric.Document.Rectangle;
 using WpfRectangle = System.Windows.Shapes.Rectangle;
 
 namespace DotElectric.TemplateEditor.Tests.Services;

@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
 
-namespace DotElectric.TemplateEditor.Models.Objects;
+namespace DotElectric.Document;
 
 public partial class Line : TemplateObjectBase
 {
@@ -19,13 +17,13 @@ public partial class Line : TemplateObjectBase
     private long _endMicronsY;
 
     [ObservableProperty]
-    private long _strokeThicknessMicrons = EditorSettings.DefaultStrokeThicknessMicrons;
+    private long _strokeThicknessMicrons = DocumentDefaults.DefaultStrokeThicknessMicrons;
 
     [ObservableProperty]
     private LineType _lineType;
 
     [ObservableProperty]
-    private string _strokeColor = EditorSettings.DefaultStrokeColor;
+    private string _strokeColor = DocumentDefaults.DefaultStrokeColor;
 
     public override long MicronsX
     {
@@ -46,7 +44,7 @@ public partial class Line : TemplateObjectBase
 
     public Line(long startMicronsX, long startMicronsY, long endMicronsX, long endMicronsY,
         LineType lineType = LineType.Solid,
-        long strokeThicknessMicrons = EditorSettings.DefaultStrokeThicknessMicrons,
+        long strokeThicknessMicrons = DocumentDefaults.DefaultStrokeThicknessMicrons,
         string? strokeColor = null) : this()
     {
         StartMicronsX = startMicronsX;
@@ -55,7 +53,7 @@ public partial class Line : TemplateObjectBase
         EndMicronsY = endMicronsY;
         LineType = lineType;
         StrokeThicknessMicrons = strokeThicknessMicrons;
-        StrokeColor = strokeColor ?? EditorSettings.DefaultStrokeColor;
+        StrokeColor = strokeColor ?? DocumentDefaults.DefaultStrokeColor;
     }
 
     public override void Move(long micronsX, long micronsY)

@@ -2,7 +2,6 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.ViewModels;
 

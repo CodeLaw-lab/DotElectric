@@ -1,7 +1,6 @@
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
 

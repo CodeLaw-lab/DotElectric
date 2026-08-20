@@ -1,6 +1,5 @@
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Tools;
 
 namespace DotElectric.TemplateEditor.Helpers;

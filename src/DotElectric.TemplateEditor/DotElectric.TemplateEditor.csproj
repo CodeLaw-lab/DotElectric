@@ -10,10 +10,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DotElectric.Document\DotElectric.Document.csproj" />
     <ProjectReference Include="..\DotElectric.Sheets\DotElectric.Sheets.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="DotElectric.Document" />
     <Using Include="DotElectric.Sheets" />
   </ItemGroup>
 

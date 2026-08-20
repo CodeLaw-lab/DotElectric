@@ -1,7 +1,6 @@
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using Moq;
 
 namespace DotElectric.TemplateEditor.Tests.Helpers;

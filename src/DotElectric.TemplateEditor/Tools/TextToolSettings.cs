@@ -1,5 +1,4 @@
 using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Tools;
 
@@ -9,7 +8,7 @@ namespace DotElectric.TemplateEditor.Tools;
 public sealed class TextToolSettings
 {
     public TextType DefaultTextType => TextType.Text;
-    public long DefaultFontSizeMicrons => EditorSettings.DefaultFontSizeMicrons;
-    public string DefaultFont => EditorSettings.DefaultFontName;
+    public long DefaultFontSizeMicrons => DocumentDefaults.DefaultFontSizeMicrons;
+    public string DefaultFont => DocumentDefaults.DefaultFontName;
     public string DefaultContent => "Текст";
 }

@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Immutable-структура для хранения пары координат в микронах.

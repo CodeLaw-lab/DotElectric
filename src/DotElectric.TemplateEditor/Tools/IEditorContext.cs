@@ -2,7 +2,6 @@ using System.Collections.ObjectModel;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels.Managers;
 
 namespace DotElectric.TemplateEditor.Tools;

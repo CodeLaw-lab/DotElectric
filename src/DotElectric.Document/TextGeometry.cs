@@ -1,7 +1,4 @@
-using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
-
-namespace DotElectric.TemplateEditor.Helpers;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Геометрия повёрнутого текста. WPF LayoutTransform позиционирует повёрнутый элемент

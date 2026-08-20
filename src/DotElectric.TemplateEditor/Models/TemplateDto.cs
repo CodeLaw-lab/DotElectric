@@ -1,6 +1,5 @@
 using System.Xml.Serialization;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Services;
 

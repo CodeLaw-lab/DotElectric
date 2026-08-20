@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Метаданные шаблона (автор, даты, описание).

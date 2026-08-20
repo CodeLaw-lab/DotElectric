@@ -23,18 +23,6 @@ public static class EditorSettings
     // Undo/Redo
     public const int CommandHistoryMaxLevels = 50;
 
-    // Stroke
-    public const long DefaultStrokeThicknessMicrons = 500;
-
-    // Text
-    public const long DefaultFontSizeMicrons = 14000;
-    public const string DefaultFontName = "ГОСТ А";
-
-    // Colors
-    public const string DefaultStrokeColor = "#000000";
-    public const string DefaultFillColor = "Transparent";
-    public const string DefaultTextForeground = "#000000";
-
     // Timing
     public const int DoubleClickThresholdMs = 500;
 

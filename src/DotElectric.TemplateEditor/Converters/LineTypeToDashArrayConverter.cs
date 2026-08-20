@@ -1,7 +1,6 @@
 using System.Globalization;
 using System.Windows.Data;
 using DotElectric.TemplateEditor.Helpers;
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.Converters;
 

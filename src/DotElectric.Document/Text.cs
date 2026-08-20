@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
 
-namespace DotElectric.TemplateEditor.Models.Objects;
+namespace DotElectric.Document;
 
 public partial class Text : TemplateObjectBase
 {
@@ -59,7 +57,7 @@ public partial class Text : TemplateObjectBase
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WidthMicrons))]
-    private string _fontName = EditorSettings.DefaultFontName;
+    private string _fontName = DocumentDefaults.DefaultFontName;
 
     [ObservableProperty]
     private TextType _textType;
@@ -74,7 +72,7 @@ public partial class Text : TemplateObjectBase
     private string? _defaultValue;
 
     [ObservableProperty]
-    private string _foreground = EditorSettings.DefaultTextForeground;
+    private string _foreground = DocumentDefaults.DefaultTextForeground;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(WidthMicrons))]
@@ -109,7 +107,7 @@ public partial class Text : TemplateObjectBase
         get
         {
             var lc = LineCount;
-            var heightRatio = FontMetrics.Default.GetHeightRatio(FontName);
+            var heightRatio = FontMetricsProvider.Current.GetHeightRatio(FontName);
             if (lc <= 1) return (long)(FontSizeMicrons * heightRatio);
             return (long)(FontSizeMicrons * heightRatio * (1 + (lc - 1) * LineSpacingFactor));
         }
@@ -120,7 +118,7 @@ public partial class Text : TemplateObjectBase
         get
         {
             if (string.IsNullOrEmpty(Content)) return FontSizeMicrons;
-            var factor = FontMetrics.Default.GetAdvWidthRatio(FontName);
+            var factor = FontMetricsProvider.Current.GetAdvWidthRatio(FontName);
             var maxLen = Content.Split('\n').Max(l => l.Length);
             return (long)Math.Max(FontSizeMicrons, maxLen * FontSizeMicrons * factor);
         }
@@ -180,7 +178,7 @@ public partial class Text : TemplateObjectBase
         Key = key;
         IsEditable = isEditable;
         DefaultValue = defaultValue;
-        Foreground = foreground ?? EditorSettings.DefaultTextForeground;
+        Foreground = foreground ?? DocumentDefaults.DefaultTextForeground;
         TextWrapping = textWrapping;
         TextAlignment = textAlignment;
     }

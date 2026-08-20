@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Controls;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.ViewModels;
 using DotElectric.TemplateEditor.ViewModels.Managers;
 

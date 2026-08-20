@@ -1,8 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Constants;
-using DotElectric.TemplateEditor.Helpers;
 
-namespace DotElectric.TemplateEditor.Models.Objects;
+namespace DotElectric.Document;
 
 public partial class Rectangle : TemplateObjectBase
 {
@@ -20,16 +18,16 @@ public partial class Rectangle : TemplateObjectBase
     private long _heightMicrons;
 
     [ObservableProperty]
-    private long _strokeThicknessMicrons = EditorSettings.DefaultStrokeThicknessMicrons;
+    private long _strokeThicknessMicrons = DocumentDefaults.DefaultStrokeThicknessMicrons;
 
     [ObservableProperty]
     private LineType _lineType;
 
     [ObservableProperty]
-    private string _strokeColor = EditorSettings.DefaultStrokeColor;
+    private string _strokeColor = DocumentDefaults.DefaultStrokeColor;
 
     [ObservableProperty]
-    private string _fillColor = EditorSettings.DefaultFillColor;
+    private string _fillColor = DocumentDefaults.DefaultFillColor;
 
     public override long MicronsX
     {
@@ -74,7 +72,7 @@ public partial class Rectangle : TemplateObjectBase
 
     public Rectangle(long micronsX, long micronsY, long widthMicrons, long heightMicrons,
         LineType lineType = LineType.Solid,
-        long strokeThicknessMicrons = EditorSettings.DefaultStrokeThicknessMicrons,
+        long strokeThicknessMicrons = DocumentDefaults.DefaultStrokeThicknessMicrons,
         string? strokeColor = null, string? fillColor = null) : this()
     {
         if (widthMicrons < 0)
@@ -87,8 +85,8 @@ public partial class Rectangle : TemplateObjectBase
         HeightMicrons = heightMicrons;
         LineType = lineType;
         StrokeThicknessMicrons = strokeThicknessMicrons;
-        StrokeColor = strokeColor ?? EditorSettings.DefaultStrokeColor;
-        FillColor = fillColor ?? EditorSettings.DefaultFillColor;
+        StrokeColor = strokeColor ?? DocumentDefaults.DefaultStrokeColor;
+        FillColor = fillColor ?? DocumentDefaults.DefaultFillColor;
     }
 
     public override void Move(long micronsX, long micronsY)

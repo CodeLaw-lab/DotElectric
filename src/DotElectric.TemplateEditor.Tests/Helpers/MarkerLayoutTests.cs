@@ -1,7 +1,6 @@
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Tools;
 
 namespace DotElectric.TemplateEditor.Tests.Helpers;
@@ -11,12 +10,12 @@ public class MarkerLayoutTests : IDisposable
 {
     public MarkerLayoutTests()
     {
-        FontMetrics.Default.Reset();
+        FontMetricsProvider.Reset();
     }
 
     public void Dispose()
     {
-        FontMetrics.Default.Reset();
+        FontMetricsProvider.Reset();
     }
 
     // ===== Каталог маркеров =====
@@ -299,7 +298,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_0Deg_HitsCorner()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 0);
 
         // Bottom-left corner (RotatedCorner0) = (0, 0+HeightMicrons)
@@ -311,7 +310,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_90Deg_HitsCorner()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
 
         // RotatedCorner0 for 90° = (X, Y+H)
@@ -323,7 +322,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_180Deg_HitsCorner()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 180);
 
         var corner = new PointMicrons(text.RotatedCorner0X, text.RotatedCorner0Y);
@@ -334,7 +333,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_270Deg_HitsCorner()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 270);
 
         var corner = new PointMicrons(text.RotatedCorner0X, text.RotatedCorner0Y);
@@ -345,7 +344,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_90Deg_HitsAllFourCorners()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 90);
 
         var corners = new[]
@@ -366,7 +365,7 @@ public class MarkerLayoutTests : IDisposable
     [Fact]
     public void HitHandle_Text_CorrectedMetrics_180Deg_HitsAllFourCorners()
     {
-        FontMetrics.Default.InitializeWithTestValues(1.1719, 0.55, "ГОСТ Б");
+        FontMetricsProvider.SetCurrent(new DotElectric.TemplateEditor.Tests.Helpers.FixedFontMetrics(1.1719, 0.55));
         var text = new Text(0, 0, "Hi", 10000, "ГОСТ Б", rotationAngle: 180);
 
         var corners = new[]

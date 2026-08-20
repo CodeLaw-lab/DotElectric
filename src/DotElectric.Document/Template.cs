@@ -1,12 +1,12 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using DotElectric.TemplateEditor.Models.Objects;
+using DotElectric.Sheets;
 
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Корневая модель шаблона листов.
-/// Содержит метаданные, параметры листа, сетку по умолчанию и коллекцию объектов.
+/// Содержит метаданные, параметры листа и коллекцию объектов.
 /// Модель создаётся один раз и не заменяется после создания (иммутабельна после инициализации).
 /// INPC реализован для <see cref="Sheet"/>, чтобы подписчики (GridManager) могли
 /// реагировать на смену формата листа.
@@ -33,12 +33,6 @@ public class Template : ObservableObject
         get => _sheet;
         set => SetProperty(ref _sheet, value);
     }
-
-    /// <summary>
-    /// Сетка по умолчанию (фиксированная, 5 мм, readonly).
-    /// НЕ настраивается и НЕ сериализуется — это константа шаблона.
-    /// </summary>
-    public Grid DefaultGrid { get; } = Grid.Default;
 
     /// <summary>
     /// Коллекция объектов шаблона (линии, прямоугольники, текст).

@@ -3,7 +3,6 @@ using System.IO;
 using DotElectric.TemplateEditor.Commands;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 
 namespace DotElectric.TemplateEditor.Tests;

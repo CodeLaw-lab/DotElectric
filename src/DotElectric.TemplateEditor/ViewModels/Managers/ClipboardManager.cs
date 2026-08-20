@@ -1,4 +1,3 @@
-using DotElectric.TemplateEditor.Models.Objects;
 
 namespace DotElectric.TemplateEditor.ViewModels.Managers;
 

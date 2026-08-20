@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 using DotElectric.TemplateEditor.Constants;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using Microsoft.Extensions.Logging;
 
 namespace DotElectric.TemplateEditor.Services;
@@ -247,7 +246,7 @@ public sealed class TemplateService : ITemplateService
                 dto.EndMicronsX,
                 dto.EndMicronsY,
                 dto.LineType ?? LineType.Solid,
-                dto.StrokeThicknessMicrons ?? EditorSettings.DefaultStrokeThicknessMicrons,
+                dto.StrokeThicknessMicrons ?? DocumentDefaults.DefaultStrokeThicknessMicrons,
                 dto.StrokeColor),
 
             "Rectangle" => new Rectangle(
@@ -256,7 +255,7 @@ public sealed class TemplateService : ITemplateService
                 dto.WidthMicrons ?? 0,
                 dto.HeightMicrons ?? 0,
                 dto.LineType ?? LineType.Solid,
-                dto.StrokeThicknessMicrons ?? EditorSettings.DefaultStrokeThicknessMicrons,
+                dto.StrokeThicknessMicrons ?? DocumentDefaults.DefaultStrokeThicknessMicrons,
                 dto.StrokeColor,
                 dto.FillColor),
 
@@ -264,8 +263,8 @@ public sealed class TemplateService : ITemplateService
                 dto.MicronsX ?? 0,
                 dto.MicronsY ?? 0,
                 dto.Content ?? string.Empty,
-                dto.FontSizeMicrons ?? EditorSettings.DefaultFontSizeMicrons,
-                dto.FontName ?? EditorSettings.DefaultFontName,
+                dto.FontSizeMicrons ?? DocumentDefaults.DefaultFontSizeMicrons,
+                dto.FontName ?? DocumentDefaults.DefaultFontName,
                 dto.TextType ?? TextType.Text,
                 dto.RotationAngle ?? 0,
                 dto.Key,

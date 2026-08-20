@@ -1,4 +1,4 @@
-namespace DotElectric.TemplateEditor.Constants;
+namespace DotElectric.Document;
 
 public static class PhysicalConstants
 {

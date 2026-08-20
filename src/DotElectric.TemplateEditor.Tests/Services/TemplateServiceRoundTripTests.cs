@@ -2,7 +2,6 @@ using System.IO;
 using System.IO.Compression;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using DotElectric.TemplateEditor.Services;
 using Moq;
 

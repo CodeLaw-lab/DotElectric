@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace DotElectric.TemplateEditor.Models;
+namespace DotElectric.Document;
 
 /// <summary>
 /// Утилитарный класс для работы с Fixed-Point координатами (микроны).

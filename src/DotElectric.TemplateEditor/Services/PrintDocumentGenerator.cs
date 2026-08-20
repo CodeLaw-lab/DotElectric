@@ -4,7 +4,6 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using DotElectric.TemplateEditor.Helpers;
 using DotElectric.TemplateEditor.Models;
-using DotElectric.TemplateEditor.Models.Objects;
 using WpfLine = System.Windows.Shapes.Line;
 using WpfRectangle = System.Windows.Shapes.Rectangle;
 
@@ -55,13 +54,13 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
     private static UIElement? CreateElement(TemplateObjectBase obj, double sheetHeightMm)
         => obj switch
         {
-            Models.Objects.Line line => CreateLineElement(line, sheetHeightMm),
-            Models.Objects.Rectangle rect => CreateRectangleElement(rect, sheetHeightMm),
-            Models.Objects.Text text => CreateTextElement(text, sheetHeightMm),
+            Document.Line line => CreateLineElement(line, sheetHeightMm),
+            Document.Rectangle rect => CreateRectangleElement(rect, sheetHeightMm),
+            Document.Text text => CreateTextElement(text, sheetHeightMm),
             _ => null
         };
 
-    private static UIElement CreateLineElement(Models.Objects.Line line, double sheetHeightMm)
+    private static UIElement CreateLineElement(Document.Line line, double sheetHeightMm)
     {
         var x1 = Coordinate.ToMm(line.StartMicronsX) * WpfUnitsPerMm;
         var y1 = RenderRules.ModelYToTop(line.StartMicronsY, sheetHeightMm, WpfUnitsPerMm);
@@ -81,7 +80,7 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
         };
     }
 
-    private static UIElement CreateRectangleElement(Models.Objects.Rectangle rect, double sheetHeightMm)
+    private static UIElement CreateRectangleElement(Document.Rectangle rect, double sheetHeightMm)
     {
         var mmX = Coordinate.ToMm(rect.MicronsX);
         var mmW = Coordinate.ToMm(rect.WidthMicrons);
@@ -108,7 +107,7 @@ public sealed class PrintDocumentGenerator : IPrintDocumentGenerator
         return wpfRect;
     }
 
-    private static UIElement CreateTextElement(Models.Objects.Text text, double sheetHeightMm)
+    private static UIElement CreateTextElement(Document.Text text, double sheetHeightMm)
     {
         var mmX = Coordinate.ToMm(text.MicronsX);
         var fontSizeMm = Coordinate.ToMm(text.FontSizeMicrons);
