@@ -246,32 +246,6 @@ public class TemplateServiceRoundTripTests
     }
 
     [Fact]
-    public void Validate_ValidTemplate_ReturnsNoErrors()
-    {
-        var template = CreateTestTemplate();
-        template.Objects.Add(new Line(0, 0, 10000, 10000));
-
-        var errors = _service.Validate(template);
-        Assert.Empty(errors);
-    }
-
-    [Fact]
-    public void Validate_NullTemplate_ReturnsError()
-    {
-        var errors = _service.Validate(null!);
-        Assert.NotEmpty(errors);
-    }
-
-    [Fact(Skip = "Id is init-only — cannot set duplicates with current model")]
-    public void Validate_DuplicateIds_ReturnsError()
-    {
-        // Testing V-001 requires two objects with same Id, which is impossible with current init-only design.
-        // When model changes to allow duplicate IDs, unskip and implement:
-        //    var errors = _service.Validate(template);
-        //    Assert.Contains(errors, e => e.Code == "V-001");
-    }
-
-    [Fact]
     public void SaveAndLoad_PreservesLineStrokeColor()
     {
         var template = CreateTestTemplate();
@@ -429,16 +403,6 @@ public class TemplateServiceRoundTripTests
         {
             if (File.Exists(filePath)) File.Delete(filePath);
         }
-    }
-
-    [Fact]
-    public void Validate_ObjectOutOfBounds_ReturnsError()
-    {
-        var template = CreateTestTemplate(); // A3: 420x297mm
-        template.Objects.Add(new Line(1000_000, 1000_000, 1001_000, 1001_000)); // way outside
-
-        var errors = _service.Validate(template);
-        Assert.NotEmpty(errors);
     }
 
     private static Template CreateTestTemplate()

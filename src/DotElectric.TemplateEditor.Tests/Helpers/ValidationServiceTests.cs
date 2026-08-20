@@ -287,37 +287,37 @@ public class ValidationServiceTests
         Assert.Empty(errors);
     }
 
-    // ===== ValidateHexColor standalone =====
+    // ===== HexColorValidation standalone =====
 
     [Fact]
-    public void ValidateHexColor_ValidHex_ReturnsNull()
+    public void HexColorValidation_ValidHex_ReturnsNull()
     {
-        Assert.Null(ValidationService.ValidateHexColor("#FF0000"));
-        Assert.Null(ValidationService.ValidateHexColor("#000000"));
-        Assert.Null(ValidationService.ValidateHexColor("#123ABC"));
-        Assert.Null(ValidationService.ValidateHexColor("#AABBCCDD"));
+        Assert.Null(HexColorValidation.Validate("#FF0000"));
+        Assert.Null(HexColorValidation.Validate("#000000"));
+        Assert.Null(HexColorValidation.Validate("#123ABC"));
+        Assert.Null(HexColorValidation.Validate("#AABBCCDD"));
     }
 
     [Fact]
-    public void ValidateHexColor_Transparent_ReturnsNull()
+    public void HexColorValidation_Transparent_ReturnsNull()
     {
-        Assert.Null(ValidationService.ValidateHexColor("Transparent"));
+        Assert.Null(HexColorValidation.Validate("Transparent"));
     }
 
     [Fact]
-    public void ValidateHexColor_InvalidHex_ReturnsError()
+    public void HexColorValidation_InvalidHex_ReturnsError()
     {
-        Assert.NotNull(ValidationService.ValidateHexColor("not-a-color"));
-        Assert.NotNull(ValidationService.ValidateHexColor("#GGG"));
-        Assert.NotNull(ValidationService.ValidateHexColor("#12345"));
-        Assert.NotNull(ValidationService.ValidateHexColor(""));
+        Assert.NotNull(HexColorValidation.Validate("not-a-color"));
+        Assert.NotNull(HexColorValidation.Validate("#GGG"));
+        Assert.NotNull(HexColorValidation.Validate("#12345"));
+        Assert.NotNull(HexColorValidation.Validate(""));
     }
 
     [Fact]
-    public void ValidateHexColor_Empty_ReturnsError()
+    public void HexColorValidation_Empty_ReturnsError()
     {
-        Assert.NotNull(ValidationService.ValidateHexColor(""));
-        Assert.NotNull(ValidationService.ValidateHexColor(null));
+        Assert.NotNull(HexColorValidation.Validate(""));
+        Assert.NotNull(HexColorValidation.Validate(null));
     }
 
     // ===== V-001: Пустой ID =====

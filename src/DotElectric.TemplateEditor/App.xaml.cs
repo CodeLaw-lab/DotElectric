@@ -68,7 +68,7 @@ public partial class App : Application
                     services.AddSingleton<ISettingsService, SettingsService>();
                     services.AddSingleton<IDispatcherService, WpfDispatcherService>();
                     services.AddSingleton<IMessageBoxProvider, WpfMessageBoxProvider>();
-                    services.AddSingleton<IValidationService>(_ => Helpers.ValidationService.Default);
+                    services.AddSingleton<IValidationService>(_ => HexColorValidation.Default);
                     services.AddSingleton<IDialogService, DialogService>();
                     services.AddSingleton<ITemplateValidator, TemplateValidator>();
                     services.AddSingleton<ITemplateService, TemplateService>();

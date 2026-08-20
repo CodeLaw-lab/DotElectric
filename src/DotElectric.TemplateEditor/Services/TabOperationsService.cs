@@ -11,6 +11,7 @@ namespace DotElectric.TemplateEditor.Services;
 public sealed class TabOperationsService : ITabOperationsService
 {
     private readonly ITemplateService _templateService;
+    private readonly ITemplateValidator _templateValidator;
     private readonly IFileService _fileService;
     private readonly IDialogService _dialogService;
     private readonly ISettingsService _settingsService;
@@ -20,6 +21,7 @@ public sealed class TabOperationsService : ITabOperationsService
 
     public TabOperationsService(
         ITemplateService templateService,
+        ITemplateValidator templateValidator,
         IFileService fileService,
         IDialogService dialogService,
         ISettingsService settingsService,
@@ -28,6 +30,7 @@ public sealed class TabOperationsService : ITabOperationsService
         ILogger<TabOperationsService> logger)
     {
         _templateService = templateService ?? throw new ArgumentNullException(nameof(templateService));
+        _templateValidator = templateValidator ?? throw new ArgumentNullException(nameof(templateValidator));
         _fileService = fileService ?? throw new ArgumentNullException(nameof(fileService));
         _dialogService = dialogService ?? throw new ArgumentNullException(nameof(dialogService));
         _settingsService = settingsService ?? throw new ArgumentNullException(nameof(settingsService));
@@ -111,8 +114,11 @@ public sealed class TabOperationsService : ITabOperationsService
                 if (string.IsNullOrEmpty(path)) return;
             }
 
-            // Validate before save
-            var errors = _templateService.Validate(tab.Template).ToList();
+            // Проверка перед сохранением: до диалога доходят только ошибки —
+            // предупреждения в решении о сохранении не участвуют.
+            var errors = _templateValidator.Validate(tab.Template)
+                .Where(e => e.Severity == ValidationSeverity.Error)
+                .ToList();
             if (errors.Count > 0)
             {
                 var errorText = string.Join("\n", errors);

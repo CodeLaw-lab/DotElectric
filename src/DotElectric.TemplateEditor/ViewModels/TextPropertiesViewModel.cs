@@ -133,7 +133,7 @@ public partial class TextPropertiesViewModel : ObjectPropertiesViewModel<Text>
         var text = CurrentObject;
         if (text is null) return;
         SetProperty(value, () => text.Foreground, v => text.Foreground = v,
-            ValidationService.ValidateHexColor, nameof(Foreground), "Цвет текста");
+            HexColorValidation.Validate, nameof(Foreground), "Цвет текста");
     }
 
     [RelayCommand]

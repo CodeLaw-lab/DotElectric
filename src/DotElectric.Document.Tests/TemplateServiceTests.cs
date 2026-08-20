@@ -46,24 +46,6 @@ public class TemplateServiceTests
     }
 
     [Fact]
-    public void Validate_ValidTemplate_ReturnsNoErrors()
-    {
-        var template = _service.CreateNew("A4");
-        var errors = _service.Validate(template).ToList();
-        Assert.Empty(errors);
-    }
-
-    [Fact]
-    public void Validate_TemplateWithErrors_ReturnsErrors()
-    {
-        var template = _service.CreateNew("A4");
-        template.Objects.Add(new Line(999000, 0, 1000000, 0)); // за пределами A4 (297мм)
-
-        var errors = _service.Validate(template).ToList();
-        Assert.NotEmpty(errors);
-    }
-
-    [Fact]
     public void SaveAndLoad_RoundTrip_PreservesData()
     {
         var template = _service.CreateNew("A4");

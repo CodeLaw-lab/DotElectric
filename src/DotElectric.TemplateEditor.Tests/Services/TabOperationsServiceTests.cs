@@ -12,6 +12,7 @@ namespace DotElectric.TemplateEditor.Tests.Services;
 public class TabOperationsServiceTests
 {
     private readonly Mock<ITemplateService> _templateServiceMock;
+    private readonly Mock<ITemplateValidator> _validatorMock;
     private readonly Mock<IFileService> _fileServiceMock;
     private readonly Mock<IDialogService> _dialogServiceMock;
     private readonly Mock<ISettingsService> _settingsServiceMock;
@@ -24,7 +25,8 @@ public class TabOperationsServiceTests
     public TabOperationsServiceTests()
     {
         _templateServiceMock = new Mock<ITemplateService>();
-        _templateServiceMock.Setup(s => s.Validate(It.IsAny<Template>())).Returns(Enumerable.Empty<string>());
+        _validatorMock = new Mock<ITemplateValidator>();
+        _validatorMock.Setup(v => v.Validate(It.IsAny<Template>())).Returns(Enumerable.Empty<ValidationError>());
         _fileServiceMock = new Mock<IFileService>();
         _dialogServiceMock = new Mock<IDialogService>();
         _settingsServiceMock = new Mock<ISettingsService>();
@@ -35,6 +37,7 @@ public class TabOperationsServiceTests
         _loggerMock = new Mock<ILogger<TabOperationsService>>();
         _service = new TabOperationsService(
             _templateServiceMock.Object,
+            _validatorMock.Object,
             _fileServiceMock.Object,
             _dialogServiceMock.Object,
             _settingsServiceMock.Object,
@@ -72,7 +75,15 @@ public class TabOperationsServiceTests
     public void Constructor_NullTemplateService_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            null!, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            null!, _validatorMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            _printServiceMock.Object, _factoryMock.Object, _loggerMock.Object));
+    }
+
+    [Fact]
+    public void Constructor_NullValidator_ThrowsArgumentNullException()
+    {
+        Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
+            _templateServiceMock.Object, null!, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
             _printServiceMock.Object, _factoryMock.Object, _loggerMock.Object));
     }
 
@@ -80,7 +91,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullFileService_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, null!, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            _templateServiceMock.Object, _validatorMock.Object, null!, _dialogServiceMock.Object, _settingsServiceMock.Object,
             _printServiceMock.Object, _factoryMock.Object, _loggerMock.Object));
     }
 
@@ -88,7 +99,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullDialogService_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, _fileServiceMock.Object, null!, _settingsServiceMock.Object,
+            _templateServiceMock.Object, _validatorMock.Object, _fileServiceMock.Object, null!, _settingsServiceMock.Object,
             _printServiceMock.Object, _factoryMock.Object, _loggerMock.Object));
     }
 
@@ -96,7 +107,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullSettingsService_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, null!,
+            _templateServiceMock.Object, _validatorMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, null!,
             _printServiceMock.Object, _factoryMock.Object, _loggerMock.Object));
     }
 
@@ -104,7 +115,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullPrintService_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            _templateServiceMock.Object, _validatorMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
             null!, _factoryMock.Object, _loggerMock.Object));
     }
 
@@ -112,7 +123,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullFactory_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            _templateServiceMock.Object, _validatorMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
             _printServiceMock.Object, null!, _loggerMock.Object));
     }
 
@@ -120,7 +131,7 @@ public class TabOperationsServiceTests
     public void Constructor_NullLogger_ThrowsArgumentNullException()
     {
         Assert.Throws<ArgumentNullException>(() => new TabOperationsService(
-            _templateServiceMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
+            _templateServiceMock.Object, _validatorMock.Object, _fileServiceMock.Object, _dialogServiceMock.Object, _settingsServiceMock.Object,
             _printServiceMock.Object, _factoryMock.Object, null!));
     }
 
@@ -450,13 +461,17 @@ public class TabOperationsServiceTests
         {
             var template = CreateTemplate();
             using var editor = CreateEditor(template, filePath);
-            _templateServiceMock.Setup(s => s.Validate(template)).Returns(new[] { "error 1", "error 2" });
+            _validatorMock.Setup(v => v.Validate(template)).Returns(new[]
+            {
+                new ValidationError("V-003", "error 1"),
+                new ValidationError("V-003", "error 2")
+            });
             _dialogServiceMock.Setup(d => d.ShowUnsavedChangesDialogAsync(It.IsAny<string>()))
                 .ReturnsAsync(UnsavedChangesResult.Save);
 
             await _service.SaveTabAsync(editor);
 
-            _dialogServiceMock.Verify(d => d.ShowUnsavedChangesDialogAsync(It.Is<string>(m => m.Contains("error 1"))), Times.Once);
+            _dialogServiceMock.Verify(d => d.ShowUnsavedChangesDialogAsync(It.Is<string>(m => m.Contains("[V-003] error 1"))), Times.Once);
             _templateServiceMock.Verify(s => s.Save(template, filePath), Times.Once);
             Assert.False(editor.DirtyStateManager.IsDirty);
         }
@@ -472,7 +487,7 @@ public class TabOperationsServiceTests
     {
         var template = CreateTemplate();
         using var editor = CreateEditor(template, "C:\\file.tdel");
-        _templateServiceMock.Setup(s => s.Validate(template)).Returns(new[] { "error" });
+        _validatorMock.Setup(v => v.Validate(template)).Returns(new[] { new ValidationError("V-003", "error") });
         _dialogServiceMock.Setup(d => d.ShowUnsavedChangesDialogAsync(It.IsAny<string>()))
             .ReturnsAsync(UnsavedChangesResult.DontSave);
 
@@ -487,13 +502,39 @@ public class TabOperationsServiceTests
     {
         var template = CreateTemplate();
         using var editor = CreateEditor(template, "C:\\file.tdel");
-        _templateServiceMock.Setup(s => s.Validate(template)).Returns(new[] { "error" });
+        _validatorMock.Setup(v => v.Validate(template)).Returns(new[] { new ValidationError("V-003", "error") });
         _dialogServiceMock.Setup(d => d.ShowUnsavedChangesDialogAsync(It.IsAny<string>()))
             .ReturnsAsync(UnsavedChangesResult.Cancel);
 
         await _service.SaveTabAsync(editor);
 
         _templateServiceMock.Verify(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task SaveTabAsync_ValidationWarnings_NoDialog_Saves()
+    {
+        var filePath = Path.Combine(Path.GetTempPath(), $"tabops_warn_{Guid.NewGuid():N}.tdel");
+        try
+        {
+            var template = CreateTemplate();
+            using var editor = CreateEditor(template, filePath);
+            _validatorMock.Setup(v => v.Validate(template)).Returns(new[]
+            {
+                new ValidationError("V-004", "empty text content", severity: ValidationSeverity.Warning)
+            });
+
+            await _service.SaveTabAsync(editor);
+
+            _dialogServiceMock.Verify(d => d.ShowUnsavedChangesDialogAsync(It.IsAny<string>()), Times.Never);
+            _templateServiceMock.Verify(s => s.Save(template, filePath), Times.Once);
+            Assert.False(editor.DirtyStateManager.IsDirty);
+        }
+        finally
+        {
+            if (File.Exists(filePath))
+                File.Delete(filePath);
+        }
     }
 
     [Fact]

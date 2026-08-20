@@ -4,8 +4,8 @@ namespace DotElectric.TemplateEditor.Helpers;
 
 /// <summary>
 /// Проверки полей панели свойств редактора (координата, размер, содержимое текста,
-/// размер шрифта, цвет). Проверка формата цвета делегируется документной библиотеке
-/// (<see cref="HexColorValidation"/>) — копий кода нет.
+/// размер шрифта). Проверка формата цвета — в документной библиотеке
+/// (<see cref="HexColorValidation"/>), потребители вызывают её напрямую.
 /// </summary>
 public static class ValidationService
 {
@@ -40,14 +40,4 @@ public static class ValidationService
             return $"Минимальный размер шрифта — 1 мм ({EditorSettings.MinFontSizeMicrons} микрон).";
         return null;
     }
-
-    /// <summary>
-    /// Проверка формата цвета — делегирование документной библиотеке (копий кода нет).
-    /// </summary>
-    public static string? ValidateHexColor(string? value) => HexColorValidation.Validate(value);
-
-    /// <summary>
-    /// Запасной поставщик проверки цвета (документная библиотека).
-    /// </summary>
-    public static readonly IValidationService Default = HexColorValidation.Default;
 }

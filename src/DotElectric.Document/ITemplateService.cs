@@ -3,7 +3,7 @@ using DotElectric.Sheets;
 namespace DotElectric.Document;
 
 /// <summary>
-/// Сервис управления шаблонами: создание, загрузка, сохранение, валидация.
+/// Сервис управления шаблонами: создание, загрузка, сохранение.
 /// </summary>
 public interface ITemplateService
 {
@@ -35,11 +35,4 @@ public interface ITemplateService
     /// <param name="template">Шаблон для сохранения.</param>
     /// <param name="filePath">Путь к файлу .tdel.</param>
     void Save(Template template, string filePath);
-
-    /// <summary>
-    /// Валидировать шаблон.
-    /// </summary>
-    /// <param name="template">Шаблон для проверки.</param>
-    /// <returns>Коллекция ошибок валидации. Пустая = всё в порядке.</returns>
-    IEnumerable<string> Validate(Template template);
 }

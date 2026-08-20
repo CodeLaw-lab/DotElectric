@@ -94,7 +94,7 @@ public partial class LinePropertiesViewModel : ObjectPropertiesViewModel<Line>
         var line = CurrentObject;
         if (line is null) return;
         SetProperty(value, () => line.StrokeColor, v => line.StrokeColor = v,
-            ValidationService.ValidateHexColor, nameof(StrokeColor), "Цвет линии");
+            HexColorValidation.Validate, nameof(StrokeColor), "Цвет линии");
     }
 
     [RelayCommand]
