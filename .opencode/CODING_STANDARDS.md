@@ -194,7 +194,7 @@ All agents MUST read this file before any code operation.
 ### 6.3 NO Static Services
 - `ValidationService` — проверки полей редактора; проверка цвета делегируется `HexColorValidation` (Document); контракты `IValidationService`/`ITemplateValidator` в Document
 - Метрики шрифта — read-only `IFontMetrics` (Document) + эмбиентный слот `FontMetricsProvider.Current` (ADR-0003); WPF-реализация `WpfFontMetrics` (Services) пишется в слот при старте
-- `EditorConstants` → `PhysicalConstants` + `EditorSettings` (редактор) и `DocumentDefaults` (Document)
+- `EditorConstants` → `DocumentConstants` (Document — только то, что читает сам документ) + `EditorSettings` (редактор, секция Interaction — константы взаимодействия) и `DocumentDefaults` (Document)
 - WPF-диалоги: `IDialogFileService`/`WpfDialogFileService` для CI/testability
 
 ### 6.4 Dual-Write Prohibited
@@ -457,7 +457,7 @@ public void MethodName_Scenario_ExpectedResult()
 | 2 | WPF-типы в ViewModel | Нарушение MVVM | Converter / interface |
 | 3 | Static Service (ValidationService) | Нетестируемо | DI interface |
 | 4 | Forwarding-свойства на EditorViewModel | Хрупкость, дублирование | XAML → manager напрямую |
-| 5 | EditorConstants | Смешивание физики и UI | PhysicalConstants + EditorSettings |
+| 5 | EditorConstants | Смешивание физики и UI | DocumentConstants (документ) + EditorSettings (редактор); константы живут в сборке читателя |
 | 6 | `Thread.Sleep` в тестах | Flaky, медленно | IDateTimeProvider |
 | 7 | `MockBehavior.Strict` | Ломается при новых методах | Loose |
 | 8 | Shape на каждый MouseMove | Утечка памяти, GC pressure | Preview pattern |
