@@ -8,9 +8,9 @@ namespace DotElectric.TemplateEditor.Tests.Models;
 public class GridSettingsTests
 {
     [Fact]
-    public void FromDefaultGrid_CopiesStepAndEnablesAll()
+    public void CreateDefault_CopiesStepAndEnablesAll()
     {
-        var settings = GridSettings.FromDefaultGrid();
+        var settings = GridSettings.CreateDefault();
 
         Assert.True(settings.Enabled);
         Assert.True(settings.SnapEnabled);
@@ -21,7 +21,7 @@ public class GridSettingsTests
     [Fact]
     public void Properties_CanBeModified()
     {
-        var settings = GridSettings.FromDefaultGrid();
+        var settings = GridSettings.CreateDefault();
 
         settings.Enabled = false;
         settings.SnapEnabled = false;

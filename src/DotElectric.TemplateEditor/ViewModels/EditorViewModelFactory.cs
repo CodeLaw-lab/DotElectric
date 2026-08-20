@@ -78,6 +78,6 @@ public sealed class EditorViewModelFactory : IEditorViewModelFactory
             if (app != null)
                 return GridSettings.FromAppSettings(app);
         }
-        return GridSettings.FromDefaultGrid();
+        return GridSettings.CreateDefault();
     }
 }

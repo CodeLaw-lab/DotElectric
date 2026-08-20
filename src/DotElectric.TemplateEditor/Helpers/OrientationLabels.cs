@@ -16,6 +16,6 @@ public static class OrientationLabels
         {
             SheetOrientation.Portrait => "кн.",
             SheetOrientation.Landscape => "алб.",
-            _ => ""
+            _ => throw new NotSupportedException($"Неизвестная ориентация листа: {orientation}")
         };
 }

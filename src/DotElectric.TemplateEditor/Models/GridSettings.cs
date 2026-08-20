@@ -54,7 +54,7 @@ public sealed class GridSettings
     /// <summary>
     /// Создать настройки по умолчанию (шаг 5 мм).
     /// </summary>
-    public static GridSettings FromDefaultGrid()
+    public static GridSettings CreateDefault()
         => new()
         {
             Enabled = true,

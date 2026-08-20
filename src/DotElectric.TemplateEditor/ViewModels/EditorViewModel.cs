@@ -433,7 +433,7 @@ public partial class EditorViewModel : ObservableObject, IDisposable, IAutosaveT
         Template = template ?? throw new ArgumentNullException(nameof(template));
         _commandHistory = new CommandHistory(maxLevels: EditorSettings.CommandHistoryMaxLevels, markDirty: MarkDirty);
         TabId = Guid.NewGuid().ToString("N")[..12];
-        GridSettings = gridSettings ?? GridSettings.FromDefaultGrid();
+        GridSettings = gridSettings ?? GridSettings.CreateDefault();
         var resolvedGridNodeGenerator = gridNodeGenerator ?? new GridNodeGenerator();
         _themeService = themeService;
 
