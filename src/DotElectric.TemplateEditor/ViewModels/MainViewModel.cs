@@ -167,13 +167,20 @@ public partial class MainViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>
-    /// Создать новую вкладку с пользовательским форматом (диалог ввода размеров).
+    /// Открыть Настройки. После подтверждения диалога сохранённая тема
+    /// применяется сразу (живая смена), а не при следующем запуске.
     /// </summary>
     [RelayCommand]
     private void OpenSettings()
     {
         var dialogVm = new SettingsViewModel(_settingsService);
-        _dialogHostService.ShowDialog(dialogVm);
+        var result = _dialogHostService.ShowDialog(dialogVm);
+        if (result != true)
+            return;
+
+        var settings = _settingsService.Load();
+        _themeService.SetTheme(settings.Theme);
+        Theme = settings.Theme;
     }
 
     [RelayCommand]

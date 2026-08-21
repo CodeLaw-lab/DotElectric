@@ -542,6 +542,35 @@ public class MainViewModelTests : IDisposable
         Assert.True(changed);
     }
 
+    // ===== OpenSettings: живая смена темы из настроек =====
+
+    [Fact]
+    public void OpenSettingsCommand_Confirmed_AppliesSavedThemeLive()
+    {
+        _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { Theme = "Dark" });
+        _mockDialogHostService
+            .Setup(d => d.ShowDialog(It.IsAny<SettingsViewModel>(), It.IsAny<object?>()))
+            .Returns(true);
+
+        _viewModel.OpenSettingsCommand.Execute(null);
+
+        _mockThemeService.Verify(t => t.SetTheme("Dark"), Times.Once);
+        Assert.Equal("Dark", _viewModel.Theme);
+    }
+
+    [Fact]
+    public void OpenSettingsCommand_Canceled_DoesNotApplyTheme()
+    {
+        _mockSettingsService.Setup(s => s.Load()).Returns(new AppSettings { Theme = "Dark" });
+        _mockDialogHostService
+            .Setup(d => d.ShowDialog(It.IsAny<SettingsViewModel>(), It.IsAny<object?>()))
+            .Returns(false);
+
+        _viewModel.OpenSettingsCommand.Execute(null);
+
+        _mockThemeService.Verify(t => t.SetTheme(It.IsAny<string>()), Times.Never);
+    }
+
     // ===== NewTab с пунктом меню =====
 
     [Fact]
