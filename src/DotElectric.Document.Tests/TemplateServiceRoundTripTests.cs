@@ -1,5 +1,6 @@
 using System.IO;
 using System.IO.Compression;
+using System.Text.RegularExpressions;
 using Moq;
 
 namespace DotElectric.Document.Tests;
@@ -403,6 +404,141 @@ public class TemplateServiceRoundTripTests
         {
             if (File.Exists(filePath)) File.Delete(filePath);
         }
+    }
+
+    // ===== Идентификатор объекта переживает «сохранил → загрузил» =====
+
+    [Fact]
+    public void SaveAndLoad_PreservesObjectIds_MixedTypes()
+    {
+        var template = CreateTestTemplate();
+        var line = new Line(0, 0, 1000, 1000);
+        var rect = new Rectangle(1000, 1000, 5000, 3000);
+        var text = new Text(2000, 2000, "Id", 3500);
+        template.Objects.Add(line);
+        template.Objects.Add(rect);
+        template.Objects.Add(text);
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_ids_{Guid.NewGuid():N}.tdel");
+
+        try
+        {
+            _service.Save(template, filePath);
+            var loaded = _service.Load(filePath);
+
+            Assert.Equal(3, loaded.Objects.Count);
+            Assert.Equal(line.Id, loaded.Objects[0].Id);
+            Assert.Equal(rect.Id, loaded.Objects[1].Id);
+            Assert.Equal(text.Id, loaded.Objects[2].Id);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void Load_MissingIdElement_AssignsNewIds()
+    {
+        var template = CreateTestTemplate();
+        template.Objects.Add(new Line(0, 0, 1000, 1000));
+        template.Objects.Add(new Rectangle(1000, 1000, 5000, 3000));
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_missing_ids_{Guid.NewGuid():N}.tdel");
+
+        try
+        {
+            _service.Save(template, filePath);
+            RewriteTemplateXml(filePath,
+                xml => Regex.Replace(xml, @"\s*<Id>[^<]*</Id>\s*\r?\n", ""));
+
+            var loaded = _service.Load(filePath);
+
+            Assert.Equal(2, loaded.Objects.Count);
+            foreach (var obj in loaded.Objects)
+            {
+                Assert.False(string.IsNullOrWhiteSpace(obj.Id));
+                Assert.True(Guid.TryParse(obj.Id, out _));
+            }
+            Assert.NotEqual(template.Objects[0].Id, loaded.Objects[0].Id);
+            Assert.NotEqual(template.Objects[1].Id, loaded.Objects[1].Id);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void Load_EmptyIdElement_AssignsNewIds()
+    {
+        var template = CreateTestTemplate();
+        template.Objects.Add(new Line(0, 0, 1000, 1000));
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_empty_id_{Guid.NewGuid():N}.tdel");
+
+        try
+        {
+            _service.Save(template, filePath);
+            RewriteTemplateXml(filePath,
+                xml => Regex.Replace(xml, "<Id>[^<]*</Id>", "<Id></Id>"));
+
+            var loaded = _service.Load(filePath);
+
+            var obj = Assert.Single(loaded.Objects);
+            Assert.False(string.IsNullOrWhiteSpace(obj.Id));
+            Assert.True(Guid.TryParse(obj.Id, out _));
+            Assert.NotEqual(template.Objects[0].Id, obj.Id);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
+    public void Save_UnknownModelSubtype_WritesRecordWithoutType_WithId_SkippedOnLoad()
+    {
+        var template = CreateTestTemplate();
+        var unknown = new TestTemplateObject("unknown-id-1", 1000, 2000);
+        template.Objects.Add(unknown);
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_unknown_type_{Guid.NewGuid():N}.tdel");
+
+        try
+        {
+            _service.Save(template, filePath);
+
+            var xml = ReadTemplateXml(filePath);
+            Assert.Contains("<Id>unknown-id-1</Id>", xml);
+            Assert.DoesNotContain("<Type>", xml);
+
+            var loaded = _service.Load(filePath);
+            Assert.Empty(loaded.Objects);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    private static string ReadTemplateXml(string filePath)
+    {
+        using var archive = ZipFile.OpenRead(filePath);
+        var entry = archive.GetEntry("template.xml")!;
+        using var reader = new StreamReader(entry.Open());
+        return reader.ReadToEnd();
+    }
+
+    private static void RewriteTemplateXml(string filePath, Func<string, string> transform)
+    {
+        var xml = ReadTemplateXml(filePath);
+        File.Delete(filePath);
+
+        using var archive = ZipFile.Open(filePath, ZipArchiveMode.Create);
+        var entry = archive.CreateEntry("template.xml", CompressionLevel.Optimal);
+        using var writer = new StreamWriter(entry.Open(), System.Text.Encoding.UTF8);
+        writer.Write(transform(xml));
     }
 
     private static Template CreateTestTemplate()
