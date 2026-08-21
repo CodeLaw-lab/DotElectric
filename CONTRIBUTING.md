@@ -54,7 +54,7 @@ src/
 │   └── Messages/                        # WeakReferenceMessenger сообщения
 ├── DotElectric.Document/                # Document model library (objects, metadata, .tdel serialization, validation, DocumentConstants) — no editor knowledge
 ├── DotElectric.Sheets/                  # Sheet formats library (SheetFormatCatalog, isolated, no dependencies)
-├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2044 tests)
+├── DotElectric.TemplateEditor.Tests/    # xUnit v3 tests (2051 tests)
 ├── DotElectric.Document.Tests/          # xUnit v3 tests for DotElectric.Document (454 tests)
 └── DotElectric.Sheets.Tests/            # xUnit v3 tests for DotElectric.Sheets (127 tests)
 ```
@@ -70,7 +70,7 @@ src/
 ### Testing
 - xUnit v3 with Moq
 - Tests live with the code: библиотечные типы (`DotElectric.Document`, `DotElectric.Sheets`) тестируются в проектах библиотек, поведение редактора — в app-проекте (единственное пересечение — `IntegrationTests.cs`)
-- Target coverage: ≥80% line-rate (CI gate, actual 92.05%)
+- Target coverage: ≥80% line-rate (CI gate, actual 91.41%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers
