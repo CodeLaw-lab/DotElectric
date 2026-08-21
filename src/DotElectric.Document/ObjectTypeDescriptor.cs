@@ -49,7 +49,9 @@ public sealed class ObjectTypeDescriptor
     public Action<TemplateObjectBase, ObjectDto> WriteToDto { get; }
 
     /// <summary>
-    /// Объектные правила проверки документа в порядке V-003 → V-004 → V-007 → V-005.
+    /// Объектные правила проверки документа. Порядок внутри объекта
+    /// V-003 → V-004 → V-007 → V-005; неприменимые к типу правила
+    /// пропускаются (у текста нет правила типа линии V-007).
     /// </summary>
     public Func<TemplateObjectBase, Sheet, IValidationService, IEnumerable<ValidationError>> Validate { get; }
 }

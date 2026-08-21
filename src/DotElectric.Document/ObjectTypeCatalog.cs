@@ -85,8 +85,7 @@ public static class ObjectTypeCatalog
     {
         var line = (Line)obj;
 
-        if (line.StartMicronsX < 0 || line.StartMicronsX > sheet.WidthMicrons ||
-            line.StartMicronsY < 0 || line.StartMicronsY > sheet.HeightMicrons)
+        if (OutsideSheet(line.StartMicronsX, line.StartMicronsY, sheet))
         {
             yield return new ValidationError(
                 "V-003",
@@ -95,8 +94,7 @@ public static class ObjectTypeCatalog
                 objectId: obj.Id);
         }
 
-        if (line.EndMicronsX < 0 || line.EndMicronsX > sheet.WidthMicrons ||
-            line.EndMicronsY < 0 || line.EndMicronsY > sheet.HeightMicrons)
+        if (OutsideSheet(line.EndMicronsX, line.EndMicronsY, sheet))
         {
             yield return new ValidationError(
                 "V-003",
@@ -116,13 +114,8 @@ public static class ObjectTypeCatalog
                 severity: ValidationSeverity.Warning);
         }
 
-        if (!Enum.IsDefined(typeof(LineType), line.LineType))
-        {
-            yield return new ValidationError(
-                "V-007",
-                $"Некорректный тип линии у объекта '{obj.Id}': '{line.LineType}'.",
-                objectId: obj.Id);
-        }
+        foreach (var error in ValidateLineTypeValue(line.LineType, obj.Id))
+            yield return error;
 
         if (colorValidation.ValidateHexColor(line.StrokeColor) != null)
             yield return new ValidationError("V-005",
@@ -166,8 +159,7 @@ public static class ObjectTypeCatalog
     {
         var rect = (Rectangle)obj;
 
-        if (rect.MicronsX < 0 || rect.MicronsX > sheet.WidthMicrons ||
-            rect.MicronsY < 0 || rect.MicronsY > sheet.HeightMicrons)
+        if (OutsideSheet(rect.MicronsX, rect.MicronsY, sheet))
         {
             yield return new ValidationError(
                 "V-003",
@@ -202,13 +194,8 @@ public static class ObjectTypeCatalog
                 objectId: obj.Id);
         }
 
-        if (!Enum.IsDefined(typeof(LineType), rect.LineType))
-        {
-            yield return new ValidationError(
-                "V-007",
-                $"Некорректный тип линии у объекта '{obj.Id}': '{rect.LineType}'.",
-                objectId: obj.Id);
-        }
+        foreach (var error in ValidateLineTypeValue(rect.LineType, obj.Id))
+            yield return error;
 
         if (colorValidation.ValidateHexColor(rect.StrokeColor) != null)
             yield return new ValidationError("V-005",
@@ -265,8 +252,7 @@ public static class ObjectTypeCatalog
     {
         var text = (Text)obj;
 
-        if (text.MicronsX < 0 || text.MicronsX > sheet.WidthMicrons ||
-            text.MicronsY < 0 || text.MicronsY > sheet.HeightMicrons)
+        if (OutsideSheet(text.MicronsX, text.MicronsY, sheet))
         {
             yield return new ValidationError(
                 "V-003",
@@ -300,4 +286,19 @@ public static class ObjectTypeCatalog
     // (формат существующего генератора).
     private static string ResolveId(string? id)
         => string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;
+
+    private static bool OutsideSheet(long x, long y, Sheet sheet)
+        => x < 0 || x > sheet.WidthMicrons || y < 0 || y > sheet.HeightMicrons;
+
+    // V-007: недостижимо для типизированного перечисления, сохраняется как есть (ADR-0004, Q6).
+    private static IEnumerable<ValidationError> ValidateLineTypeValue(LineType lineType, string objectId)
+    {
+        if (!Enum.IsDefined(typeof(LineType), lineType))
+        {
+            yield return new ValidationError(
+                "V-007",
+                $"Некорректный тип линии у объекта '{objectId}': '{lineType}'.",
+                objectId: objectId);
+        }
+    }
 }
