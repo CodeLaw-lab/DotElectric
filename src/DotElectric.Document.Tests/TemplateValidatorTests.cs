@@ -484,16 +484,6 @@ public class TemplateValidatorTests
         Assert.Single(errors, e => e.RuleId == "V-006");
     }
 
-    [Fact]
-    public void ValidateObject_NullSheet_ReturnsV006_NoThrow()
-    {
-        var errors = new TemplateValidator()
-            .ValidateObject(new Line(0, 0, 1000, 1000), null!)
-            .ToList();
-
-        Assert.Contains(errors, e => e.RuleId == "V-006");
-    }
-
     // ===== V-007: Некорректный тип линии =====
 
     [Fact]
@@ -737,24 +727,6 @@ public class TemplateValidatorTests
     }
 
     [Fact]
-    public void ValidateObject_ValidObject_ReturnsNoErrors()
-    {
-        var sheet = Sheet.FromFormat("A3");
-        var line = new Line(0, 0, 10000, 10000);
-
-        var errors = new TemplateValidator().ValidateObject(line, sheet);
-        Assert.Empty(errors);
-    }
-
-    [Fact]
-    public void ValidateObject_NullObject_ReturnsEmpty()
-    {
-        var sheet = Sheet.FromFormat("A3");
-        var errors = new TemplateValidator().ValidateObject(null!, sheet);
-        Assert.Empty(errors);
-    }
-
-    [Fact]
     public void ValidateMetadataKeys_EmptyAuthor_ReturnsWarning()
     {
         var metadata = new Metadata { Author = "" };
@@ -874,40 +846,62 @@ public class TemplateValidatorTests
         Assert.DoesNotContain(errors, e => e.RuleId == "V-007");
     }
 
-    // ===== Перенесено из IntegrationTests (приложение) =====
+    // ===== Группировка ошибок по объекту (декларированное отклонение порядка) =====
 
     [Fact]
-    public void ValidateObject_CoordinatesOutOfBounds_ReturnsV003()
+    public void Validate_MultiObjectErrors_GroupedByObject()
     {
-        var sheet = Sheet.FromFormat("A3"); // 420_000 x 297_000
-        var rect = new Rectangle(500_000, 0, 10_000, 10_000);
+        var template = TestTemplates.CreateA3();
+        // Объект 1: оба конца линии вне листа (две V-003) + плохой цвет (V-005)
+        var badLine = new Line(500_000, 0, 510_000, 1000);
+        badLine.StrokeColor = "bad-color";
+        // Объект 2: линия нулевой длины (V-004, Warning)
+        var zeroLine = new Line(1000, 1000, 1000, 1000);
+        template.Objects.Add(badLine);
+        template.Objects.Add(zeroLine);
 
-        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
-        Assert.NotEmpty(errors);
+        var errors = new TemplateValidator().Validate(template).ToList();
+
+        Assert.Equal(
+            new[] { "V-003", "V-003", "V-005", "V-004" },
+            errors.Select(e => e.RuleId).ToArray());
+        Assert.Equal(
+            new[] { badLine.Id, badLine.Id, badLine.Id, zeroLine.Id },
+            errors.Select(e => e.ObjectId).ToArray());
+    }
+
+    // ===== Перепокрытие сценариев удалённого ValidateObject через Validate =====
+
+    [Fact]
+    public void Validate_RectangleOutOfBounds_ReturnsV003()
+    {
+        var template = TestTemplates.CreateA3(); // 420_000 x 297_000
+        template.Objects.Add(new Rectangle(500_000, 0, 10_000, 10_000));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
         Assert.Contains(errors, e => e.RuleId == "V-003");
     }
 
     [Fact]
-    public void ValidateObject_ZeroWidthRectangle_ReturnsV004()
+    public void Validate_ZeroWidthRectangle_ReturnsV004()
     {
-        var sheet = Sheet.FromFormat("A3");
-        var rect = new Rectangle(10_000, 10_000, 0, 10_000);
+        var template = TestTemplates.CreateA3();
+        template.Objects.Add(new Rectangle(10_000, 10_000, 0, 10_000));
 
-        var errors = new TemplateValidator().ValidateObject(rect, sheet).ToList();
-        Assert.NotEmpty(errors);
+        var errors = new TemplateValidator().Validate(template).ToList();
         Assert.Contains(errors, e => e.RuleId == "V-004");
     }
 
-    [Fact]
-    public void ValidateObject_ValidLineType_NoV007Error()
-    {
-        var sheet = Sheet.FromFormat("A3");
-        // LineType is an enum, all values are valid by construction.
-        // This test verifies the validation doesn't crash on valid types.
-        var line = new Line(0, 0, 10_000, 10_000, LineType.DashDotDot);
+    // ===== Инвариант: неизвестный подтип модели — пусто во всех объектных правилах =====
 
-        var errors = new TemplateValidator().ValidateObject(line, sheet).ToList();
-        var v007Errors = errors.Where(e => e.RuleId == "V-007").ToList();
-        Assert.Empty(v007Errors);
+    [Fact]
+    public void Validate_UnknownModelSubtype_NoObjectRuleErrors()
+    {
+        var template = TestTemplates.CreateValidA4();
+        // Координаты вне листа — но для неизвестного подтипа объектных правил нет.
+        template.Objects.Add(new TestTemplateObject("t-1", -5000, -5000));
+
+        var errors = new TemplateValidator().Validate(template).ToList();
+        Assert.Empty(errors);
     }
 }

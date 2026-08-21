@@ -206,47 +206,10 @@ public sealed class TemplateService : ITemplateService
             : SheetOrientation.Portrait;
      }
 
-    private TemplateObjectBase? MapToObject(ObjectDto dto)
-    {
-        return dto.ObjectType switch
-        {
-            "Line" => new Line(
-                dto.StartMicronsX,
-                dto.StartMicronsY,
-                dto.EndMicronsX,
-                dto.EndMicronsY,
-                dto.LineType ?? LineType.Solid,
-                dto.StrokeThicknessMicrons ?? DocumentDefaults.DefaultStrokeThicknessMicrons,
-                dto.StrokeColor),
-
-            "Rectangle" => new Rectangle(
-                dto.MicronsX ?? 0,
-                dto.MicronsY ?? 0,
-                dto.WidthMicrons ?? 0,
-                dto.HeightMicrons ?? 0,
-                dto.LineType ?? LineType.Solid,
-                dto.StrokeThicknessMicrons ?? DocumentDefaults.DefaultStrokeThicknessMicrons,
-                dto.StrokeColor,
-                dto.FillColor),
-
-            "Text" => new Text(
-                dto.MicronsX ?? 0,
-                dto.MicronsY ?? 0,
-                dto.Content ?? string.Empty,
-                dto.FontSizeMicrons ?? DocumentDefaults.DefaultFontSizeMicrons,
-                dto.FontName ?? DocumentDefaults.DefaultFontName,
-                dto.TextType ?? TextType.Text,
-                dto.RotationAngle ?? 0,
-                dto.Key,
-                dto.IsEditable,
-                dto.DefaultValue,
-                dto.Foreground,
-                dto.TextWrapping,
-                dto.TextAlignment ?? "Left"),
-
-            _ => null
-        };
-    }
+    private static TemplateObjectBase? MapToObject(ObjectDto dto)
+        => ObjectTypeCatalog.TryGet(dto.ObjectType, out var descriptor)
+            ? descriptor.FromDto(dto)
+            : null;
 
     private TemplateDto MapToDto(Template template)
     {
@@ -278,52 +241,12 @@ public sealed class TemplateService : ITemplateService
         return dto;
     }
 
-    private ObjectDto MapToDto(TemplateObjectBase obj)
+    private static ObjectDto MapToDto(TemplateObjectBase obj)
     {
         var dto = new ObjectDto { Id = obj.Id };
 
-        switch (obj)
-        {
-            case Line line:
-                dto.ObjectType = "Line";
-                dto.StartMicronsX = line.StartMicronsX;
-                dto.StartMicronsY = line.StartMicronsY;
-                dto.EndMicronsX = line.EndMicronsX;
-                dto.EndMicronsY = line.EndMicronsY;
-                dto.LineType = line.LineType;
-                dto.StrokeThicknessMicrons = line.StrokeThicknessMicrons;
-                dto.StrokeColor = line.StrokeColor;
-                break;
-
-            case Rectangle rect:
-                dto.ObjectType = "Rectangle";
-                dto.MicronsX = rect.MicronsX;
-                dto.MicronsY = rect.MicronsY;
-                dto.WidthMicrons = rect.WidthMicrons;
-                dto.HeightMicrons = rect.HeightMicrons;
-                dto.LineType = rect.LineType;
-                dto.StrokeThicknessMicrons = rect.StrokeThicknessMicrons;
-                dto.StrokeColor = rect.StrokeColor;
-                dto.FillColor = rect.FillColor;
-                break;
-
-            case Text text:
-                dto.ObjectType = "Text";
-                dto.MicronsX = text.MicronsX;
-                dto.MicronsY = text.MicronsY;
-                dto.Content = text.Content;
-                dto.FontSizeMicrons = text.FontSizeMicrons;
-                dto.FontName = text.FontName;
-                dto.TextType = text.TextType;
-                dto.RotationAngle = text.RotationAngle;
-                dto.Key = text.Key;
-                dto.IsEditable = text.IsEditable;
-                dto.DefaultValue = text.DefaultValue;
-                dto.Foreground = text.Foreground;
-                dto.TextWrapping = text.TextWrapping;
-                dto.TextAlignment = text.TextAlignment;
-                break;
-        }
+        if (ObjectTypeCatalog.TryGet(obj, out var descriptor))
+            descriptor.WriteToDto(obj, dto);
 
         return dto;
     }
