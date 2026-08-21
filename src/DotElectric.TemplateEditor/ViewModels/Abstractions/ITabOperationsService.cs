@@ -4,13 +4,13 @@ using DotElectric.TemplateEditor.ViewModels;
 namespace DotElectric.TemplateEditor.ViewModels.Abstractions;
 
 /// <summary>
-/// Facade for tab operations (NewTab, OpenFile, Save, SaveAs, Print).
+/// Facade for tab operations (NewTab, OpenFile, Save, SaveAs).
 /// Reduces MainViewModel DI dependencies.
 /// </summary>
 public interface ITabOperationsService
 {
-    /// <summary>Create a new tab with the specified format.</summary>
-    EditorViewModel CreateNewTab(string? format, string? lastUsedFormat, string? lastUsedOrientation);
+    /// <summary>Create a new tab with the specified format and orientation.</summary>
+    EditorViewModel CreateNewTab(string? format, SheetOrientation? orientation, string? lastUsedFormat, string? lastUsedOrientation);
 
     /// <summary>Open a file dialog and create a tab.</summary>
     Task<EditorViewModel?> OpenFileAsync();

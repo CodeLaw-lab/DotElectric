@@ -1,16 +1,15 @@
 using System.Windows;
-using System.Windows.Documents;
-using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.ViewModels;
 
 namespace DotElectric.TemplateEditor.Views;
 
 public partial class PrintPreviewWindow : Window
 {
-    public PrintPreviewWindow(FixedDocument document, string title)
+    public PrintPreviewWindow(PrintPreviewViewModel viewModel)
     {
         InitializeComponent();
-        Title = $"Предпросмотр печати — {title}";
-        DocumentViewer.Document = document;
+        Title = $"Предпросмотр печати — {viewModel.DisplayName}";
+        DocumentViewer.Document = viewModel.Document;
     }
 
     private void DocumentViewer_OnLoaded(object sender, RoutedEventArgs e)

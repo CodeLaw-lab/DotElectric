@@ -41,6 +41,42 @@ public class WpfDialogHostServiceTests
     }
 
     [Fact]
+    public void ResolveWindowDescriptor_PrintPreviewViewModel_ReturnsPrintPreviewWindow()
+    {
+        WpfContext.Execute(() =>
+        {
+            var viewModel = new PrintPreviewViewModel(new System.Windows.Documents.FixedDocument(), "Вкладка");
+
+            var (windowType, dataContext) = WpfDialogHostService.ResolveWindowDescriptor(viewModel);
+
+            Assert.Equal(typeof(PrintPreviewWindow), windowType);
+            Assert.Same(viewModel, dataContext);
+        });
+    }
+
+    [Fact]
+    public void CreateWindow_PrintPreviewWindow_SetsTitleAndDocumentFromViewModel()
+    {
+        WpfContext.Execute(() =>
+        {
+            var document = new System.Windows.Documents.FixedDocument();
+            var viewModel = new PrintPreviewViewModel(document, "A3 (алб.) — Без имени");
+
+            var window = WpfDialogHostService.CreateWindow(typeof(PrintPreviewWindow), viewModel);
+            try
+            {
+                var previewWindow = Assert.IsType<PrintPreviewWindow>(window);
+                Assert.Equal("Предпросмотр печати — A3 (алб.) — Без имени", previewWindow.Title);
+                Assert.Same(document, previewWindow.DocumentViewer.Document);
+            }
+            finally
+            {
+                window.Close();
+            }
+        });
+    }
+
+    [Fact]
     public void ShowDialog_CustomSheetDialogVm_Cancel_ReturnsFalse()
     {
         WpfContext.Execute(() =>
@@ -95,6 +131,37 @@ public class WpfDialogHostServiceTests
             finally
             {
                 owner.Close();
+            }
+        });
+    }
+
+    [Fact]
+    public void ShowDialog_NoExplicitOwner_ResolvesOwnerFromMainWindowProvider()
+    {
+        WpfContext.Execute(() =>
+        {
+            var main = new Window();
+            main.Show();
+
+            var hasOwnedDialog = false;
+            try
+            {
+                var vm = new CustomSheetDialogViewModel();
+                var host = new WpfDialogHostService(() => main);
+
+                Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+                {
+                    hasOwnedDialog = main.OwnedWindows.Count > 0;
+                    vm.CancelCommand.Execute(null);
+                });
+
+                host.ShowDialog(vm);
+
+                Assert.True(hasOwnedDialog);
+            }
+            finally
+            {
+                main.Close();
             }
         });
     }

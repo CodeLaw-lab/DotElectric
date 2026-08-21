@@ -7,7 +7,7 @@ using Moq;
 namespace DotElectric.TemplateEditor.Tests.Services;
 
 /// <summary>
-/// Unit tests for TabOperationsService (NewTab, OpenFile, Save, SaveAs, CustomTab, PromptAndSave, ParseSheetFormat).
+/// Unit tests for TabOperationsService (NewTab, OpenFile, Save, SaveAs, CustomTab, PromptAndSave).
 /// </summary>
 public class TabOperationsServiceTests
 {
@@ -145,7 +145,7 @@ public class TabOperationsServiceTests
         _templateServiceMock.Setup(s => s.CreateNew("A4", SheetOrientation.Landscape)).Returns(template);
         _factoryMock.Setup(f => f.Create(template, null, _printServiceMock.Object, null, null)).Returns(editor);
 
-        var result = _service.CreateNewTab(null, "A4L", "Landscape");
+        var result = _service.CreateNewTab(null, null, "A4", "Landscape");
 
         Assert.Same(editor, result);
         _templateServiceMock.Verify(s => s.CreateNew("A4", SheetOrientation.Landscape), Times.Once);
@@ -156,9 +156,9 @@ public class TabOperationsServiceTests
     }
 
     [Fact]
-    public void CreateNewTab_ExplicitFormat_WinsOverLastUsed()
+    public void CreateNewTab_ExplicitFormatAndOrientation_WinOverLastUsed()
     {
-        _service.CreateNewTab("A3P", "A4L", "Landscape");
+        _service.CreateNewTab("A3", SheetOrientation.Portrait, "A4", "Landscape");
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Portrait), Times.Once);
         _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
@@ -167,9 +167,9 @@ public class TabOperationsServiceTests
     }
 
     [Fact]
-    public void CreateNewTab_FormatWithoutSuffix_UsesLastUsedOrientation()
+    public void CreateNewTab_NoOrientation_UsesLastUsedOrientation()
     {
-        _service.CreateNewTab(null, "A3", "Portrait");
+        _service.CreateNewTab(null, null, "A3", "Portrait");
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Portrait), Times.Once);
     }
@@ -177,7 +177,7 @@ public class TabOperationsServiceTests
     [Fact]
     public void CreateNewTab_InvalidLastUsedOrientation_FallsBackToDefaultOrientation()
     {
-        _service.CreateNewTab("A3", null, "Bogus");
+        _service.CreateNewTab("A3", null, null, "Bogus");
 
         _templateServiceMock.Verify(
             s => s.CreateNew("A3", SheetOrientation.Landscape),
@@ -185,9 +185,9 @@ public class TabOperationsServiceTests
     }
 
     [Fact]
-    public void CreateNewTab_FormatWithoutSuffix_LastUsedOrientationNull_UsesLandscapeFallback()
+    public void CreateNewTab_LastUsedOrientationNull_UsesLandscapeFallback()
     {
-        _service.CreateNewTab("A4", null, null);
+        _service.CreateNewTab("A4", null, null, null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A4", SheetOrientation.Landscape), Times.Once);
     }
@@ -195,7 +195,7 @@ public class TabOperationsServiceTests
     [Fact]
     public void CreateNewTab_AllNull_UsesDefaultFormatAndLandscape()
     {
-        _service.CreateNewTab(null, null, null);
+        _service.CreateNewTab(null, null, null, null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Landscape), Times.Once);
         _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
@@ -208,7 +208,7 @@ public class TabOperationsServiceTests
     {
         _appSettings.DefaultSheetFormat = "A4";
 
-        _service.CreateNewTab(null, null, null);
+        _service.CreateNewTab(null, null, null, null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A4", SheetOrientation.Landscape), Times.Once);
         _settingsServiceMock.Verify(s => s.Save(It.Is<AppSettings>(a =>
@@ -220,7 +220,7 @@ public class TabOperationsServiceTests
     {
         _appSettings.DefaultSheetFormat = "Bogus";
 
-        _service.CreateNewTab(null, null, null);
+        _service.CreateNewTab(null, null, null, null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A3", SheetOrientation.Landscape), Times.Once);
     }
@@ -230,7 +230,7 @@ public class TabOperationsServiceTests
     {
         _appSettings.DefaultSheetFormat = "A4";
 
-        _service.CreateNewTab(null, "A1L", null);
+        _service.CreateNewTab(null, null, "A1", null);
 
         _templateServiceMock.Verify(s => s.CreateNew("A1", SheetOrientation.Landscape), Times.Once);
     }
@@ -730,73 +730,5 @@ public class TabOperationsServiceTests
             if (File.Exists(filePath))
                 File.Delete(filePath);
         }
-    }
-
-    // === ParseSheetFormat ===
-
-    [Fact]
-    public void ParseSheetFormat_Null_ReturnsNull()
-    {
-        var result = TabOperationsService.ParseSheetFormat(null!, out var orientation);
-
-        Assert.Null(result);
-        Assert.Null(orientation);
-    }
-
-    [Fact]
-    public void ParseSheetFormat_Empty_ReturnsEmpty()
-    {
-        var result = TabOperationsService.ParseSheetFormat("", out var orientation);
-
-        Assert.Equal("", result);
-        Assert.Null(orientation);
-    }
-
-    [Fact]
-    public void ParseSheetFormat_SingleChar_ReturnsAsIs()
-    {
-        var result = TabOperationsService.ParseSheetFormat("A", out var orientation);
-
-        Assert.Equal("A", result);
-        Assert.Null(orientation);
-    }
-
-    [Theory]
-    [InlineData("A4P", "A4", SheetOrientation.Portrait)]
-    [InlineData("A3L", "A3", SheetOrientation.Landscape)]
-    [InlineData("A4×2L", "A4×2", SheetOrientation.Landscape)]
-    public void ParseSheetFormat_WithSuffix_ReturnsBaseFormatAndOrientation(string input, string expectedFormat, SheetOrientation expectedOrientation)
-    {
-        var result = TabOperationsService.ParseSheetFormat(input, out var orientation);
-
-        Assert.Equal(expectedFormat, result);
-        Assert.Equal(expectedOrientation, orientation);
-    }
-
-    [Fact]
-    public void ParseSheetFormat_LowercaseSuffix_IsUppercasedAndDetected()
-    {
-        var result = TabOperationsService.ParseSheetFormat("a4p", out var orientation);
-
-        Assert.Equal("a4", result);
-        Assert.Equal(SheetOrientation.Portrait, orientation);
-    }
-
-    [Fact]
-    public void ParseSheetFormat_NoSuffix_ReturnsFormatAndNullOrientation()
-    {
-        var result = TabOperationsService.ParseSheetFormat("A4", out var orientation);
-
-        Assert.Equal("A4", result);
-        Assert.Null(orientation);
-    }
-
-    [Fact]
-    public void ParseSheetFormat_UnknownSuffix_ReturnsFormatAsIs()
-    {
-        var result = TabOperationsService.ParseSheetFormat("A4X", out var orientation);
-
-        Assert.Equal("A4X", result);
-        Assert.Null(orientation);
     }
 }

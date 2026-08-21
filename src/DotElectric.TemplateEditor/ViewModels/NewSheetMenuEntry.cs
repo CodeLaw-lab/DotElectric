@@ -23,8 +23,10 @@ public enum NewSheetMenuKind
 
 /// <summary>
 /// Вложенный пункт ориентации внутри группы формата.
+/// Несёт типизированную ориентацию: формат (строковая идентичность)
+/// и значение перечисления — без строковых суффиксов.
 /// </summary>
-public sealed record NewSheetOrientationEntry(string Header, string CommandParameter);
+public sealed record NewSheetOrientationEntry(string Header, string Format, SheetOrientation Orientation);
 
 /// <summary>
 /// Пункт модели меню «Файл > Новый шаблон». Модель генерируется из

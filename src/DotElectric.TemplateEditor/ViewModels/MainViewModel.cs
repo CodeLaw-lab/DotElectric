@@ -6,7 +6,6 @@ using DotElectric.TemplateEditor.Messages;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
 using DotElectric.TemplateEditor.ViewModels.Abstractions;
-using DotElectric.TemplateEditor.Views;
 using Microsoft.Extensions.Logging;
 
 namespace DotElectric.TemplateEditor.ViewModels;
@@ -138,17 +137,17 @@ public partial class MainViewModel : ObservableObject, IDisposable
     // === Команды ===
 
     /// <summary>
-    /// Создать новую вкладку (пустой шаблон заданного формата).
-    /// Поддерживаемые форматы: "A0", "A1", "A2", "A3", "A4" или с суффиксом ориентации: "A4P", "A4L", "A3P", "A3L" и т.д.
-    /// Если format = null, используется последний сохранённый формат.
+    /// Создать новую вкладку. Пункт меню несёт формат и ориентацию;
+    /// пустой пункт — последний использованный формат из настроек,
+    /// ориентация — по цепочке запасных значений сервиса вкладок.
     /// </summary>
     [RelayCommand]
-    private void NewTab(string? format = null)
+    private void NewTab(NewSheetOrientationEntry? entry = null)
     {
         var settings = _settingsService.Load();
-        var rawFormat = format ?? settings.LastUsedSheetFormat;
+        var format = entry?.Format ?? settings.LastUsedSheetFormat;
         var lastOrient = settings.LastUsedSheetOrientation;
-        var editor = _tabOperations.CreateNewTab(rawFormat, null, lastOrient);
+        var editor = _tabOperations.CreateNewTab(format, entry?.Orientation, null, lastOrient);
         OpenedTabs.Add(editor);
         SelectedTab = editor;
     }
@@ -162,7 +161,7 @@ public partial class MainViewModel : ObservableObject, IDisposable
         var settings = _settingsService.Load();
         var fmt = settings.LastUsedSheetFormat;
         var orient = settings.LastUsedSheetOrientation;
-        var editor = _tabOperations.CreateNewTab(null, fmt, orient);
+        var editor = _tabOperations.CreateNewTab(null, null, fmt, orient);
         OpenedTabs.Add(editor);
         SelectedTab = editor;
     }
@@ -223,10 +222,10 @@ public partial class MainViewModel : ObservableObject, IDisposable
     /// </summary>
     private static IReadOnlyList<NewSheetOrientationEntry> BuildOrientations(SheetFormat format)
     {
-        var longMm = format.LongSideMicrons / 1000;
-        var shortMm = format.ShortSideMicrons / 1000;
-        var landscape = new NewSheetOrientationEntry($"Альбомная ({longMm}×{shortMm})", $"{format.Name}L");
-        var portrait = new NewSheetOrientationEntry($"Книжная ({shortMm}×{longMm})", $"{format.Name}P");
+        var longMm = Coordinate.FormatMm(format.LongSideMicrons);
+        var shortMm = Coordinate.FormatMm(format.ShortSideMicrons);
+        var landscape = new NewSheetOrientationEntry($"Альбомная ({longMm}×{shortMm})", format.Name, SheetOrientation.Landscape);
+        var portrait = new NewSheetOrientationEntry($"Книжная ({shortMm}×{longMm})", format.Name, SheetOrientation.Portrait);
 
         return format.DefaultOrientation == SheetOrientation.Portrait
             ? [portrait, landscape]
@@ -349,9 +348,8 @@ public partial class MainViewModel : ObservableObject, IDisposable
         try
         {
             var document = _printDocumentGenerator.Generate(SelectedTab.Template);
-            var window = new PrintPreviewWindow(document, SelectedTab.DirtyStateManager.DisplayName);
-            window.Owner = System.Windows.Application.Current.MainWindow;
-            window.ShowDialog();
+            var previewViewModel = new PrintPreviewViewModel(document, SelectedTab.DirtyStateManager.DisplayName);
+            _dialogHostService.ShowDialog(previewViewModel);
         }
         catch (Exception ex)
         {

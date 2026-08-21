@@ -10,13 +10,31 @@ namespace DotElectric.TemplateEditor.Services;
 /// </summary>
 public sealed class WpfDialogHostService : IDialogHostService
 {
+    private readonly Func<Window?> _mainWindowProvider;
+
+    public WpfDialogHostService(Func<Window?>? mainWindowProvider = null)
+    {
+        // Application.Current.MainWindow читается только с потока диспетчера
+        // приложения; с чужих потоков владелец не разрешается.
+        _mainWindowProvider = mainWindowProvider ?? (() =>
+        {
+            var application = Application.Current;
+            return application != null && application.Dispatcher.CheckAccess()
+                ? application.MainWindow
+                : null;
+        });
+    }
+
     public bool? ShowDialog(object viewModel, object? owner = null)
     {
         var (windowType, dataContext) = ResolveWindowDescriptor(viewModel);
         var window = CreateWindow(windowType, dataContext);
 
-        if (owner is Window ownerWindow)
-            window.Owner = ownerWindow;
+        // Владелец по умолчанию — главное окно приложения: объявленное в XAML
+        // центрирование на владельце работает у всех диалогов.
+        var resolvedOwner = owner as Window ?? _mainWindowProvider();
+        if (resolvedOwner != null)
+            window.Owner = resolvedOwner;
 
         if (viewModel is ICustomSheetDialogVm dialogVm)
         {
@@ -46,6 +64,7 @@ public sealed class WpfDialogHostService : IDialogHostService
         return viewModel switch
         {
             SettingsViewModel _ => (typeof(SettingsView), viewModel),
+            PrintPreviewViewModel _ => (typeof(PrintPreviewWindow), viewModel),
             _ => (typeof(CustomSheetDialog), viewModel)
         };
     }
