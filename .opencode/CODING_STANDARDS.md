@@ -6,7 +6,7 @@ All agents MUST read this file before any code operation.
 Если правило в AGENTS.md, skill или любом другом документе противоречит этому — побеждает этот документ.
 
 **Build:** 0 errors, 0 warnings
-**Tests:** 2617 passed, 0 skipped
+**Tests:** 2655 passed, 0 skipped
 **Coverage:** ≥80% line-rate (CI gate)
 
 ---
