@@ -70,7 +70,7 @@ src/
 ### Testing
 - xUnit v3 with Moq
 - Tests live with the code: библиотечные типы (`DotElectric.Document`, `DotElectric.Sheets`) тестируются в проектах библиотек, поведение редактора — в app-проекте (единственное пересечение — `IntegrationTests.cs`)
-- Target coverage: ≥80% line-rate (CI gate, actual 91.16%)
+- Target coverage: ≥80% line-rate (CI gate, actual 92.05%)
 - Test naming: `MethodName_Scenario_ExpectedResult`
 - Mock WPF dependencies (dialogs, services)
 - Behaviors: test via STA-compatible unit tests (WpfContext) or internal static handlers

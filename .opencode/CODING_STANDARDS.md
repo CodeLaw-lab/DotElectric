@@ -195,7 +195,7 @@ All agents MUST read this file before any code operation.
 - `ValidationService` — проверки полей редактора (координата, размер, содержимое текста, размер шрифта); проверка цвета — `HexColorValidation` (Document), потребители вызывают её напрямую; контракты `IValidationService`/`ITemplateValidator` в Document; проверка документа при сохранении — `ITemplateValidator` напрямую у потребителя (`TabOperationsService`), сервис шаблона — только чтение/запись
 - Метрики шрифта — read-only `IFontMetrics` (Document) + эмбиентный слот `FontMetricsProvider.Current` (ADR-0003); WPF-реализация `WpfFontMetrics` (Services) пишется в слот при старте
 - `EditorConstants` → `DocumentConstants` (Document — только то, что читает сам документ) + `EditorSettings` (редактор, секция Interaction — константы взаимодействия) и `DocumentDefaults` (Document)
-- WPF-диалоги: `IDialogFileService`/`WpfDialogFileService` для CI/testability
+- WPF-диалоги: `IDialogFileService`/`WpfDialogFileService` для CI/testability; показ окон — только через шов `IDialogHostService`/`WpfDialogHostService` (определитель «модель → окно», включая предпросмотр печати — `PrintPreviewViewModel`); владелец по умолчанию — главное окно через инъектируемый провайдер конструктора (WPF-статика потоко-аффинна, дефолт guarded `Dispatcher.CheckAccess()`, прецедент `WpfDispatcherService`)
 
 ### 6.4 Dual-Write Prohibited
 - Никогда два manager'а с независимыми копиями одного settings
