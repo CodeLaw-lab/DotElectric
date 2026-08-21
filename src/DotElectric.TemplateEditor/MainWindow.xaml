@@ -75,7 +75,7 @@
             <Setter Property="Padding" Value="12,6"/>
             <Setter Property="Header" Value="{Binding Header, Mode=OneWay}"/>
             <Setter Property="Command" Value="{Binding DataContext.NewTabCommand, RelativeSource={RelativeSource AncestorType=Menu}}"/>
-            <Setter Property="CommandParameter" Value="{Binding CommandParameter, Mode=OneWay}"/>
+            <Setter Property="CommandParameter" Value="{Binding Mode=OneWay}"/>
         </Style>
     </Window.Resources>
 

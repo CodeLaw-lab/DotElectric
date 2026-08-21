@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace DotElectric.TemplateEditor.Services;
 
 /// <summary>
-/// Facade for tab operations. Encapsulates NewTab, OpenFile, Save, SaveAs, PreviewPrint.
+/// Facade for tab operations. Encapsulates NewTab, OpenFile, Save, SaveAs.
 /// </summary>
 public sealed class TabOperationsService : ITabOperationsService
 {
@@ -39,15 +39,13 @@ public sealed class TabOperationsService : ITabOperationsService
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
-    public EditorViewModel CreateNewTab(string? format, string? lastUsedFormat, string? lastUsedOrientation)
+    public EditorViewModel CreateNewTab(string? format, SheetOrientation? orientation, string? lastUsedFormat, string? lastUsedOrientation)
     {
         var settings = _settingsService.Load();
-        var rawFormat = format ?? lastUsedFormat ?? ResolveDefaultFormat(settings);
+        var fmt = format ?? lastUsedFormat ?? ResolveDefaultFormat(settings);
 
-        // Parse format and orientation from string like "A4P", "A3L", "A4", "A3"
-        var fmt = ParseSheetFormat(rawFormat, out var orientation);
-
-        // If orientation not specified — use last saved or default for format
+        // Если ориентация не задана — используем последнюю сохранённую
+        // или ориентацию формата по умолчанию.
         if (orientation == null)
         {
             var orientStr = lastUsedOrientation ?? "Landscape";
@@ -195,31 +193,4 @@ public sealed class TabOperationsService : ITabOperationsService
         => SheetFormatCatalog.Contains(settings.DefaultSheetFormat)
             ? settings.DefaultSheetFormat
             : SheetFormatCatalog.DefaultName;
-
-    internal static string ParseSheetFormat(string rawFormat, out SheetOrientation? orientation)
-    {
-        orientation = null;
-
-        if (string.IsNullOrEmpty(rawFormat) || rawFormat.Length < 2)
-            return rawFormat;
-
-        // Last character is the orientation suffix
-        var suffix = rawFormat[^1].ToString().ToUpperInvariant();
-        var baseFormat = rawFormat[..^1];
-
-        if (suffix == "P")
-        {
-            orientation = SheetOrientation.Portrait;
-            return baseFormat;
-        }
-
-        if (suffix == "L")
-        {
-            orientation = SheetOrientation.Landscape;
-            return baseFormat;
-        }
-
-        // No suffix — return as-is
-        return rawFormat;
-    }
 }

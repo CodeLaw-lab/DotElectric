@@ -29,7 +29,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     public MainViewModelAsyncFlowTests()
     {
         _mockTabOperations = new Mock<ITabOperationsService>();
-        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<SheetOrientation?>(), It.IsAny<string?>(), It.IsAny<string?>()))
             .Returns(CreateEditor);
         _mockTabOperations.Setup(t => t.CreateNewCustomTab(It.IsAny<double>(), It.IsAny<double>()))
             .Returns(() => CreateEditor());
@@ -88,6 +88,15 @@ public class MainViewModelAsyncFlowTests : IDisposable
         return new EditorViewModel(new Template(),
             printService: new Mock<IPrintService>().Object);
     }
+
+    private static NewSheetOrientationEntry MenuEntry(string format)
+        => new(format, format, SheetOrientation.Landscape);
+
+    private void CreateTab(string format = "A4")
+        => _viewModel.NewTabCommand.Execute(MenuEntry(format));
+
+    private static void CreateTab(MainViewModel viewModel, string format)
+        => viewModel.NewTabCommand.Execute(MenuEntry(format));
 
     private MainViewModel CreateViewModel(AutosaveService autosaveService) => new(
         _mockTabOperations.Object,
@@ -322,7 +331,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task SaveAsCommand_WithSelectedTab_DelegatesToService()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.SaveAsCommand.ExecuteAsync(null);
@@ -333,7 +342,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task SaveCommand_WithSelectedTab_DelegatesWithExactTab()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.SaveCommand.ExecuteAsync(null);
@@ -360,7 +369,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
 
         try
         {
-            vm.NewTabCommand.Execute("A4");
+            CreateTab(vm, "A4");
             var tab = vm.OpenedTabs[0];
             tab.MarkDirty();
             tab.DirtyStateManager.FilePath = "test.tdel";
@@ -388,7 +397,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
         // Remove the autosave folder so SaveSession (File.WriteAllText) throws mid-flight
         Directory.Delete(_testAutosaveFolder, true);
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
         tab.MarkDirty();
         tab.DirtyStateManager.FilePath = "test.tdel";
@@ -405,9 +414,9 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_SelectedTabWithOthers_SwitchesToLastRemaining()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
         var first = _viewModel.OpenedTabs[0];
         _viewModel.SelectedTab = first;
 
@@ -422,7 +431,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     {
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(false);
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -434,7 +443,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task CloseTabCommand_Confirm_DisposesTab()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -448,8 +457,8 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task CloseAllTabsCommand_ClosesAllTabs_DisposesEach()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
+        CreateTab("A4");
+        CreateTab("A3");
         var tabs = _viewModel.OpenedTabs.ToList();
 
         await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
@@ -469,9 +478,9 @@ public class MainViewModelAsyncFlowTests : IDisposable
             .ReturnsAsync(true)
             .Callback((EditorViewModel tab) => closed.Add(tab));
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
         var t0 = _viewModel.OpenedTabs[0];
         var keep = _viewModel.OpenedTabs[1];
         var t2 = _viewModel.OpenedTabs[2];
@@ -527,7 +536,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public void PreviewPrintCommand_GenerateThrows_LogsErrorAndShowsError()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         _viewModel.SelectedTab = _viewModel.OpenedTabs[0];
         _mockPrintDocumentGenerator.Setup(g => g.Generate(It.IsAny<Template>()))
             .Throws(new InvalidOperationException("boom"));
@@ -537,6 +546,8 @@ public class MainViewModelAsyncFlowTests : IDisposable
         Assert.Null(exception);
         VerifyLogErrorOnce(_mockLogger);
         _mockDialogService.Verify(d => d.ShowError(It.IsAny<string>()), Times.Once);
+        _mockDialogHostService.Verify(
+            d => d.ShowDialog(It.IsAny<object>(), It.IsAny<object?>()), Times.Never);
     }
 
     [Fact]
@@ -552,9 +563,9 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task CloseOtherTabsRequestMessage_ClosesOtherTabs_KeepsTarget()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
         var keep = _viewModel.OpenedTabs[1];
 
         WeakReferenceMessenger.Default.Send(new CloseOtherTabsRequestMessage(keep));
@@ -567,8 +578,8 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public async Task CloseAllTabsRequestMessage_ClosesAllTabs()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
+        CreateTab("A4");
+        CreateTab("A3");
 
         WeakReferenceMessenger.Default.Send(new CloseAllTabsRequestMessage());
         await Task.Yield();
@@ -581,7 +592,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
     [Fact]
     public void Dispose_AfterDispose_MessengerCloseMessage_DoesNothing()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
         _viewModel.Dispose();
 
@@ -609,7 +620,7 @@ public class MainViewModelAsyncFlowTests : IDisposable
 
         try
         {
-            vm.NewTabCommand.Execute("A4");
+            CreateTab(vm, "A4");
             var tab = vm.OpenedTabs[0];
             tab.MarkDirty();
             vm.Dispose();

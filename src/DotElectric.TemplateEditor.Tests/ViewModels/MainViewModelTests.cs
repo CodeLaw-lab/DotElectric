@@ -53,8 +53,8 @@ public class MainViewModelTests : IDisposable
             autosaveFolder: _testAutosaveFolder);
 
         // Setup default TabOperations behavior
-        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
-            .Returns((string? fmt, string? _, string? _) =>
+        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<SheetOrientation?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+            .Returns((string? fmt, SheetOrientation? _, string? _, string? _) =>
             {
                 return new EditorViewModel(
                     new Template(),
@@ -85,6 +85,14 @@ public class MainViewModelTests : IDisposable
         if (Directory.Exists(_testAutosaveFolder))
             Directory.Delete(_testAutosaveFolder, true);
     }
+
+    // ===== Локальные помощники создания вкладок =====
+
+    private static NewSheetOrientationEntry MenuEntry(string format, SheetOrientation orientation = SheetOrientation.Landscape)
+        => new(format, format, orientation);
+
+    private void CreateTab(string format = "A4")
+        => _viewModel.NewTabCommand.Execute(MenuEntry(format));
 
     // ===== Constructor =====
 
@@ -132,9 +140,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void NewTabCommand_CreatesNewTab()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
 
-        _mockTabOperations.Verify(t => t.CreateNewTab("A4", null, "Landscape"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4", SheetOrientation.Landscape, null, "Landscape"), Times.Once);
         Assert.Single(_viewModel.OpenedTabs);
         Assert.NotNull(_viewModel.SelectedTab);
         Assert.Same(_viewModel.OpenedTabs[0], _viewModel.SelectedTab);
@@ -152,17 +160,17 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void NewTabCommand_SavesLastUsedFormat()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
 
-        _mockTabOperations.Verify(t => t.CreateNewTab("A4", null, "Landscape"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4", SheetOrientation.Landscape, null, "Landscape"), Times.Once);
     }
 
     [Fact]
     public void NewTabCommand_MultipleTabs_AddsAll()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
 
         Assert.Equal(3, _viewModel.OpenedTabs.Count);
     }
@@ -170,9 +178,9 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void NewTabCommand_MultipleTabs_AllHaveUniqueIds()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
 
         var ids = _viewModel.OpenedTabs.Select(t => t.TabId).Distinct().ToList();
         Assert.Equal(3, ids.Count);
@@ -186,7 +194,7 @@ public class MainViewModelTests : IDisposable
         _viewModel.NewTabWithLastFormatCommand.Execute(null);
 
         _mockSettingsService.Verify(s => s.Load(), Times.AtLeastOnce);
-        _mockTabOperations.Verify(t => t.CreateNewTab(null, "A3", "Landscape"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab(null, null, "A3", "Landscape"), Times.Once);
         Assert.Single(_viewModel.OpenedTabs);
     }
 
@@ -219,25 +227,25 @@ public class MainViewModelTests : IDisposable
     }
 
     [Fact]
-    public void NewSheetMenu_OrientationHeadersAndParameters_ByteForByteWithPreviousMenu()
+    public void NewSheetMenu_OrientationHeadersAndFormats_ByteForByteWithPreviousMenu()
     {
         var groups = _viewModel.NewSheetMenu
             .Where(e => e.Kind == NewSheetMenuKind.FormatGroup)
-            .Select(e => (e.Header, Orientations: e.Orientations!.Select(o => (o.Header, o.CommandParameter)).ToArray()))
+            .Select(e => (e.Header, Orientations: e.Orientations!.Select(o => (o.Header, o.Format, o.Orientation)).ToArray()))
             .ToArray();
 
-        var expected = new (string Header, (string Header, string Parameter)[] Orientations)[]
+        var expected = new (string Header, (string Header, string Format, SheetOrientation Orientation)[] Orientations)[]
         {
-            ("A0", new[] { ("Альбомная (1189×841)", "A0L"), ("Книжная (841×1189)", "A0P") }),
-            ("A1", new[] { ("Альбомная (841×594)", "A1L"), ("Книжная (594×841)", "A1P") }),
-            ("A2", new[] { ("Альбомная (594×420)", "A2L"), ("Книжная (420×594)", "A2P") }),
-            ("A3", new[] { ("Альбомная (420×297)", "A3L"), ("Книжная (297×420)", "A3P") }),
-            ("A4", new[] { ("Книжная (210×297)", "A4P"), ("Альбомная (297×210)", "A4L") }),
-            ("A4×2", new[] { ("Книжная (210×594)", "A4×2P"), ("Альбомная (594×210)", "A4×2L") }),
-            ("A3×2", new[] { ("Книжная (297×840)", "A3×2P"), ("Альбомная (840×297)", "A3×2L") }),
-            ("A2×2", new[] { ("Книжная (420×1188)", "A2×2P"), ("Альбомная (1188×420)", "A2×2L") }),
-            ("A1×2", new[] { ("Книжная (594×1682)", "A1×2P"), ("Альбомная (1682×594)", "A1×2L") }),
-            ("A0×2", new[] { ("Книжная (841×2378)", "A0×2P"), ("Альбомная (2378×841)", "A0×2L") })
+            ("A0", new[] { ("Альбомная (1189×841)", "A0", SheetOrientation.Landscape), ("Книжная (841×1189)", "A0", SheetOrientation.Portrait) }),
+            ("A1", new[] { ("Альбомная (841×594)", "A1", SheetOrientation.Landscape), ("Книжная (594×841)", "A1", SheetOrientation.Portrait) }),
+            ("A2", new[] { ("Альбомная (594×420)", "A2", SheetOrientation.Landscape), ("Книжная (420×594)", "A2", SheetOrientation.Portrait) }),
+            ("A3", new[] { ("Альбомная (420×297)", "A3", SheetOrientation.Landscape), ("Книжная (297×420)", "A3", SheetOrientation.Portrait) }),
+            ("A4", new[] { ("Книжная (210×297)", "A4", SheetOrientation.Portrait), ("Альбомная (297×210)", "A4", SheetOrientation.Landscape) }),
+            ("A4×2", new[] { ("Книжная (210×594)", "A4×2", SheetOrientation.Portrait), ("Альбомная (594×210)", "A4×2", SheetOrientation.Landscape) }),
+            ("A3×2", new[] { ("Книжная (297×840)", "A3×2", SheetOrientation.Portrait), ("Альбомная (840×297)", "A3×2", SheetOrientation.Landscape) }),
+            ("A2×2", new[] { ("Книжная (420×1188)", "A2×2", SheetOrientation.Portrait), ("Альбомная (1188×420)", "A2×2", SheetOrientation.Landscape) }),
+            ("A1×2", new[] { ("Книжная (594×1682)", "A1×2", SheetOrientation.Portrait), ("Альбомная (1682×594)", "A1×2", SheetOrientation.Landscape) }),
+            ("A0×2", new[] { ("Книжная (841×2378)", "A0×2", SheetOrientation.Portrait), ("Альбомная (2378×841)", "A0×2", SheetOrientation.Landscape) })
         };
 
         Assert.Equal(expected.Length, groups.Length);
@@ -256,7 +264,7 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -277,7 +285,7 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -291,8 +299,8 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
+        CreateTab("A4");
+        CreateTab("A3");
         var firstTab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(firstTab);
@@ -307,7 +315,7 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -321,7 +329,7 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(false);
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
 
         await _viewModel.CloseTabCommand.ExecuteAsync(tab);
@@ -337,9 +345,9 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
 
         await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
 
@@ -359,8 +367,8 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(false);
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
+        CreateTab("A4");
+        CreateTab("A3");
 
         await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
 
@@ -373,9 +381,9 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
 
         await _viewModel.CloseAllTabsCommand.ExecuteAsync(null);
 
@@ -390,9 +398,9 @@ public class MainViewModelTests : IDisposable
         _mockTabOperations.Setup(t => t.PromptAndSaveIfDirtyAsync(It.IsAny<EditorViewModel>()))
             .ReturnsAsync(true);
 
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
-        _viewModel.NewTabCommand.Execute("A2");
+        CreateTab("A4");
+        CreateTab("A3");
+        CreateTab("A2");
         var keepTab = _viewModel.OpenedTabs[1];
 
         await _viewModel.CloseOtherTabsCommand.ExecuteAsync(keepTab);
@@ -404,7 +412,7 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task CloseOtherTabsCommand_NullTab_DoesNothing()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         await _viewModel.CloseOtherTabsCommand.ExecuteAsync(null!);
         Assert.Single(_viewModel.OpenedTabs);
     }
@@ -421,7 +429,7 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task SaveCommand_WithSelectedTab_DelegatesToService()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
 
         await _viewModel.SaveCommand.ExecuteAsync(null);
 
@@ -440,8 +448,8 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public async Task SaveAllCommand_WithTabs_SavesAllTabs()
     {
-        _viewModel.NewTabCommand.Execute("A4");
-        _viewModel.NewTabCommand.Execute("A3");
+        CreateTab("A4");
+        CreateTab("A3");
 
         await _viewModel.SaveAllCommand.ExecuteAsync(null);
 
@@ -475,12 +483,12 @@ public class MainViewModelTests : IDisposable
         mockTemplateService.Setup(s => s.Save(It.IsAny<Template>(), It.IsAny<string>()))
             .Throws(new InvalidOperationException("Autosave failed"));
 
-        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<string?>(), It.IsAny<string?>()))
-            .Returns((string? fmt, string? _, string? _) =>
+        _mockTabOperations.Setup(t => t.CreateNewTab(It.IsAny<string?>(), It.IsAny<SheetOrientation?>(), It.IsAny<string?>(), It.IsAny<string?>()))
+            .Returns((string? fmt, SheetOrientation? _, string? _, string? _) =>
                 new EditorViewModel(new Template(),
                     printService: new Mock<IPrintService>().Object));
 
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
         tab.MarkDirty();
 
@@ -532,14 +540,14 @@ public class MainViewModelTests : IDisposable
         Assert.True(changed);
     }
 
-    // ===== NewTab с суффиксом ориентации =====
+    // ===== NewTab с пунктом меню =====
 
     [Fact]
-    public void NewTabCommand_WithOrientationSuffix_PassesThrough()
+    public void NewTabCommand_WithMenuEntry_PassesFormatAndOrientation()
     {
-        _viewModel.NewTabCommand.Execute("A4L");
+        _viewModel.NewTabCommand.Execute(MenuEntry("A4", SheetOrientation.Portrait));
 
-        _mockTabOperations.Verify(t => t.CreateNewTab("A4L", null, "Landscape"), Times.Once);
+        _mockTabOperations.Verify(t => t.CreateNewTab("A4", SheetOrientation.Portrait, null, "Landscape"), Times.Once);
         Assert.Single(_viewModel.OpenedTabs);
     }
 
@@ -572,18 +580,24 @@ public class MainViewModelTests : IDisposable
     {
         var exception = Record.Exception(() => _viewModel.PreviewPrintCommand.Execute(null));
         Assert.Null(exception);
+        _mockDialogHostService.Verify(
+            d => d.ShowDialog(It.IsAny<object>(), It.IsAny<object?>()), Times.Never);
     }
 
     [Fact]
-    public void PrintPreviewCommand_WhenActiveTabExists_DoesNotThrow()
+    public void PrintPreviewCommand_WhenActiveTabExists_ShowsDialogWithPrintPreviewViewModel()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         var tab = _viewModel.OpenedTabs[0];
         _viewModel.SelectedTab = tab;
 
-        // NOTE: Window creation requires STA, verifying no exception from logic only
-        var exception = Record.Exception(() => _viewModel.PreviewPrintCommand.Execute(null));
-        Assert.Null(exception);
+        _viewModel.PreviewPrintCommand.Execute(null);
+
+        _mockDialogHostService.Verify(
+            d => d.ShowDialog(
+                It.Is<PrintPreviewViewModel>(vm => vm.DisplayName == tab.DirtyStateManager.DisplayName),
+                It.IsAny<object?>()),
+            Times.Once);
     }
 
     // ===== OpenSettings =====
@@ -616,7 +630,7 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void CanCloseAnyTab_HasTabs_ReturnsTrue()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         Assert.True(_viewModel.CanCloseAnyTab());
     }
 
@@ -631,7 +645,7 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void CanSave_HasSelectedTab_ReturnsTrue()
     {
-        _viewModel.NewTabCommand.Execute("A4");
+        CreateTab("A4");
         Assert.True(_viewModel.CanSave());
     }
 

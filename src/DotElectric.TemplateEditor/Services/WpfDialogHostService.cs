@@ -15,8 +15,11 @@ public sealed class WpfDialogHostService : IDialogHostService
         var (windowType, dataContext) = ResolveWindowDescriptor(viewModel);
         var window = CreateWindow(windowType, dataContext);
 
-        if (owner is Window ownerWindow)
-            window.Owner = ownerWindow;
+        // Владелец по умолчанию — главное окно приложения: объявленное в XAML
+        // центрирование на владельце работает у всех диалогов.
+        var resolvedOwner = owner as Window ?? Application.Current?.MainWindow;
+        if (resolvedOwner != null)
+            window.Owner = resolvedOwner;
 
         if (viewModel is ICustomSheetDialogVm dialogVm)
         {
@@ -46,6 +49,7 @@ public sealed class WpfDialogHostService : IDialogHostService
         return viewModel switch
         {
             SettingsViewModel _ => (typeof(SettingsView), viewModel),
+            PrintPreviewViewModel _ => (typeof(PrintPreviewWindow), viewModel),
             _ => (typeof(CustomSheetDialog), viewModel)
         };
     }
