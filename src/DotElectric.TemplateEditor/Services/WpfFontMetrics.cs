@@ -3,6 +3,12 @@ using Serilog;
 
 namespace DotElectric.TemplateEditor.Services;
 
+/// <summary>
+/// WPF-реализация метрик шрифта: измеряет коэффициенты по встроенным TTF
+/// (GlyphTypeface). Запасные значения при недоступности шрифта и метрики
+/// неизвестного имени (ведёт себя как шрифт по умолчанию, спека #162) —
+/// из каталога шрифтов документной библиотеки.
+/// </summary>
 public sealed class WpfFontMetrics : IFontMetrics
 {
     public static readonly WpfFontMetrics Default = new();
@@ -113,8 +119,6 @@ public sealed class WpfFontMetrics : IFontMetrics
         if (_heightRatios.TryGetValue(fontName, out var ratio))
             return ratio;
 
-        // Неизвестное имя ведёт себя как шрифт по умолчанию (спека #162):
-        // измеренное значение дефолтного шрифта, иначе запасное из каталога.
         var resolved = FontCatalog.Resolve(fontName);
         return _heightRatios.TryGetValue(resolved, out var measured)
             ? measured
@@ -126,8 +130,6 @@ public sealed class WpfFontMetrics : IFontMetrics
         if (_widthRatios.TryGetValue(fontName, out var ratio))
             return ratio;
 
-        // Неизвестное имя ведёт себя как шрифт по умолчанию (спека #162):
-        // измеренное значение дефолтного шрифта, иначе запасное из каталога.
         var resolved = FontCatalog.Resolve(fontName);
         return _widthRatios.TryGetValue(resolved, out var measured)
             ? measured

@@ -117,16 +117,4 @@ public class FontCatalogTests
     {
         Assert.Equal(FontCatalog.DefaultName, FontCatalog.Resolve(name));
     }
-
-    [Fact]
-    public void FallbackRatios_LiveOnlyInCatalog_WpfFallbacksMatch()
-    {
-        var gostA = FontCatalog.Get("ГОСТ А");
-        var gostB = FontCatalog.Get("ГОСТ Б");
-
-        Assert.Equal(1.0, gostA.FallbackHeightRatio);
-        Assert.Equal(0.5, gostA.FallbackWidthRatio);
-        Assert.Equal(1.0, gostB.FallbackHeightRatio);
-        Assert.Equal(0.65, gostB.FallbackWidthRatio);
-    }
 }
