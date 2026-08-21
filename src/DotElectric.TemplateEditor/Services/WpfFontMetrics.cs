@@ -3,6 +3,12 @@ using Serilog;
 
 namespace DotElectric.TemplateEditor.Services;
 
+/// <summary>
+/// WPF-реализация метрик шрифта: измеряет коэффициенты по встроенным TTF
+/// (GlyphTypeface). Запасные значения при недоступности шрифта и метрики
+/// неизвестного имени (ведёт себя как шрифт по умолчанию, спека #162) —
+/// из каталога шрифтов документной библиотеки.
+/// </summary>
 public sealed class WpfFontMetrics : IFontMetrics
 {
     public static readonly WpfFontMetrics Default = new();
@@ -26,8 +32,12 @@ public sealed class WpfFontMetrics : IFontMetrics
         {
             if (_initialized) return;
 
-            LoadFont("ГОСТ А", "GOST Type AU", fallbackHeight: 1.0, fallbackWidth: 0.5);
-            LoadFont("ГОСТ Б", "GOST Type BU", fallbackHeight: 1.0, fallbackWidth: 0.65);
+            foreach (var font in FontCatalog.All)
+            {
+                LoadFont(font.Name, font.FamilyName,
+                    fallbackHeight: font.FallbackHeightRatio,
+                    fallbackWidth: font.FallbackWidthRatio);
+            }
 
             _initialized = true;
         }
@@ -108,18 +118,21 @@ public sealed class WpfFontMetrics : IFontMetrics
     {
         if (_heightRatios.TryGetValue(fontName, out var ratio))
             return ratio;
-        return 1.0;
+
+        var resolved = FontCatalog.Resolve(fontName);
+        return _heightRatios.TryGetValue(resolved, out var measured)
+            ? measured
+            : FontCatalog.Get(resolved).FallbackHeightRatio;
     }
 
     public double GetAdvWidthRatio(string fontName)
     {
         if (_widthRatios.TryGetValue(fontName, out var ratio))
             return ratio;
-        return fontName switch
-        {
-            "ГОСТ А" => 0.5,
-            "ГОСТ Б" => 0.65,
-            _ => 0.6
-        };
+
+        var resolved = FontCatalog.Resolve(fontName);
+        return _widthRatios.TryGetValue(resolved, out var measured)
+            ? measured
+            : FontCatalog.Get(resolved).FallbackWidthRatio;
     }
 }

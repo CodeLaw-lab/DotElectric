@@ -45,9 +45,11 @@ public class WpfFontMetricsTests : IDisposable
     }
 
     [Fact]
-    public void GetAdvWidthRatio_Default_Unknown_ReturnsDefaultFallback()
+    public void GetAdvWidthRatio_Default_Unknown_ReturnsDefaultFontRatio()
     {
-        Assert.Equal(0.6, WpfFontMetrics.Default.GetAdvWidthRatio("Unknown"));
+        Assert.Equal(
+            WpfFontMetrics.Default.GetAdvWidthRatio("ГОСТ А"),
+            WpfFontMetrics.Default.GetAdvWidthRatio("Unknown"));
     }
 
     // ---- IFontMetrics contract (read-only) via mock ----
@@ -106,11 +108,11 @@ public class WpfFontMetricsTests : IDisposable
     }
 
     [Fact]
-    public void FreshInstance_GetAdvWidthRatio_Unknown_ReturnsDefaultFallback()
+    public void FreshInstance_GetAdvWidthRatio_Unknown_ReturnsDefaultFontRatio()
     {
         var fm = new WpfFontMetrics();
 
-        Assert.Equal(0.6, fm.GetAdvWidthRatio("Unknown"));
+        Assert.Equal(fm.GetAdvWidthRatio("ГОСТ А"), fm.GetAdvWidthRatio("Unknown"));
     }
 
     // ---- Initialize() real path (fallbacks in testhost; real TTF loading is
@@ -193,23 +195,24 @@ public class WpfFontMetricsTests : IDisposable
         });
     }
 
-    // ---- Unknown font behavior ----
+    // ---- Unknown font behavior: неизвестное имя ведёт себя как шрифт
+    //      по умолчанию (спека #162) ----
 
     [Fact]
-    public void GetHeightRatio_UnknownFontName_ReturnsFallbackOne()
+    public void GetHeightRatio_UnknownFontName_ReturnsDefaultFontRatio()
     {
         var fm = new WpfFontMetrics();
 
-        Assert.Equal(1.0, fm.GetHeightRatio("NonExistentFont"));
-        Assert.Equal(1.0, fm.GetHeightRatio("SomeRandomFont"));
+        Assert.Equal(fm.GetHeightRatio("ГОСТ А"), fm.GetHeightRatio("NonExistentFont"));
+        Assert.Equal(fm.GetHeightRatio("ГОСТ А"), fm.GetHeightRatio("SomeRandomFont"));
     }
 
     [Fact]
-    public void GetAdvWidthRatio_UnknownFontName_ReturnsDefaultFallback()
+    public void GetAdvWidthRatio_UnknownFontName_ReturnsDefaultFontRatio()
     {
         var fm = new WpfFontMetrics();
 
-        Assert.Equal(0.6, fm.GetAdvWidthRatio("SomeRandomFont"));
+        Assert.Equal(fm.GetAdvWidthRatio("ГОСТ А"), fm.GetAdvWidthRatio("SomeRandomFont"));
     }
 
     // ---- Null / empty font name edge cases ----
@@ -223,11 +226,11 @@ public class WpfFontMetricsTests : IDisposable
     }
 
     [Fact]
-    public void GetHeightRatio_EmptyString_ReturnsFallbackOne()
+    public void GetHeightRatio_EmptyString_ReturnsDefaultFontRatio()
     {
         var fm = new WpfFontMetrics();
 
-        Assert.Equal(1.0, fm.GetHeightRatio(""));
+        Assert.Equal(fm.GetHeightRatio("ГОСТ А"), fm.GetHeightRatio(""));
     }
 
     [Fact]
@@ -239,11 +242,11 @@ public class WpfFontMetricsTests : IDisposable
     }
 
     [Fact]
-    public void GetAdvWidthRatio_EmptyString_ReturnsDefaultFallback()
+    public void GetAdvWidthRatio_EmptyString_ReturnsDefaultFontRatio()
     {
         var fm = new WpfFontMetrics();
 
-        Assert.Equal(0.6, fm.GetAdvWidthRatio(""));
+        Assert.Equal(fm.GetAdvWidthRatio("ГОСТ А"), fm.GetAdvWidthRatio(""));
     }
 
     // ---- ComputeAverageAdvanceWidth (pure internal static, no STA) ----

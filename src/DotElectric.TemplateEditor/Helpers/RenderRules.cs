@@ -14,17 +14,23 @@ namespace DotElectric.TemplateEditor.Helpers;
 /// </summary>
 public static class RenderRules
 {
+    // Кэш FontFamily рядом с картой: биндинги канваса срабатывают на каждый
+    // текстовый объект и каждое обновление. FontFamily не наследует Freezable —
+    // экземпляры неизменяемы и читаемы из любого потока (печать) без заморозки.
+    private static readonly IReadOnlyDictionary<string, FontFamily> FontFamilies =
+        FontCatalog.All.ToDictionary(f => f.Name, f => CreateFontFamily(f.FamilyName));
+
+    private static FontFamily CreateFontFamily(string familyName)
+        => new($"pack://application:,,,/Resources/Fonts/#{familyName}");
+
     /// <summary>
-    /// Карта шрифтов: доменное имя ГОСТ-шрифта → WPF FontFamily (pack-URI).
-    /// Неизвестное имя или null → Segoe UI.
+    /// Карта шрифтов: доменное имя из каталога шрифтов → WPF FontFamily
+    /// (pack-URI строится по внутреннему имени файла шрифта). Неизвестное имя
+    /// или null — шрифт по умолчанию (спека #162): картинка и геометрия
+    /// сходятся в одной точке решения. Экземпляры кэшированы.
     /// </summary>
     public static FontFamily FontFamilyFor(string? fontName)
-        => fontName switch
-        {
-            "ГОСТ А" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type AU"),
-            "ГОСТ Б" => new FontFamily("pack://application:,,,/Resources/Fonts/#GOST Type BU"),
-            _ => new FontFamily("Segoe UI")
-        };
+        => FontFamilies[FontCatalog.Resolve(fontName)];
 
     private static readonly DoubleCollection _dashed = CreateFrozenDash(10, 5);
     private static readonly DoubleCollection _dashDot = CreateFrozenDash(10, 5, 2, 5);

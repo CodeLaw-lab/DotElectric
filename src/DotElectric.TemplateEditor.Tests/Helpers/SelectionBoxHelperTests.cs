@@ -232,7 +232,7 @@ public class SelectionBoxHelperTests
     [Fact]
     public void GetObjectBounds_Text_CalculatesWidthFromContent()
     {
-        var text = new Text(0, 0, "Hello", 5000); // width = 5 * 5000 * 0.6 = 15000
+        var text = new Text(0, 0, "Hello", 5000); // width = 5 * 5000 * 0.5 = 12500
         var objects = new List<TemplateObjectBase> { text };
         var box = new RectMicrons(0, 0, 20000, 10000);
 
