@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using DotElectric.TemplateEditor.Models;
 using DotElectric.TemplateEditor.Services;
+using DotElectric.TemplateEditor.Tests.Helpers;
 using DotElectric.TemplateEditor.ViewModels;
 using DotElectric.TemplateEditor.ViewModels.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -155,6 +156,7 @@ public class MainViewModelTests : IDisposable
 
         Assert.Single(_viewModel.OpenedTabs);
         _mockSettingsService.Verify(s => s.Load(), Times.AtLeastOnce);
+        _mockTabOperations.Verify(t => t.CreateNewTab("A3", null, null, "Landscape"), Times.Once);
     }
 
     [Fact]
@@ -587,17 +589,23 @@ public class MainViewModelTests : IDisposable
     [Fact]
     public void PrintPreviewCommand_WhenActiveTabExists_ShowsDialogWithPrintPreviewViewModel()
     {
-        CreateTab("A4");
-        var tab = _viewModel.OpenedTabs[0];
-        _viewModel.SelectedTab = tab;
+        WpfContext.Execute(() =>
+        {
+            var document = new System.Windows.Documents.FixedDocument();
+            _mockPrintDocumentGenerator.Setup(g => g.Generate(It.IsAny<Template>())).Returns(document);
+            CreateTab("A4");
+            var tab = _viewModel.OpenedTabs[0];
+            _viewModel.SelectedTab = tab;
 
-        _viewModel.PreviewPrintCommand.Execute(null);
+            _viewModel.PreviewPrintCommand.Execute(null);
 
-        _mockDialogHostService.Verify(
-            d => d.ShowDialog(
-                It.Is<PrintPreviewViewModel>(vm => vm.DisplayName == tab.DirtyStateManager.DisplayName),
-                It.IsAny<object?>()),
-            Times.Once);
+            _mockDialogHostService.Verify(
+                d => d.ShowDialog(
+                    It.Is<PrintPreviewViewModel>(vm =>
+                        ReferenceEquals(vm.Document, document) && vm.DisplayName == tab.DirtyStateManager.DisplayName),
+                    It.IsAny<object?>()),
+                Times.Once);
+        });
     }
 
     // ===== OpenSettings =====

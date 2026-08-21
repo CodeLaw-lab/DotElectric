@@ -136,6 +136,37 @@ public class WpfDialogHostServiceTests
     }
 
     [Fact]
+    public void ShowDialog_NoExplicitOwner_ResolvesOwnerFromMainWindowProvider()
+    {
+        WpfContext.Execute(() =>
+        {
+            var main = new Window();
+            main.Show();
+
+            var hasOwnedDialog = false;
+            try
+            {
+                var vm = new CustomSheetDialogViewModel();
+                var host = new WpfDialogHostService(() => main);
+
+                Dispatcher.CurrentDispatcher.BeginInvoke(() =>
+                {
+                    hasOwnedDialog = main.OwnedWindows.Count > 0;
+                    vm.CancelCommand.Execute(null);
+                });
+
+                host.ShowDialog(vm);
+
+                Assert.True(hasOwnedDialog);
+            }
+            finally
+            {
+                main.Close();
+            }
+        });
+    }
+
+    [Fact]
     public void ShowDialog_CustomSheetDialogVm_UnsubscribesHandlersInFinally()
     {
         WpfContext.Execute(() =>
