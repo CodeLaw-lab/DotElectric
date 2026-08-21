@@ -25,21 +25,40 @@ public class RenderRulesTests
         Assert.Equal(expectedSource, family.Source);
     }
 
+    // Неизвестное имя и null рендерятся шрифтом по умолчанию (спека #162):
+    // картинка и геометрия сходятся в одной точке решения.
+
     [Theory]
     [InlineData("Arial")]
     [InlineData("")]
     [InlineData("   ")]
-    public void FontFamilyFor_UnknownFont_ReturnsSegoeUi(string fontName)
+    public void FontFamilyFor_UnknownFont_ReturnsDefaultFontFamily(string fontName)
     {
         var family = RenderRules.FontFamilyFor(fontName);
-        Assert.Equal("Segoe UI", family.Source);
+        Assert.Equal(RenderRules.FontFamilyFor("ГОСТ А").Source, family.Source);
     }
 
     [Fact]
-    public void FontFamilyFor_Null_ReturnsSegoeUi()
+    public void FontFamilyFor_Null_ReturnsDefaultFontFamily()
     {
         var family = RenderRules.FontFamilyFor(null);
-        Assert.Equal("Segoe UI", family.Source);
+        Assert.Equal(RenderRules.FontFamilyFor("ГОСТ А").Source, family.Source);
+    }
+
+    [Fact]
+    public void FontFamilyFor_CachesInstances()
+    {
+        Assert.Same(RenderRules.FontFamilyFor("ГОСТ А"), RenderRules.FontFamilyFor("ГОСТ А"));
+        Assert.Same(RenderRules.FontFamilyFor("ГОСТ Б"), RenderRules.FontFamilyFor("ГОСТ Б"));
+    }
+
+    [Fact]
+    public void FontFamilyFor_UnknownOrNull_ReturnsCachedDefaultInstance()
+    {
+        var defaultFamily = RenderRules.FontFamilyFor("ГОСТ А");
+
+        Assert.Same(defaultFamily, RenderRules.FontFamilyFor("Futura"));
+        Assert.Same(defaultFamily, RenderRules.FontFamilyFor(null));
     }
 
     // ===== Dash-карта (LineType → StrokeDashArray) =====

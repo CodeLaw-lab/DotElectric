@@ -154,6 +154,28 @@ public class TemplateServiceRoundTripTests
     }
 
     [Fact]
+    public void SaveAndLoad_PreservesUnknownFontName()
+    {
+        var template = CreateTestTemplate();
+        template.Objects.Add(new Text(1000, 1000, "Текст", 5000, "Futura"));
+
+        var filePath = Path.Combine(Path.GetTempPath(), $"test_unknown_font_{Guid.NewGuid():N}.tdel");
+
+        try
+        {
+            _service.Save(template, filePath);
+            var loaded = _service.Load(filePath);
+
+            var text = (Text)loaded.Objects[0];
+            Assert.Equal("Futura", text.FontName);
+        }
+        finally
+        {
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+    }
+
+    [Fact]
     public void Save_CreatesDirectoryIfNeeded()
     {
         var template = CreateTestTemplate();

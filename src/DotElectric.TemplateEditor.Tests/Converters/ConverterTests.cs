@@ -1236,28 +1236,31 @@ public class FontNameToFamilyConverterTests
         Assert.Equal(expectedSource, family.Source);
     }
 
+    // Неизвестное имя и отсутствующее значение рендерятся шрифтом по умолчанию
+    // (спека #162) — конвертер делегирует правилам рендера.
+
     [Fact]
-    public void Convert_UnknownFont_ReturnsSegoeUi()
+    public void Convert_UnknownFont_ReturnsDefaultFontFamily()
     {
         var result = _converter.Convert("Arial", typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
         var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
-        Assert.Equal("Segoe UI", family.Source);
+        Assert.Equal("pack://application:,,,/Resources/Fonts/#GOST Type AU", family.Source);
     }
 
     [Fact]
-    public void Convert_NonStringValue_ReturnsSegoeUi()
+    public void Convert_NonStringValue_ReturnsDefaultFontFamily()
     {
         var result = _converter.Convert(42, typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
         var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
-        Assert.Equal("Segoe UI", family.Source);
+        Assert.Equal("pack://application:,,,/Resources/Fonts/#GOST Type AU", family.Source);
     }
 
     [Fact]
-    public void Convert_NullValue_ReturnsSegoeUi()
+    public void Convert_NullValue_ReturnsDefaultFontFamily()
     {
         var result = _converter.Convert(null, typeof(System.Windows.Media.FontFamily), null, CultureInfo.InvariantCulture);
         var family = Assert.IsType<System.Windows.Media.FontFamily>(result);
-        Assert.Equal("Segoe UI", family.Source);
+        Assert.Equal("pack://application:,,,/Resources/Fonts/#GOST Type AU", family.Source);
     }
 
     [Fact]
