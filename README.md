@@ -7,7 +7,7 @@
 **Последнее обновление:** 21.08.2026 — Кандидат 7 обзора №5 (#167, тикет #168, PR #170): предпросмотр печати через шов диалогов и типизированная ориентация меню. `MainViewModel.PreviewPrint` больше не создаёт окно — показ через `IDialogHostService` (тонкая `PrintPreviewViewModel`, окно с конструктором от модели); владелец диалогов по умолчанию — главное окно (инъектируемый провайдер в WPF-реализации шва, CenterOwner работает у всех трёх окон); пункты меню несут типизированную ориентацию (`NewSheetOrientationEntry(Header, Format, Orientation)`), строковый протокол «A4L» и парсер суффиксов удалены целиком; фасад `CreateNewTab` с типизированной ориентацией, цепочки запасных значений побайтно; settings.json байт-совместим; CONTEXT.md — статья «Предпросмотр печати»; байт-в-байт кроме центрирования двух диалогов, тесты 2625 (2655 − 33 теста парсера + 3 пина; распределение: приложение 2044 + Document 454 + Sheets 127), coverage 92.05%
 
 [![CI](https://github.com/anomalyco/dotelectric/actions/workflows/ci.yml/badge.svg)](https://github.com/anomalyco/dotelectric/actions)
-[![Coverage](https://img.shields.io/badge/coverage-91%25-green)](https://github.com/anomalyco/dotelectric/actions)
+[![Coverage](https://img.shields.io/badge/coverage-92%25-green)](https://github.com/anomalyco/dotelectric/actions)
 
 ---
 
