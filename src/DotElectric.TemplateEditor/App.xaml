@@ -13,7 +13,12 @@
                                                  SecondaryColor="#66BB6A"/>
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign2.Defaults.xaml"/>
 
-                <!-- Dark Theme приложения -->
+                <!-- Общая структура темы: кисти и стили (без цветов).
+                     Цвета живут в палитрах тем и подменяются при смене темы. -->
+                <ResourceDictionary Source="Resources/Styles/ThemeStructure.xaml"/>
+
+                <!-- Стартовая палитра — тёмная; ThemeService подменяет палитру
+                     при смене темы (F9 / Настройки) -->
                 <ResourceDictionary Source="Resources/Styles/DarkTheme.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
